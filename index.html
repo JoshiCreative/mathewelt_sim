@@ -211,8 +211,7 @@
     }
 
     .badge {
-      display: inline-flex;
-      align-items: center;
+      display: inline-block;
       padding: 6px 12px;
       border-radius: 999px;
       background: #e5e7eb;
@@ -222,60 +221,6 @@
     }
     .badge-u { background: var(--u-light); color: var(--u-dark); }
     .badge-m { background: var(--m-light); color: var(--m-dark); }
-
-    /* POPUP/TOOLTIP STYLE */
-    .info-trigger {
-      display: inline-block;
-      width: 18px;
-      height: 18px;
-      background: #6b7280;
-      color: white;
-      border-radius: 50%;
-      text-align: center;
-      font-size: 0.75rem;
-      line-height: 18px;
-      cursor: help;
-      margin-left: 6px;
-      position: relative;
-    }
-
-    .info-trigger:hover {
-      background: #374151;
-    }
-
-    .info-trigger .tooltip-content {
-      visibility: hidden;
-      width: 260px;
-      background-color: #1f2937;
-      color: #fff;
-      text-align: left;
-      border-radius: 8px;
-      padding: 12px;
-      position: absolute;
-      z-index: 100;
-      bottom: 125%;
-      left: 50%;
-      transform: translateX(-50%);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      font-weight: normal;
-      font-size: 0.85rem;
-      line-height: 1.4;
-    }
-
-    .info-trigger .tooltip-content::after {
-      content: "";
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      margin-left: -5px;
-      border-width: 5px;
-      border-style: solid;
-      border-color: #1f2937 transparent transparent transparent;
-    }
-
-    .info-trigger:hover .tooltip-content {
-      visibility: visible;
-    }
 
     .student-textarea {
       width: 100%;
@@ -318,15 +263,7 @@
         <div class="cup-container" id="container-u"></div>
         <div style="margin-top: 20px;">
           <span class="badge badge-u" id="sum-u">Summe: 64 ml</span>
-          <span class="badge badge-u">
-            Ausgleichswert
-            <span class="info-trigger">?
-              <span class="tooltip-content">
-                Der Ausgleichswert zeigt an, wie viel Milliliter (ml) Wasser jedes Kind im Becher hätte, wenn das gesamte Wasser absolut gerecht und gleichmäßig auf alle Teammitglieder aufgeteilt wird.
-              </span>
-            </span>: 
-            <span id="avg-u" style="color: var(--warn); margin-left: 6px;">gesucht...</span>
-          </span>
+          <span class="badge badge-u">Ausgleichswert: <span id="avg-u" style="color: var(--warn);">gesucht...</span></span>
         </div>
       </article>
 
@@ -335,15 +272,7 @@
         <div class="cup-container" id="container-m"></div>
         <div style="margin-top: 20px;">
           <span class="badge badge-m" id="sum-m">Summe: 75 ml</span>
-          <span class="badge badge-m">
-            Ausgleichswert
-            <span class="info-trigger">?
-              <span class="tooltip-content">
-                Der Ausgleichswert zeigt an, wie viel Milliliter (ml) Wasser jedes Kind im Becher hätte, wenn das gesamte Wasser absolut gerecht und gleichmäßig auf alle Teammitglieder aufgeteilt wird.
-              </span>
-            </span>: 
-            <span id="avg-m" style="color: var(--warn); margin-left: 6px;">gesucht...</span>
-          </span>
+          <span class="badge badge-m">Ausgleichswert: <span id="avg-m" style="color: var(--warn);">gesucht...</span></span>
         </div>
       </article>
 
@@ -379,8 +308,9 @@
   </main>
 
   <script>
-    const MAX_ML = 24;
+    const MAX_ML = 24; // Puffer nach oben vergrößert für bessere Ansicht
 
+    // Feste, korrekte mathematische Zielwerte für die Lernkontrolle
     let data = {
       u: { names: ["Marla", "Andi", "Hakan", "Francy"], values: [15, 17, 12, 20], orig: [15, 17, 12, 20], targetAvg: 16 },
       m: { names: ["Harald", "Sarah", "Monika", "Chris", "Flo"], values: [13, 16, 15, 13, 18], orig: [13, 16, 15, 13, 18], targetAvg: 15 }
@@ -465,6 +395,7 @@
       }
     }
 
+    /* INTERAKTIVES KÄSTCHENMODELL GENERIEREN */
     function loadGridModel(key) {
       const canvas = document.getElementById("grid-canvas-area");
       canvas.innerHTML = "";
@@ -479,6 +410,7 @@
         label.style.fontSize = "0.85rem";
         label.style.marginTop = "6px";
         
+        // Generiere 22 Kästchen übereinander (wie im Arbeitsheft)
         for (let h = 1; h <= 22; h++) {
           const cell = document.createElement("div");
           cell.className = "grid-cell";
@@ -508,6 +440,9 @@
     function updateAnalysis() {
       ['u', 'm'].forEach(key => {
         const team = data[key];
+        const sum = team.values.reduce((a,b) => a+b, 0);
+
+        // Überprüfung, ob alle Becher exakt auf dem korrekten Ausgleichswert stehen
         const allExactlyEqual = team.values.every(val => Math.abs(val - team.targetAvg) < 0.01);
         
         if (allExactlyEqual || valuesRevealed) {
@@ -541,7 +476,7 @@
 
     window.onload = function() {
       init();
-      loadGridModel('u');
+      loadGridModel('u'); // Standardmäßig mit den Unicorns starten
     };
   </script>
 </body>
