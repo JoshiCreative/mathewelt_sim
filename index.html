@@ -454,6 +454,45 @@
         }
       });
     }
+    // STRIKTE PRÜFUNG: Haben ALLE Becher im Team exakt denselben Wert?
+      // ----------------------------------------------------
+      
+      // 1. Prüfung für Unicorns ('u') -> Alle Becher müssen identisch sein
+      if (data.u.values.length > 0) {
+        const firstValU = data.u.values[0];
+        const allExactlyEqualU = data.u.values.every(val => Math.abs(val - firstValU) < 0.01);
+        
+        if (allExactlyEqualU) {
+          document.getElementById("avg-u").style.color = "var(--ok)";
+          document.getElementById("avg-u").innerText = `${avgU.toFixed(1)} ml`;
+          
+          if (!congratulatedU) {
+            congratulatedU = true; 
+            setTimeout(() => {
+              alert(`🎉 Richtig. Gut gemacht!\nDu hast alle Becher der Unicorns auf genau ${avgU.toFixed(0)} ml ausgeglichen!`);
+            }, 100);
+          }
+        }
+      }
+      
+      // 2. Prüfung für Mathe-Asse ('m') -> Alle Becher müssen identisch sein
+      if (data.m.values.length > 0) {
+        const firstValM = data.m.values[0];
+        const allExactlyEqualM = data.m.values.every(val => Math.abs(val - firstValM) < 0.01);
+        
+        if (allExactlyEqualM) {
+          document.getElementById("avg-m").style.color = "var(--ok)";
+          document.getElementById("avg-m").innerText = `${avgM.toFixed(1)} ml`;
+          
+          if (!congratulatedM) {
+            congratulatedM = true; 
+            setTimeout(() => {
+              alert(`🎉 Richtig. Gut gemacht!\nDu hast alle Becher der Mathe-Asse auf genau ${avgM.toFixed(0)} ml ausgeglichen!`);
+            }, 100);
+          }
+        }
+      }
+    }
 
     function toggleAverage() { showAvgLine = !showAvgLine; valuesRevealed = true; init(); }
     
