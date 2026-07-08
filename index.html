@@ -426,4 +426,123 @@
           </div>
           <div class="cup-shell">
             ${avgLineHtml}
-            <div class
+            <div class="water-fill" style="height: ${heightPercent}%;"></div>
+          </div>
+        `;
+        container.appendChild(cupItem);
+      });
+    }
+
+    function takeWater(key, idx) {
+      if (data[key].values[idx] >= 1) {
+        data[key].values[idx] -= 1;
+        pipetteBuffer += 1;
+        pipetteSourceTeam = key;
+        updatePipetteUI();
+        init();
+      }
+    }
+
+    function giveWater(key, idx) {
+      if (pipetteBuffer >= 1) {
+        data[key].values[idx] += 1;
+        pipetteBuffer -= 1;
+        if (pipetteBuffer === 0) pipetteSourceTeam = null;
+        updatePipetteUI();
+        init();
+      }
+    }
+
+    function updatePipetteUI() {
+      const display = document.getElementById("buffer-display");
+      const box = document.getElementById("pipette-box");
+      box.className = "transfer-buffer";
+      if (pipetteBuffer > 0) {
+        box.classList.add('active-' + pipetteSourceTeam);
+        display.innerHTML = `Gefüllt: <span style="color:var(--danger);">${pipetteBuffer} ml</span>`;
+      } else {
+        display.innerHTML = `Gefüllt: 0 ml`;
+      }
+    }
+
+    function loadGridModel(key) {
+      const canvas = document.getElementById("grid-canvas-area");
+      canvas.innerHTML = "";
+      const team = data[key];
+      
+      team.orig.forEach((origVal, childIdx) => {
+        const col = document.createElement("div");
+        col.className = "grid-column";
+        
+        const label = document.createElement("div");
+        label.innerText = team.names[childIdx];
+        label.style.fontSize = "0.85rem";
+        label.style.marginTop = "6px";
+        
+        for (let h = 1; h <= 22; h++) {
+          const cell = document.createElement("div");
+          cell.className = "grid-cell";
+          
+          if (h <= origVal) {
+            cell.classList.add("active-fill");
+          }
+          
+          cell.onclick = function() {
+            if (cell.classList.contains("active-fill")) {
+              cell.classList.remove("active-fill");
+              cell.classList.add("moved-fill"); 
+            } else if (cell.classList.contains("moved-fill")) {
+              cell.classList.remove("moved-fill");
+            } else {
+              cell.classList.add("active-fill"); 
+            }
+          };
+          
+          col.appendChild(cell);
+        }
+        col.appendChild(label);
+        canvas.appendChild(col);
+      });
+    }
+
+    function updateAnalysis() {
+      ['u', 'm'].forEach(key => {
+        const team = data[key];
+        const allExactlyEqual = team.values.every(val => Math.abs(val - team.targetAvg) < 0.01);
+        
+        if (allExactlyEqual || valuesRevealed) {
+          document.getElementById(`avg-${key}`).innerText = `${team.targetAvg} ml`;
+          document.getElementById(`avg-${key}`).style.color = "var(--ok)";
+        } else {
+          document.getElementById(`avg-${key}`).innerText = "gesucht...";
+          document.getElementById(`avg-${key}`).style.color = "var(--warn)";
+        }
+      });
+    }
+
+    function toggleAverage() { showAvgLine = !showAvgLine; valuesRevealed = true; init(); }
+    
+    function equalizeAll() {
+      valuesRevealed = true;
+      ['u', 'm'].forEach(key => {
+        data[key].values = data[key].values.map(() => data[key].targetAvg);
+      });
+      init();
+    }
+
+    function resetToOriginal() {
+      data.u.values = [...data.u.orig];
+      data.m.values = [...data.m.orig];
+      pipetteBuffer = 0; pipetteSourceTeam = null; showAvgLine = false; valuesRevealed = false;
+      updatePipetteUI();
+      init();
+      loadGridModel('u');
+    }
+
+    window.onload = function() {
+      init();
+      loadGridModel('u');
+    };
+  </script>
+</body>
+</html>
