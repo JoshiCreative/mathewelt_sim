@@ -195,4 +195,235 @@
       width: 32px;
       height: 20px;
       border: 1px solid #94a3b8;
-      background-color: #
+      background-color: #cbd5e1;
+      margin-top: 1px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .grid-cell.active-fill {
+      background-color: #38bdf8;
+    }
+
+    .grid-cell.moved-fill {
+      background-color: #f59e0b;
+      border-style: dashed;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-right: 8px;
+    }
+    .badge-u { background: var(--u-light); color: var(--u-dark); }
+    .badge-m { background: var(--m-light); color: var(--m-dark); }
+
+    /* POPUP/TOOLTIP STYLE */
+    .info-trigger {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      background: #6b7280;
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      font-size: 0.75rem;
+      line-height: 18px;
+      cursor: help;
+      margin-left: 6px;
+      position: relative;
+    }
+
+    .info-trigger:hover {
+      background: #374151;
+    }
+
+    .info-trigger .tooltip-content {
+      visibility: hidden;
+      width: 260px;
+      background-color: #1f2937;
+      color: #fff;
+      text-align: left;
+      border-radius: 8px;
+      padding: 12px;
+      position: absolute;
+      z-index: 100;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      font-weight: normal;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .info-trigger .tooltip-content::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #1f2937 transparent transparent transparent;
+    }
+
+    .info-trigger:hover .tooltip-content {
+      visibility: visible;
+    }
+
+    .student-textarea {
+      width: 100%;
+      height: 80px;
+      border: 2px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: vertical;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Mathewelt – Wasser & Kästchenmodell</h1>
+    <p>
+      Gerecht aufteilen: Nutze erst die Pipette bei den Wasserbechern. Nutze danach die digitale Kästchenzeichnung darunter, um die Blöcke wie im Arbeitsheft gedanklich umzuschichten.
+    </p>
+    <div style="margin-top: 15px;">
+      <button class="btn-small secondary" style="padding: 5px 12px; font-size: 0.85rem;" onclick="resetToOriginal()">🔄 Simulation zurücksetzen</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="transfer-buffer" id="pipette-box">
+      <div>
+        <strong>Umschütt-Modus (Pipette):</strong> 
+        <div id="buffer-info">Klicke bei einem Kind auf <button style="padding:2px 8px; font-size:0.8rem; background:#ea580c;">&rarr;</button>, um Wasser aufzusaugen.</div>
+      </div>
+      <div id="buffer-display" style="font-weight: bold; font-size: 1.1rem; text-align: right;">Gefüllt: 0 ml</div>
+    </section>
+
+    <div class="teams-grid">
+      
+      <article class="team-card" style="border-top: 4px solid var(--u);">
+        <div class="team-header"><h2 style="color: var(--u-dark);">Unicorns</h2></div>
+        <div class="cup-container" id="container-u"></div>
+        <div style="margin-top: 20px;">
+          <span class="badge badge-u" id="sum-u">Summe: 64 ml</span>
+          <span class="badge badge-u">
+            Ausgleichswert
+            <span class="info-trigger">?
+              <span class="tooltip-content">
+                Der Ausgleichswert zeigt an, wie viel Milliliter (ml) Wasser jedes Kind im Becher hätte, wenn das gesamte Wasser absolut gerecht und gleichmäßig auf alle Teammitglieder aufgeteilt wird.
+              </span>
+            </span>: 
+            <span id="avg-u" style="color: var(--warn); margin-left: 6px;">gesucht...</span>
+          </span>
+        </div>
+      </article>
+
+      <article class="team-card" style="border-top: 4px solid var(--m);">
+        <div class="team-header"><h2 style="color: var(--m-dark);">Mathe-Asse</h2></div>
+        <div class="cup-container" id="container-m"></div>
+        <div style="margin-top: 20px;">
+          <span class="badge badge-m" id="sum-m">Summe: 75 ml</span>
+          <span class="badge badge-m">
+            Ausgleichswert
+            <span class="info-trigger">?
+              <span class="tooltip-content">
+                Der Ausgleichswert zeigt an, wie viel Milliliter (ml) Wasser jedes Kind im Becher hätte, wenn das gesamte Wasser absolut gerecht und gleichmäßig auf alle Teammitglieder aufgeteilt wird.
+              </span>
+            </span>: 
+            <span id="avg-m" style="color: var(--warn); margin-left: 6px;">gesucht...</span>
+          </span>
+        </div>
+      </article>
+
+      <article class="grid-tool-card full-width-grid" id="grid-tool-section" style="border-top: 4px solid #4b5563;">
+        <h3>✏️ Digitale Kästchenzeichnung (wie im Arbeitsheft)</h3>
+        <p style="font-size: 0.95rem; color: var(--muted); margin: 0 0 10px 0;">
+          Klicke auf die grauen oder blauen Kästchen, um sie umzufärben, wegzustreichen oder hinzuzufügen. Schaffst du es, die Blöcke zeichnerisch so umzubauen, dass alle Kinder gleich viele Kästchen hoch sind?
+        </p>
+        <div style="margin-bottom: 10px;">
+          <button class="btn-small secondary" onclick="loadGridModel('u')">Kästchen für Unicorns laden</button>
+          <button class="btn-small secondary" onclick="loadGridModel('m')">Kästchen für Mathe-Asse laden</button>
+        </div>
+        <div class="grid-canvas" id="grid-canvas-area"></div>
+      </article>
+
+    </div>
+
+    <section class="results">
+      <h2>Hilfswerkzeuge für die Klasse</h2>
+      <div class="button-row">
+        <button class="accent" onclick="toggleAverage()">Ausgleichslinie ein/ausblenden</button>
+        <button class="warning" onclick="equalizeAll()">Mathematisch exakt ausgleichen</button>
+      </div>
+    </section>
+
+    <section class="student-input-section">
+      <h3>Deine mathematische Entdeckung ✍️</h3>
+      <label for="student-thought" style="font-weight: 500;">
+        Beschreibe, wie dir das Kästchenmodell dabei geholfen hat, den Ausgleichswert zu finden:
+      </label>
+      <textarea id="student-thought" class="student-textarea" placeholder="Wenn ich die Kästchen von oben wegnehme und unten dazutue..."></textarea>
+    </section>
+  </main>
+
+  <script>
+    const MAX_ML = 24;
+
+    let data = {
+      u: { names: ["Marla", "Andi", "Hakan", "Francy"], values: [15, 17, 12, 20], orig: [15, 17, 12, 20], targetAvg: 16 },
+      m: { names: ["Harald", "Sarah", "Monika", "Chris", "Flo"], values: [13, 16, 15, 13, 18], orig: [13, 16, 15, 13, 18], targetAvg: 15 }
+    };
+
+    let showAvgLine = false;
+    let valuesRevealed = false; 
+    let pipetteBuffer = 0;
+    let pipetteSourceTeam = null;
+
+    function init() {
+      renderTeam('u');
+      renderTeam('m');
+      updateAnalysis();
+    }
+
+    function renderTeam(key) {
+      const container = document.getElementById(`container-${key}`);
+      container.innerHTML = "";
+      const team = data[key];
+
+      team.values.forEach((val, idx) => {
+        const name = team.names[idx];
+        const heightPercent = (val / MAX_ML) * 100;
+        const cupItem = document.createElement("div");
+        cupItem.className = "cup-item";
+        
+        let avgLineHtml = "";
+        if (showAvgLine) {
+          const avgPercent = (team.targetAvg / MAX_ML) * 100;
+          avgLineHtml = `<div class="cup-avg-line" style="bottom: ${avgPercent}%;"></div>`;
+        }
+
+        const canTake = (pipetteSourceTeam === null || pipetteSourceTeam === key) && val > 0;
+        const canGive = pipetteSourceTeam === key && pipetteBuffer > 0 && val < MAX_ML;
+
+        cupItem.innerHTML = `
+          <div class="cup-name" style="font-weight:600;">${name}</div>
+          <div style="font-size:0.85rem; color:var(--muted);">${val.toFixed(0)} ml</div>
+          <div class="action-btns">
+            <button class="warning" onclick="takeWater('${key}', ${idx})" ${!canTake ? 'disabled' : ''}>&rarr;</button>
+            <button class="accent" onclick="giveWater('${key}', ${idx})" ${!canGive ? 'disabled' : ''}>&larr;</button>
+          </div>
+          <div class="cup-shell">
+            ${avgLineHtml}
+            <div class
