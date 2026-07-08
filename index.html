@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mathewelt – Wasser balancieren (Simulation)</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #d1d5db;
+      --u: #8b5cf6;
+      --u-light: #f3e8ff;
+      --u-dark: #6b21a8;
+      --m: #0ea5e9;
+      --m-light: #e0f2fe;
+      --m-dark: #0369a1;
+      --ok: #16a34a;
+      --warn: #ea580c;
+      --danger: #ef4444;
+      --water: linear-gradient(180deg, #7dd3fc 0%, #38bdf8 45%, #0284c7 100%);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    header {
+      padding: 24px;
+      background: #111827;
+      color: white;
+    }
+
+    header h1 { margin: 0 0 8px 0; font-size: 2rem; }
+    header p { margin: 0; color: #d1d5db; max-width: 950px; }
+
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .controls, .results, .team-card, .transfer-buffer, .student-input-section {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+      margin-bottom: 24px;
+    }
+
+    .transfer-buffer {
+      background: #f9fafb;
+      border: 2px dashed var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+    }
+
+    .transfer-buffer.active-u {
+      background: var(--u-light);
+      border-color: var(--u);
+    }
+
+    .transfer-buffer.active-m {
+      background: var(--m-light);
+      border-color: var(--m);
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: #111827;
+      color: white;
+      transition: all 0.2s ease;
+    }
+
+    button:hover { opacity: 0.9; transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    button:disabled { opacity: 0.25; cursor: not-allowed; transform: none !important; }
+    button.secondary { background: #4b5563; }
+    button.accent { background: var(--ok); }
+    button.warning { background: var(--warn); }
+    
+    .btn-small {
+      padding: 4px 10px;
+      font-size: 0.85rem;
+      border-radius: 6px;
+    }
+
+    .teams-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .teams-grid { grid-template-columns: 1fr; }
+    }
+
+    .team-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #f3f4f6;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .cup-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .cup-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 110px;
+    }
+
+    .cup-name { font-weight: bold; text-align: center; font-size: 0.95rem; }
+    
+    .cup-shell {
+      position: relative;
+      width: 70px;
+      height: 140px;
+      border: 3px solid #64748b;
+      border-top: none;
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+      background: rgba(255, 255, 255, 0.6);
+      overflow: hidden;
+    }
+
+    .water-fill {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background: var(--water);
+      transition: height 0.3s ease-in-out;
+    }
+
+    .cup-avg-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      border-top: 2px dashed var(--danger);
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .cup-input {
+      width: 100%;
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 4px;
+      width: 100%;
+    }
+    .action-btns button {
+      flex: 1;
+      padding: 6px 2px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+    }
+
+    .explanation {
+      margin-top: 16px;
+      background: #f9fafb;
+      border-left: 4px solid #3b82f6;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-right: 8px;
+    }
+    
+    .badge-u { background: var(--u-light); color: var(--u-dark); }
+    .badge-m { background: var(--m-light); color: var(--m-dark); }
+
+    /* Info-Hilfe Fragezeichen Styling */
+    .info-help {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      background: #9ca3af;
+      color: white;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      cursor: help;
+      margin-left: 4px;
+      position: relative;
+    }
+
+    .info-help:hover {
+      background: #4b5563;
+    }
+
+    .info-help .tooltiptext {
+      visibility: hidden;
+      width: 260px;
+      background-color: #1f2937;
+      color: #fff;
+      text-align: left;
+      border-radius: 8px;
+      padding: 12px;
+      position: absolute;
+      z-index: 20;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.2s;
+      font-family: sans-serif;
+      font-weight: normal;
+      line-height: 1.4;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .info-help:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .student-textarea {
+      width: 100%;
+      height: 100px;
+      border: 2px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: vertical;
+      margin-top: 12px;
+    }
+
+    .student-textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .submitted-card {
+      background: #f0fdf4;
+      border: 2px solid #bbf7d0;
+      color: #166534;
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .pipette-alert {
+      font-weight: bold;
+      color: var(--danger);
+      animation: pulse 1.5s infinite;
+      display: none;
+      margin-top: 4px;
+      font-size: 0.9rem;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Mathewelt – Wasser balancieren</h1>
+    <p>
+      Gerecht verteilen leicht gemacht: Verändere die Wassermengen per Schieberegler oder gieße Wasser innerhalb des Teams um, um eine Grundvorstellung zum Ausgleichswert zu entwickeln.
+    </p>
+  </header>
+
+  <main>
+    <section class="transfer-buffer" id="pipette-box">
+      <div>
+        <strong>Umschütt-Modus (Pipette):</strong> 
+        <div id="buffer-info">Klicke bei einem Kind auf <button class="btn-small" style="background:#ea580c;">&rarr;</button>, um Wasser aufzusaugen.</div>
+        <div id="pipette-warn-msg" class="pipette-alert">⚠️ Die Pipette ist noch befüllt! Leere sie komplett aus, bevor du das Team wechselst.</div>
+      </div>
+      <div id="buffer-display" style="font-weight: bold; font-size: 1.2rem; text-align: right;">Gefüllt: 0 ml<br><span style="font-size:0.85rem; font-weight:normal; color:var(--muted);">Team: Keins</span></div>
+    </section>
+
+    <section class="teams-grid">
+      
+      <article class="team-card" style="border-top: 4px solid var(--u);">
+        <div class="team-header">
+          <h2 style="color: var(--u-dark);">Unicorns</h2>
+          <div>
+            <button class="btn-small secondary" onclick="changeCount('u', -1)">&minus; Kind</button>
+            <button class="btn-small secondary" onclick="changeCount('u', 1)">&plus; Kind</button>
+          </div>
+        </div>
+        <div class="cup-container" id="container-u"></div>
+        <div style="margin-top: 20px;">
+          <span class="badge badge-u" id="sum-u">Summe: 0 ml</span>
+          <span class="badge badge-u">
+            Ausgleichswert
+            <span class="info-help">?
+              <span class="tooltiptext">Der Ausgleichswert gibt an, wie viel Milliliter Wasser in jedem Becher wären, wenn man das gesamte Wasser des Teams völlig gleichmäßig auf alle Kinder aufteilen würde.</span>
+            </span>: 
+            <span id="avg-u" style="color: var(--warn); font-weight: bold;">gesucht...</span>
+          </span>
+        </div>
+      </article>
+
+      <article class="team-card" style="border-top: 4px solid var(--m);">
+        <div class="team-header" style="color: var(--m-dark);">
+          <h2>Mathe-Asse</h2>
+          <div>
+            <button class="btn-small secondary" onclick="changeCount('m', -1)">&minus; Kind</button>
+            <button class="btn-small secondary" onclick="changeCount('m', 1)">&plus; Kind</button>
+          </div>
+        </div>
+        <div class="cup-container" id="container-m"></div>
+        <div style="margin-top: 20px;">
+          <span class="badge badge-m" id="sum-m">Summe: 0 ml</span>
+          <span class="badge badge-m">
+            Ausgleichswert
+            <span class="info-help">?
+              <span class="tooltiptext">Der Ausgleichswert gibt an, wie viel Milliliter Wasser in jedem Becher wären, wenn man das gesamte Wasser des Teams völlig gleichmäßig auf alle Kinder aufteilen würde.</span>
+            </span>: 
+            <span id="avg-m" style="color: var(--warn); font-weight: bold;">gesucht...</span>
+          </span>
+        </div>
+      </article>
+
+    </section>
+
+    <section class="results">
+      <h2>Simulation & Auswertung</h2>
+      <div class="button-row">
+        <button class="accent" onclick="toggleAverage()">Ausgleichslinie ein/ausblenden</button>
+        <button class="warning" onclick="equalizeAll()">Mathematisch exakt ausgleichen</button>
+        <button class="secondary" onclick="resetToOriginal()">Originalwerte laden</button>
+      </div>
+
+      <div class="explanation" id="info-box">
+        Bewege die Schieberegler oder nutze die Pfeile über den Bechern, um Wasser umzuverteilen. Versuche, die Becher innerhalb eines Teams auf die gleiche Höhe zu balancieren!
+      </div>
+    </section>
+
+    <section class="student-input-section">
+      <h3>Deine mathematische Entdeckung ✍️</h3>
+      <label for="student-thought" style="font-weight: 500;">
+        Schau dir die Ausgleichswerte der beiden Gruppen an (schalte dazu die Ausgleichslinie ein oder nutze den automatischen Ausgleich). Was fällt dir beim Vergleich auf? Schreibe deine Beobachtung auf:
+      </label>
+      <textarea id="student-thought" class="student-textarea" placeholder="Ich habe beobachtet, dass..."></textarea>
+      
+      <div class="button-row">
+        <button class="accent" onclick="submitThought()">Antwort speichern & kopieren</button>
+      </div>
+
+      <div id="submit-feedback" class="submitted-card">
+        <strong>✓ Super aufgeschrieben!</strong> Deine Antwort wurde im Zwischenspeicher kopiert. Du kannst sie jetzt mit <kbd>STRG</kbd> + <kbd>V</kbd> (oder langem Drücken am Tablet) auf der digitalen Pinnwand der Klasse einfügen.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const MAX_ML = 20;
+
+    let data = {
+      u: {
+        names: ["Marla", "Andi", "Hakan", "Francy", "Jakob", "Tina"],
+        values: [15, 17, 12, 20],
+        orig: [15, 17, 12, 20]
+      },
+      m: {
+        names: ["Harald", "Sarah", "Monika", "Chris", "Flo", "Lisa"],
+        values: [13, 15, 15, 14, 18],
+        orig: [13, 15, 15, 14, 18]
+      }
+    };
+
+    let showAvgLine = false;
+    let valuesRevealed = false; // Steuert, ob der Ausgleichswert bereits aufgedeckt ist
+    let pipetteBuffer = 0;
+    let pipetteSourceTeam = null;
+
+    function init() {
+      renderTeam('u');
+      renderTeam('m');
+      updateAnalysis();
+    }
+
+    function renderTeam(key) {
+      const container = document.getElementById(`container-${key}`);
+      container.innerHTML = "";
+
+      const team = data[key];
+      const avg = team.values.reduce((a, b) => a + b, 0) / team.values.length;
+
+      team.values.forEach((val, idx) => {
+        const name = team.names[idx] || `Kind ${idx + 1}`;
+        const heightPercent = (val / MAX_ML) * 100;
+        
+        const cupItem = document.createElement("div");
+        cupItem.className = "cup-item";
+        
+        let avgLineHtml = "";
+        if (showAvgLine) {
+          const avgPercent = (avg / MAX_ML) * 100;
+          avgLineHtml = `<div class="cup-avg-line" style="bottom: ${avgPercent}%;"></div>`;
+        }
+
+        const canTake = (pipetteSourceTeam === null || pipetteSourceTeam === key) && val > 0;
+        const canGive = pipetteSourceTeam === key && pipetteBuffer > 0 && val < MAX_ML;
+
+        cupItem.innerHTML = `
+          <div class="cup-name">${name}</div>
+          <div style="font-size:0.85rem; color:var(--muted);">${val.toFixed(1)} ml</div>
+          
+          <div class="action-btns">
+            <button class="warning" onclick="takeWater('${key}', ${idx})" title="1ml absaugen" ${!canTake ? 'disabled' : ''}>&rarr;</button>
+            <button class="accent" onclick="giveWater('${key}', ${idx})" title="1ml reinleeren" ${!canGive ? 'disabled' : ''}>&larr;</button>
+          </div>
+
+          <div class="cup-shell">
+            ${avgLineHtml}
+            <div class="water-fill" style="height: ${heightPercent}%;"></div>
+          </div>
+
+          <input class="cup-input" type="range" min="0" max="${MAX_ML}" step="0.5" value="${val}" 
+            ${pipetteBuffer > 0 ? 'disabled' : ''} oninput="updateSlider('${key}', ${idx}, this.value)">
+        `;
+        container.appendChild(cupItem);
+      });
+    }
+
+    function updateSlider(key, idx, val) {
+      data[key].values[idx] = parseFloat(val);
+      renderTeam(key);
+      updateAnalysis();
+    }
+
+    function takeWater(key, idx) {
+      if (pipetteSourceTeam !== null && pipetteSourceTeam !== key) return;
+
+      if (data[key].values[idx] >= 1) {
+        data[key].values[idx] -= 1;
+        pipetteBuffer += 1;
+        pipetteSourceTeam = key;
+        
+        updatePipetteUI();
+        renderTeam('u');
+        renderTeam('m');
+        updateAnalysis();
+      }
+    }
+
+    function giveWater(key, idx) {
+      if (pipetteSourceTeam !== key) return;
+
+      if (pipetteBuffer >= 1 && data[key].values[idx] < MAX_ML) {
+        data[key].values[idx] += 1;
+        pipetteBuffer -= 1;
+        
+        if (pipetteBuffer === 0) {
+          pipetteSourceTeam = null;
+        }
+        
+        updatePipetteUI();
+        renderTeam('u');
+        renderTeam('m');
+        updateAnalysis();
+      }
+    }
+
+    function updatePipetteUI() {
+      const display = document.getElementById("buffer-display");
+      const info = document.getElementById("buffer-info");
+      const box = document.getElementById("pipette-box");
+      const alertMsg = document.getElementById("pipette-warn-msg");
+      
+      box.className = "transfer-buffer";
+      alertMsg.style.display = "none";
+
+      if (pipetteBuffer > 0) {
+        const teamName = pipetteSourceTeam === 'u' ? 'Unicorns' : 'Mathe-Asse';
+        const teamColor = pipetteSourceTeam === 'u' ? 'var(--u-dark)' : 'var(--m-dark)';
+        
+        box.classList.add(pipetteSourceTeam === 'u' ? 'active-u' : 'active-m');
+        alertMsg.style.display = "block";
+        alertMsg.innerText = `⚠️ Die Pipette ist noch mit ${pipetteBuffer} ml der ${teamName} gefüllt!`;
+        
+        display.innerHTML = `Gefüllt: <span style="color:var(--danger);">${pipetteBuffer} ml</span><br><span style="font-size:0.85rem; font-weight:bold; color:${teamColor};">Team: ${teamName}</span>`;
+        info.innerHTML = `Du verteilst gerade Wasser innerhalb der <strong>${teamName}</strong>. Gieße es mit <button class="btn-small" style="background:#16a34a;">&larr;</button> wieder in deren Becher zurück.`;
+      } else {
+        display.innerHTML = `Gefüllt: 0 ml<br><span style="font-size:0.85rem; font-weight:normal; color:var(--muted);">Team: Keins</span>`;
+        info.innerHTML = `Klicke bei einem Kind auf <button class="btn-small" style="background:#ea580c;">&rarr;</button>, um Wasser aufzusaugen.`;
+      }
+    }
+
+    function updateAnalysis() {
+      const sumU = data.u.values.reduce((a,b) => a+b, 0);
+      const avgU = data.u.values.length ? (sumU / data.u.values.length) : 0;
+      
+      const sumM = data.m.values.reduce((a,b) => a+b, 0);
+      const avgM = data.m.values.length ? (sumM / data.m.values.length) : 0;
+
+      document.getElementById("sum-u").innerText = `Summe: ${sumU.toFixed(1)} ml`;
+      document.getElementById("sum-m").innerText = `Summe: ${sumM.toFixed(1)} ml`;
+      
+      // Werte-Anzeige wird gesteuert durch die Variable 'valuesRevealed'
+      if (valuesRevealed) {
+        document.getElementById("avg-u").style.color = "inherit";
+        document.getElementById("avg-u").innerText = `${avgU.toFixed(2)} ml`;
+        document.getElementById("avg-m").style.color = "inherit";
+        document.getElementById("avg-m").innerText = `${avgM.toFixed(2)} ml`;
+        
+        let infoBox = document.getElementById("info-box");
+        if (data.u.values.length > 0 && data.m.values.length > 0) {
+          infoBox.innerHTML = `
+            <strong>Unicorns (Ausgleichswert):</strong> ${avgU.toFixed(2)} ml <br>
+            <strong>Mathe-Asse (Ausgleichswert):</strong> ${avgM.toFixed(2)} ml <br><br>
+            <span style="font-size: 1.2rem; color: #111827; font-weight: bold;">&rarr; Was fällt dir beim Vergleich auf?</span>
+          `;
+        }
+      } else {
+        document.getElementById("avg-u").style.color = "var(--warn)";
+        document.getElementById("avg-u").innerText = "gesucht...";
+        document.getElementById("avg-m").style.color = "var(--warn)";
+        document.getElementById("avg-m").innerText = "gesucht...";
+      }
+    }
+
+    function changeCount(key, delta) {
+      if (pipetteBuffer > 0) {
+        alert("Bitte leere zuerst die Pipette aus, bevor du die Kinderanzahl änderst!");
+        return;
+      }
+      const team = data[key];
+      if (delta > 0 && team.values.length < team.names.length) {
+        team.values.push(15);
+      } else if (delta < 0 && team.values.length > 1) {
+        team.values.pop();
+      }
+      renderTeam(key);
+      updateAnalysis();
+    }
+
+    function toggleAverage() {
+      showAvgLine = !showAvgLine;
+      if (showAvgLine) {
+        valuesRevealed = true; // Linie zeigt den Wert, also decken wir ihn auch textlich auf
+      }
+      renderTeam('u');
+      renderTeam('m');
+      updateAnalysis();
+    }
+
+    function equalizeAll() {
+      if (pipetteBuffer > 0) {
+        alert("Bitte leere zuerst die Pipette aus, bevor du den automatischen Ausgleich nutzt!");
+        return;
+      }
+      valuesRevealed = true; // Automatischer Ausgleich deckt den Wert auf
+      ['u', 'm'].forEach(key => {
+        const team = data[key];
+        const avg = team.values.reduce((a,b) => a+b, 0) / team.values.length;
+        team.values = team.values.map(() => avg);
+        renderTeam(key);
+      });
+      updateAnalysis();
+    }
+
+    function resetToOriginal() {
+      if (pipetteBuffer > 0) {
+        alert("Bitte leere zuerst die Pipette aus, bevor du die Simulation zurücksetzt!");
+        return;
+      }
+      data.u.values = [...data.u.orig];
+      data.m.values = [...data.m.orig];
+      pipetteBuffer = 0;
+      pipetteSourceTeam = null;
+      showAvgLine = false;
+      valuesRevealed = false; // Beim Zurücksetzen wieder verstecken
+      document.getElementById("student-thought").value = "";
+      document.getElementById("submit-feedback").style.display = "none";
+      document.getElementById("info-box").innerText = "Bewege die Schieberegler oder nutze die Pfeile über den Bechern, um Wasser umzuverteilen. Versuche, die Becher innerhalb eines Teams auf die gleiche Höhe zu balancieren!";
+      updatePipetteUI();
+      init();
+    }
+
+    function submitThought() {
+      const text = document.getElementById("student-thought").value.trim();
+      if (text === "") {
+        alert("Bitte schreibe zuerst eine Beobachtung in das Freifeld!");
+        return;
+      }
+      
+      navigator.clipboard.writeText(text).then(() => {
+        document.getElementById("submit-feedback").style.display = "block";
+      }).catch(err => {
+        document.getElementById("submit-feedback").style.display = "block";
+      });
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
