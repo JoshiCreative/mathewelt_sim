@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mathewelt – Wasser & Kästchenmodell</title>
+  <title>Mathewelt – Wasser balancieren (Simulation)</title>
   <style>
     :root {
       --bg: #f4f7fb;
@@ -48,7 +48,7 @@
       padding: 24px;
     }
 
-    .controls, .results, .team-card, .transfer-buffer, .student-input-section, .grid-tool-card {
+    .controls, .results, .team-card, .transfer-buffer, .student-input-section {
       background: var(--card);
       border-radius: 18px;
       padding: 24px;
@@ -62,10 +62,18 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      transition: all 0.3s ease;
     }
 
-    .transfer-buffer.active-u { background: var(--u-light); border-color: var(--u); }
-    .transfer-buffer.active-m { background: var(--m-light); border-color: var(--m); }
+    .transfer-buffer.active-u {
+      background: var(--u-light);
+      border-color: var(--u);
+    }
+
+    .transfer-buffer.active-m {
+      background: var(--m-light);
+      border-color: var(--m);
+    }
 
     .button-row {
       display: flex;
@@ -87,23 +95,26 @@
     }
 
     button:hover { opacity: 0.9; transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
     button:disabled { opacity: 0.25; cursor: not-allowed; transform: none !important; }
     button.secondary { background: #4b5563; }
     button.accent { background: var(--ok); }
     button.warning { background: var(--warn); }
+    
+    .btn-small {
+      padding: 4px 10px;
+      font-size: 0.85rem;
+      border-radius: 6px;
+    }
 
     .teams-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 24px;
-      margin-bottom: 24px;
     }
-
-    .full-width-grid { grid-column: 1 / -1; }
 
     @media (max-width: 1024px) {
       .teams-grid { grid-template-columns: 1fr; }
-      .full-width-grid { grid-column: auto; }
     }
 
     .team-header {
@@ -131,6 +142,8 @@
       width: 110px;
     }
 
+    .cup-name { font-weight: bold; text-align: center; font-size: 0.95rem; }
+    
     .cup-shell {
       position: relative;
       width: 70px;
@@ -158,6 +171,7 @@
       right: 0;
       border-top: 2px dashed var(--danger);
       z-index: 10;
+      pointer-events: none;
     }
 
     .action-btns {
@@ -172,42 +186,13 @@
       border-radius: 6px;
     }
 
-    /* KÄSTCHEN MODELL STYLES */
-    .grid-canvas {
-      display: flex;
-      gap: 30px;
-      justify-content: center;
-      align-items: flex-end;
-      background: #fafafa;
-      padding: 20px;
-      border-radius: 12px;
-      border: 1px solid var(--line);
-      margin-top: 15px;
-    }
-
-    .grid-column {
-      display: flex;
-      flex-direction: column-reverse;
-      align-items: center;
-    }
-
-    .grid-cell {
-      width: 32px;
-      height: 20px;
-      border: 1px solid #94a3b8;
-      background-color: #cbd5e1;
-      margin-top: 1px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .grid-cell.active-fill {
-      background-color: #38bdf8;
-    }
-
-    .grid-cell.moved-fill {
-      background-color: #f59e0b;
-      border-style: dashed;
+    .explanation {
+      margin-top: 16px;
+      background: #f9fafb;
+      border-left: 4px solid #3b82f6;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 1.1rem;
     }
 
     .badge {
@@ -219,12 +204,56 @@
       font-size: 0.9rem;
       margin-right: 8px;
     }
+    
     .badge-u { background: var(--u-light); color: var(--u-dark); }
     .badge-m { background: var(--m-light); color: var(--m-dark); }
 
+    .info-help {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      background: #9ca3af;
+      color: white;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      cursor: help;
+      margin-left: 4px;
+      position: relative;
+    }
+
+    .info-help:hover { background: #4b5563; }
+
+    .info-help .tooltiptext {
+      visibility: hidden;
+      width: 260px;
+      background-color: #1f2937;
+      color: #fff;
+      text-align: left;
+      border-radius: 8px;
+      padding: 12px;
+      position: absolute;
+      z-index: 20;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.2s;
+      font-family: sans-serif;
+      font-weight: normal;
+      line-height: 1.4;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .info-help:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+
     .student-textarea {
       width: 100%;
-      height: 80px;
+      height: 100px;
       border: 2px solid var(--line);
       border-radius: 12px;
       padding: 12px;
@@ -233,17 +262,50 @@
       resize: vertical;
       margin-top: 12px;
     }
+
+    .student-textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .submitted-card {
+      background: #f0fdf4;
+      border: 2px solid #bbf7d0;
+      color: #166534;
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .pipette-alert {
+      font-weight: bold;
+      color: var(--danger);
+      animation: pulse 1.5s infinite;
+      display: none;
+      margin-top: 4px;
+      font-size: 0.9rem;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>Mathewelt – Wasser & Kästchenmodell</h1>
+    <h1>Mathewelt – Wasser aufteilen</h1>
     <p>
-      Gerecht aufteilen: Nutze erst die Pipette bei den Wasserbechern. Nutze danach die digitale Kästchenzeichnung darunter, um die Blöcke wie im Arbeitsheft gedanklich umzuschichten.
+      Hallo, dein Ziel ist es, das Wasser innerhalb der Teams gerecht zu verteilen. Mit der Pipette kannst du Wasser von einem Becher aufnehmen und auf andere Becher des Teams verteilen. Finde für beide Teams den Ausgleichswert.
     </p>
-    <div style="margin-top: 15px;">
-      <button class="btn-small secondary" style="padding: 5px 12px; font-size: 0.85rem;" onclick="resetToOriginal()">🔄 Simulation zurücksetzen</button>
+    <div style="margin-top: 15px; display: flex; gap: 10px; align-items: center;">
+      <span style="font-size: 0.9rem; color: #9ca3af;">Lehrkräfte-Presets:</span>
+      <button class="btn-small secondary" onclick="loadPreset(1)">Aufgabe 1 (Wasser)</button>
+      <button class="btn-small secondary" onclick="loadPreset(2)">Aufgabe 3 (Medaillen-Struktur)</button>
     </div>
   </header>
 
@@ -251,75 +313,113 @@
     <section class="transfer-buffer" id="pipette-box">
       <div>
         <strong>Umschütt-Modus (Pipette):</strong> 
-        <div id="buffer-info">Klicke bei einem Kind auf <button style="padding:2px 8px; font-size:0.8rem; background:#ea580c;">&rarr;</button>, um Wasser aufzusaugen.</div>
+        <div id="buffer-info">Klicke bei einem Kind auf <button class="btn-small" style="background:#ea580c;">&rarr;</button>, um Wasser aufzusaugen.</div>
+        <div id="pipette-warn-msg" class="pipette-alert">⚠️ Die Pipette ist noch befüllt! Leere sie komplett aus, bevor du das Team wechselst.</div>
       </div>
-      <div id="buffer-display" style="font-weight: bold; font-size: 1.1rem; text-align: right;">Gefüllt: 0 ml</div>
+      <div id="buffer-display" style="font-weight: bold; font-size: 1.2rem; text-align: right;">Gefüllt: 0 ml<br><span style="font-size:0.85rem; font-weight:normal; color:var(--muted);">Team: Keins</span></div>
     </section>
 
-    <div class="teams-grid">
+    <section class="teams-grid">
       
       <article class="team-card" style="border-top: 4px solid var(--u);">
-        <div class="team-header"><h2 style="color: var(--u-dark);">Unicorns</h2></div>
+        <div class="team-header">
+          <h2 style="color: var(--u-dark);">Unicorns</h2>
+          <div>
+            <button class="btn-small secondary" id="btn-sub-u" onclick="changeCount('u', -1)">&minus; Kind</button>
+            <button class="btn-small secondary" id="btn-add-u" onclick="changeCount('u', 1)">&plus; Kind</button>
+          </div>
+        </div>
         <div class="cup-container" id="container-u"></div>
         <div style="margin-top: 20px;">
-          <span class="badge badge-u" id="sum-u">Summe: 64 ml</span>
-          <span class="badge badge-u">Ausgleichswert: <span id="avg-u" style="color: var(--warn);">gesucht...</span></span>
+          <span class="badge badge-u" id="sum-u">Summe: 0 ml</span>
+          <span class="badge badge-u">
+            Ausgleichswert
+            <span class="info-help">?
+              <span class="tooltiptext">Der Ausgleichswert gibt an, wie viel Milliliter Wasser in jedem Becher wären, wenn man das gesamte Wasser des Teams völlig gleichmäßig auf alle Kinder aufteilen würde.</span>
+            </span>: 
+            <span id="avg-u" style="color: var(--warn); font-weight: bold;">gesucht...</span>
+          </span>
         </div>
       </article>
 
       <article class="team-card" style="border-top: 4px solid var(--m);">
-        <div class="team-header"><h2 style="color: var(--m-dark);">Mathe-Asse</h2></div>
+        <div class="team-header" style="color: var(--m-dark);">
+          <h2>Mathe-Asse</h2>
+          <div>
+            <button class="btn-small secondary" id="btn-sub-m" onclick="changeCount('m', -1)">&minus; Kind</button>
+            <button class="btn-small secondary" id="btn-add-m" onclick="changeCount('m', 1)">&plus; Kind</button>
+          </div>
+        </div>
         <div class="cup-container" id="container-m"></div>
         <div style="margin-top: 20px;">
-          <span class="badge badge-m" id="sum-m">Summe: 75 ml</span>
-          <span class="badge badge-m">Ausgleichswert: <span id="avg-m" style="color: var(--warn);">gesucht...</span></span>
+          <span class="badge badge-m" id="sum-m">Summe: 0 ml</span>
+          <span class="badge badge-m">
+            Ausgleichswert
+            <span class="info-help">?
+              <span class="tooltiptext">Der Ausgleichswert gibt an, wie viel Milliliter Wasser in jedem Becher wären, wenn man das gesamte Wasser des Teams völlig gleichmäßig auf alle Kinder aufteilen würde.</span>
+            </span>: 
+            <span id="avg-m" style="color: var(--warn); font-weight: bold;">gesucht...</span>
+          </span>
         </div>
       </article>
 
-      <article class="grid-tool-card full-width-grid" id="grid-tool-section" style="border-top: 4px solid #4b5563;">
-        <h3>✏️ Digitale Kästchenzeichnung (wie im Arbeitsheft)</h3>
-        <p style="font-size: 0.95rem; color: var(--muted); margin: 0 0 10px 0;">
-          Klicke auf die grauen oder blauen Kästchen, um sie umzufärben, wegzustreichen oder hinzuzufügen. Schaffst du es, die Blöcke zeichnerisch so umzubauen, dass alle Kinder gleich viele Kästchen hoch sind?
-        </p>
-        <div style="margin-bottom: 10px;">
-          <button class="btn-small secondary" onclick="loadGridModel('u')">Kästchen für Unicorns laden</button>
-          <button class="btn-small secondary" onclick="loadGridModel('m')">Kästchen für Mathe-Asse laden</button>
-        </div>
-        <div class="grid-canvas" id="grid-canvas-area"></div>
-      </article>
-
-    </div>
+    </section>
 
     <section class="results">
-      <h2>Hilfswerkzeuge für die Klasse</h2>
+      <h2>Simulation & Auswertung</h2>
       <div class="button-row">
         <button class="accent" onclick="toggleAverage()">Ausgleichslinie ein/ausblenden</button>
         <button class="warning" onclick="equalizeAll()">Mathematisch exakt ausgleichen</button>
+        <button class="secondary" onclick="resetToOriginal()">Simulation zurücksetzen</button>
+      </div>
+
+      <div class="explanation" id="info-box">
+        Nutze die Pfeiltasten über den Bechern, um Wasser umzuverteilen. Versuche, alle Becher innerhalb eines Teams auf die exakt gleiche Höhe zu bringen, um den Ausgleichswert freizuschalten!
       </div>
     </section>
 
     <section class="student-input-section">
       <h3>Deine mathematische Entdeckung ✍️</h3>
       <label for="student-thought" style="font-weight: 500;">
-        Beschreibe, wie dir das Kästchenmodell dabei geholfen hat, den Ausgleichswert zu finden:
+        Schau dir die Ausgleichswerte der beiden Gruppen an (schalte dazu die Ausgleichslinie ein oder nutze den automatischen Ausgleich). Was fällt dir beim Vergleich auf? Schreibe deine Beobachtung auf:
       </label>
-      <textarea id="student-thought" class="student-textarea" placeholder="Wenn ich die Kästchen von oben wegnehme und unten dazutue..."></textarea>
+      <textarea id="student-thought" class="student-textarea" placeholder="Ich habe beobachtet, dass..."></textarea>
+      
+      <div class="button-row">
+        <button class="accent" onclick="submitThought()">Antwort speichern & kopieren</button>
+      </div>
+
+      <div id="submit-feedback" class="submitted-card">
+        <strong>✓ Super aufgeschrieben!</strong> Deine Antwort wurde in den Zwischenspeicher kopiert. Du kannst sie jetzt mit <kbd>STRG</kbd> + <kbd>V</kbd> (oder langem Drücken am Tablet) auf der digitalen Pinnwand der Klasse einfügen.
+      </div>
     </section>
   </main>
 
   <script>
-    const MAX_ML = 24; // Puffer nach oben vergrößert für bessere Ansicht
+    const MAX_ML = 20;
 
-    // Feste, korrekte mathematische Zielwerte für die Lernkontrolle
     let data = {
-      u: { names: ["Marla", "Andi", "Hakan", "Francy"], values: [15, 17, 12, 20], orig: [15, 17, 12, 20], targetAvg: 16 },
-      m: { names: ["Harald", "Sarah", "Monika", "Chris", "Flo"], values: [13, 16, 15, 13, 18], orig: [13, 16, 15, 13, 18], targetAvg: 15 }
+      u: {
+        names: ["Marla", "Andi", "Hakan", "Francy", "Jakob", "Tina"],
+        values: [15, 17, 12, 20],
+        orig: [15, 17, 12, 20]
+      },
+      m: {
+        names: ["Harald", "Sarah", "Monika", "Chris", "Flo", "Lisa"],
+        values: [13, 15, 15, 14, 18],
+        orig: [13, 15, 15, 14, 18]
+      }
     };
 
     let showAvgLine = false;
     let valuesRevealed = false; 
     let pipetteBuffer = 0;
     let pipetteSourceTeam = null;
+    let umschüttenGestartet = false;
+
+    // Variablen, um ein mehrfaches Aufpoppen des Erfolgs-Alerts zu verhindern
+    let congratulatedU = false;
+    let congratulatedM = false;
 
     function init() {
       renderTeam('u');
@@ -330,17 +430,23 @@
     function renderTeam(key) {
       const container = document.getElementById(`container-${key}`);
       container.innerHTML = "";
+
       const team = data[key];
+      const avg = team.values.reduce((a, b) => a + b, 0) / team.values.length;
+
+      document.getElementById(`btn-add-${key}`).disabled = umschüttenGestartet;
+      document.getElementById(`btn-sub-${key}`).disabled = umschüttenGestartet;
 
       team.values.forEach((val, idx) => {
-        const name = team.names[idx];
+        const name = team.names[idx] || `Kind ${idx + 1}`;
         const heightPercent = (val / MAX_ML) * 100;
+        
         const cupItem = document.createElement("div");
         cupItem.className = "cup-item";
         
         let avgLineHtml = "";
         if (showAvgLine) {
-          const avgPercent = (team.targetAvg / MAX_ML) * 100;
+          const avgPercent = (avg / MAX_ML) * 100;
           avgLineHtml = `<div class="cup-avg-line" style="bottom: ${avgPercent}%;"></div>`;
         }
 
@@ -348,12 +454,14 @@
         const canGive = pipetteSourceTeam === key && pipetteBuffer > 0 && val < MAX_ML;
 
         cupItem.innerHTML = `
-          <div class="cup-name" style="font-weight:600;">${name}</div>
-          <div style="font-size:0.85rem; color:var(--muted);">${val.toFixed(0)} ml</div>
+          <div class="cup-name">${name}</div>
+          <div style="font-size:0.85rem; color:var(--muted);">${val.toFixed(1)} ml</div>
+          
           <div class="action-btns">
-            <button class="warning" onclick="takeWater('${key}', ${idx})" ${!canTake ? 'disabled' : ''}>&rarr;</button>
-            <button class="accent" onclick="giveWater('${key}', ${idx})" ${!canGive ? 'disabled' : ''}>&larr;</button>
+            <button class="warning" onclick="takeWater('${key}', ${idx})" title="1ml absaugen" ${!canTake ? 'disabled' : ''}>&rarr;</button>
+            <button class="accent" onclick="giveWater('${key}', ${idx})" title="1ml reinleeren" ${!canGive ? 'disabled' : ''}>&larr;</button>
           </div>
+
           <div class="cup-shell">
             ${avgLineHtml}
             <div class="water-fill" style="height: ${heightPercent}%;"></div>
@@ -364,159 +472,239 @@
     }
 
     function takeWater(key, idx) {
+      if (pipetteSourceTeam !== null && pipetteSourceTeam !== key) return;
+
       if (data[key].values[idx] >= 1) {
+        umschüttenGestartet = true; 
         data[key].values[idx] -= 1;
         pipetteBuffer += 1;
         pipetteSourceTeam = key;
+        
         updatePipetteUI();
-        init();
+        renderTeam('u');
+        renderTeam('m');
+        updateAnalysis();
       }
     }
 
     function giveWater(key, idx) {
-      if (pipetteBuffer >= 1) {
+      if (pipetteSourceTeam !== key) return;
+
+      if (pipetteBuffer >= 1 && data[key].values[idx] < MAX_ML) {
         data[key].values[idx] += 1;
         pipetteBuffer -= 1;
-        if (pipetteBuffer === 0) pipetteSourceTeam = null;
+        
+        if (pipetteBuffer === 0) {
+          pipetteSourceTeam = null;
+        }
+        
         updatePipetteUI();
-        init();
+        renderTeam('u');
+        renderTeam('m');
+        updateAnalysis();
       }
     }
 
     function updatePipetteUI() {
       const display = document.getElementById("buffer-display");
+      const info = document.getElementById("buffer-info");
       const box = document.getElementById("pipette-box");
+      const alertMsg = document.getElementById("pipette-warn-msg");
+      
       box.className = "transfer-buffer";
+      alertMsg.style.display = "none";
+
       if (pipetteBuffer > 0) {
-        box.classList.add('active-' + pipetteSourceTeam);
-        display.innerHTML = `Gefüllt: <span style="color:var(--danger);">${pipetteBuffer} ml</span>`;
+        const teamName = pipetteSourceTeam === 'u' ? 'Unicorns' : 'Mathe-Asse';
+        const teamColor = pipetteSourceTeam === 'u' ? 'var(--u-dark)' : 'var(--m-dark)';
+        
+        box.classList.add(pipetteSourceTeam === 'u' ? 'active-u' : 'active-m');
+        alertMsg.style.display = "block";
+        alertMsg.innerText = `⚠️ Die Pipette ist noch mit ${pipetteBuffer} ml der ${teamName} gefüllt!`;
+        
+        display.innerHTML = `Gefüllt: <span style="color:var(--danger);">${pipetteBuffer} ml</span><br><span style="font-size:0.85rem; font-weight:bold; color:${teamColor};">Team: ${teamName}</span>`;
+        info.innerHTML = `Du verteilst gerade Wasser innerhalb der <strong>${teamName}</strong>. Gieße es mit <button class="btn-small" style="background:#16a34a;">&larr;</button> wieder in deren Becher zurück.`;
       } else {
-        display.innerHTML = `Gefüllt: 0 ml`;
+        display.innerHTML = `Gefüllt: 0 ml<br><span style="font-size:0.85rem; font-weight:normal; color:var(--muted);">Team: Keins</span>`;
+        info.innerHTML = `Klicke bei einem Kind auf <button class="btn-small" style="background:#ea580c;">&rarr;</button>, um Wasser aufzusaugen.`;
       }
     }
 
-    /* INTERAKTIVES KÄSTCHENMODELL GENERIEREN */
-    function loadGridModel(key) {
-      const canvas = document.getElementById("grid-canvas-area");
-      canvas.innerHTML = "";
-      const team = data[key];
-      
-      team.orig.forEach((origVal, childIdx) => {
-        const col = document.createElement("div");
-        col.className = "grid-column";
-        
-        const label = document.createElement("div");
-        label.innerText = team.names[childIdx];
-        label.style.fontSize = "0.85rem";
-        label.style.marginTop = "6px";
-        
-        // Generiere 22 Kästchen übereinander (wie im Arbeitsheft)
-        for (let h = 1; h <= 22; h++) {
-          const cell = document.createElement("div");
-          cell.className = "grid-cell";
-          
-          if (h <= origVal) {
-            cell.classList.add("active-fill");
-          }
-          
-          cell.onclick = function() {
-            if (cell.classList.contains("active-fill")) {
-              cell.classList.remove("active-fill");
-              cell.classList.add("moved-fill"); 
-            } else if (cell.classList.contains("moved-fill")) {
-              cell.classList.remove("moved-fill");
-            } else {
-              cell.classList.add("active-fill"); 
-            }
-          };
-          
-          col.appendChild(cell);
-        }
-        col.appendChild(label);
-        canvas.appendChild(col);
-      });
-    }
-
     function updateAnalysis() {
-      ['u', 'm'].forEach(key => {
-        const team = data[key];
-        const sum = team.values.reduce((a,b) => a+b, 0);
+      const sumU = data.u.values.reduce((a,b) => a+b, 0);
+      const avgU = data.u.values.length ? (sumU / data.u.values.length) : 0;
+      
+      const sumM = data.m.values.reduce((a,b) => a+b, 0);
+      const avgM = data.m.values.length ? (sumM / data.m.values.length) : 0;
 
-        // Überprüfung, ob alle Becher exakt auf dem korrekten Ausgleichswert stehen
-        const allExactlyEqual = team.values.every(val => Math.abs(val - team.targetAvg) < 0.01);
+      document.getElementById("sum-u").innerText = `Summe: ${sumU.toFixed(1)} ml`;
+      document.getElementById("sum-m").innerText = `Summe: ${sumM.toFixed(1)} ml`;
+      
+      // Standardmäßige Textanzeige steuern (gesucht vs. durch Buttons erzwungen aufgedeckt)
+      if (valuesRevealed) {
+        document.getElementById("avg-u").style.color = "inherit";
+        document.getElementById("avg-u").innerText = `${avgU.toFixed(2)} ml`;
+        document.getElementById("avg-m").style.color = "inherit";
+        document.getElementById("avg-m").innerText = `${avgM.toFixed(2)} ml`;
         
-        if (allExactlyEqual || valuesRevealed) {
-          document.getElementById(`avg-${key}`).innerText = `${team.targetAvg} ml`;
-          document.getElementById(`avg-${key}`).style.color = "var(--ok)";
-        } else {
-          document.getElementById(`avg-${key}`).innerText = "gesucht...";
-          document.getElementById(`avg-${key}`).style.color = "var(--warn)";
+        let infoBox = document.getElementById("info-box");
+        if (data.u.values.length > 0 && data.m.values.length > 0) {
+          infoBox.innerHTML = `
+            <strong>Unicorns (Ausgleichswert):</strong> ${avgU.toFixed(2)} ml <br>
+            <strong>Mathe-Asse (Ausgleichswert):</strong> ${avgM.toFixed(2)} ml <br><br>
+            <span style="font-size: 1.2rem; color: #111827; font-weight: bold;">&rarr; Was fällt dir beim Vergleich auf?</span>
+          `;
         }
-      });
-    }
-    // STRIKTE PRÜFUNG: Haben ALLE Becher im Team exakt denselben Wert?
+      } else {
+        document.getElementById("avg-u").style.color = "var(--warn)";
+        document.getElementById("avg-u").innerText = "gesucht...";
+        document.getElementById("avg-m").style.color = "var(--warn)";
+        document.getElementById("avg-m").innerText = "gesucht...";
+      }
+
+      // ----------------------------------------------------
+      // ERFOLGSPRÜFUNG: Haben die Kinder alle Becher ausgeglichen?
       // ----------------------------------------------------
       
-      // 1. Prüfung für Unicorns ('u') -> Alle Becher müssen identisch sein
+      // 1. Prüfung für Unicorns ('u')
       if (data.u.values.length > 0) {
         const firstValU = data.u.values[0];
-        const allExactlyEqualU = data.u.values.every(val => Math.abs(val - firstValU) < 0.01);
+        const allEqualU = data.u.values.every(val => Math.abs(val - firstValU) < 0.1);
         
-        if (allExactlyEqualU) {
+        if (allEqualU) {
           document.getElementById("avg-u").style.color = "var(--ok)";
           document.getElementById("avg-u").innerText = `${avgU.toFixed(1)} ml`;
           
           if (!congratulatedU) {
             congratulatedU = true; 
             setTimeout(() => {
-              alert(`🎉 Richtig. Gut gemacht!\nDu hast alle Becher der Unicorns auf genau ${avgU.toFixed(0)} ml ausgeglichen!`);
+              alert(`🎉 Richtig. Gut gemacht!\nDu hast alle Becher der Unicorns perfekt ausgeglichen. Der Ausgleichswert ist ${avgU.toFixed(1)} ml!`);
             }, 100);
           }
         }
       }
       
-      // 2. Prüfung für Mathe-Asse ('m') -> Alle Becher müssen identisch sein
+      // 2. Prüfung für Mathe-Asse ('m')
       if (data.m.values.length > 0) {
         const firstValM = data.m.values[0];
-        const allExactlyEqualM = data.m.values.every(val => Math.abs(val - firstValM) < 0.01);
+        const allEqualM = data.m.values.every(val => Math.abs(val - firstValM) < 0.1);
         
-        if (allExactlyEqualM) {
+        if (allEqualM) {
           document.getElementById("avg-m").style.color = "var(--ok)";
           document.getElementById("avg-m").innerText = `${avgM.toFixed(1)} ml`;
           
           if (!congratulatedM) {
             congratulatedM = true; 
             setTimeout(() => {
-              alert(`🎉 Richtig. Gut gemacht!\nDu hast alle Becher der Mathe-Asse auf genau ${avgM.toFixed(0)} ml ausgeglichen!`);
+              alert(`🎉 Richtig. Gut gemacht!\nDu hast alle Becher der Mathe-Asse perfekt ausgeglichen. Der Ausgleichswert ist ${avgM.toFixed(1)} ml!`);
             }, 100);
           }
         }
       }
     }
 
-    function toggleAverage() { showAvgLine = !showAvgLine; valuesRevealed = true; init(); }
-    
+    function changeCount(key, delta) {
+      if (pipetteBuffer > 0 || umschüttenGestartet) return;
+      const team = data[key];
+      if (delta > 0 && team.values.length < team.names.length) {
+        team.values.push(10);
+        team.orig.push(10);
+      } else if (delta < 0 && team.values.length > 1) {
+        team.values.pop();
+        team.orig.pop();
+      }
+      renderTeam(key);
+      updateAnalysis();
+    }
+
+    function toggleAverage() {
+      showAvgLine = !showAvgLine;
+      if (showAvgLine) {
+        valuesRevealed = true; 
+      }
+      renderTeam('u');
+      renderTeam('m');
+      updateAnalysis();
+    }
+
     function equalizeAll() {
-      valuesRevealed = true;
+      if (pipetteBuffer > 0) {
+        alert("Bitte leere zuerst die Pipette aus, bevor du den automatischen Ausgleich nutzt!");
+        return;
+      }
+      valuesRevealed = true; 
+      umschüttenGestartet = true;
       ['u', 'm'].forEach(key => {
-        data[key].values = data[key].values.map(() => data[key].targetAvg);
+        const team = data[key];
+        const avg = team.values.reduce((a,b) => a+b, 0) / team.values.length;
+        team.values = team.values.map(() => avg);
+        renderTeam(key);
       });
-      init();
+      updateAnalysis();
+    }
+
+    function loadPreset(num) {
+      if (pipetteBuffer > 0) {
+        alert("Bitte leere zuerst die Pipette!");
+        return;
+      }
+      if (num === 1) {
+        data.u.values = [15, 17, 12, 20];
+        data.u.orig = [15, 17, 12, 20];
+        data.m.values = [13, 15, 15, 14, 18];
+        data.m.orig = [13, 15, 15, 14, 18];
+      } else if (num === 2) {
+        data.u.values = [8, 12, 16, 4];
+        data.u.orig = [8, 12, 16, 4];
+        data.m.values = [10, 10, 14, 12, 9];
+        data.m.orig = [10, 10, 14, 12, 9];
+      }
+      resetState();
     }
 
     function resetToOriginal() {
+      if (pipetteBuffer > 0) {
+        alert("Bitte leere zuerst die Pipette aus, bevor du die Simulation zurücksetzt!");
+        return;
+      }
       data.u.values = [...data.u.orig];
       data.m.values = [...data.m.orig];
-      pipetteBuffer = 0; pipetteSourceTeam = null; showAvgLine = false; valuesRevealed = false;
-      updatePipetteUI();
-      init();
-      loadGridModel('u');
+      resetState();
     }
 
-    window.onload = function() {
+    function resetState() {
+      pipetteBuffer = 0;
+      pipetteSourceTeam = null;
+      showAvgLine = false;
+      valuesRevealed = false; 
+      umschüttenGestartet = false;
+      
+      // Erfolgsstatus für Pop-ups beim Reset wieder freigeben
+      congratulatedU = false;
+      congratulatedM = false;
+
+      document.getElementById("student-thought").value = "";
+      document.getElementById("submit-feedback").style.display = "none";
+      document.getElementById("info-box").innerText = "Nutze die Pfeiltasten über den Bechern, um Wasser umzuverteilen. Versuche, alle Becher innerhalb eines Teams auf die exakt gleiche Höhe zu bringen, um den Ausgleichswert freizuschalten!";
+      updatePipetteUI();
       init();
-      loadGridModel('u'); // Standardmäßig mit den Unicorns starten
-    };
+    }
+
+    function submitThought() {
+      const text = document.getElementById("student-thought").value.trim();
+      if (text === "") {
+        alert("Bitte schreibe zuerst eine Beobachtung in das Freifeld!");
+        return;
+      }
+      
+      navigator.clipboard.writeText(text).then(() => {
+        document.getElementById("submit-feedback").style.display = "block";
+      }).catch(err => {
+        document.getElementById("submit-feedback").style.display = "block";
+      });
+    }
+
+    window.onload = init;
   </script>
 </body>
 </html>
