@@ -398,16 +398,17 @@
   <script>
     const MAX_ML = 20;
 
+    // Start-Presets angepasst, damit die Summen glatt durch die Kinder-Anzahl teilbar sind!
     let data = {
       u: {
         names: ["Marla", "Andi", "Hakan", "Francy", "Jakob", "Tina"],
-        values: [15, 17, 12, 20],
+        values: [15, 17, 12, 20], // Summe 64 / 4 Kinder = exakt 16 ml
         orig: [15, 17, 12, 20]
       },
       m: {
         names: ["Harald", "Sarah", "Monika", "Chris", "Flo", "Lisa"],
-        values: [13, 15, 15, 14, 18],
-        orig: [13, 15, 15, 14, 18]
+        values: [13, 16, 15, 13, 18], // Summe 75 / 5 Kinder = exakt 15 ml
+        orig: [13, 16, 15, 13, 18]
       }
     };
 
@@ -417,7 +418,6 @@
     let pipetteSourceTeam = null;
     let umschüttenGestartet = false;
 
-    // Variablen, um ein mehrfaches Aufpoppen des Erfolgs-Alerts zu verhindern
     let congratulatedU = false;
     let congratulatedM = false;
 
@@ -540,7 +540,6 @@
       document.getElementById("sum-u").innerText = `Summe: ${sumU.toFixed(1)} ml`;
       document.getElementById("sum-m").innerText = `Summe: ${sumM.toFixed(1)} ml`;
       
-      // Standardmäßige Textanzeige steuern (gesucht vs. durch Buttons erzwungen aufgedeckt)
       if (valuesRevealed) {
         document.getElementById("avg-u").style.color = "inherit";
         document.getElementById("avg-u").innerText = `${avgU.toFixed(2)} ml`;
@@ -563,40 +562,40 @@
       }
 
       // ----------------------------------------------------
-      // ERFOLGSPRÜFUNG: Haben die Kinder alle Becher ausgeglichen?
+      // STRIKTE PRÜFUNG: Haben ALLE Becher im Team exakt denselben Wert?
       // ----------------------------------------------------
       
-      // 1. Prüfung für Unicorns ('u')
+      // 1. Prüfung für Unicorns ('u') -> Alle Becher müssen identisch sein
       if (data.u.values.length > 0) {
         const firstValU = data.u.values[0];
-        const allEqualU = data.u.values.every(val => Math.abs(val - firstValU) < 0.1);
+        const allExactlyEqualU = data.u.values.every(val => Math.abs(val - firstValU) < 0.01);
         
-        if (allEqualU) {
+        if (allExactlyEqualU) {
           document.getElementById("avg-u").style.color = "var(--ok)";
           document.getElementById("avg-u").innerText = `${avgU.toFixed(1)} ml`;
           
           if (!congratulatedU) {
             congratulatedU = true; 
             setTimeout(() => {
-              alert(`🎉 Richtig. Gut gemacht!\nDu hast alle Becher der Unicorns perfekt ausgeglichen. Der Ausgleichswert ist ${avgU.toFixed(1)} ml!`);
+              alert(`🎉 Richtig. Gut gemacht!\nDu hast alle Becher der Unicorns auf genau ${avgU.toFixed(0)} ml ausgeglichen!`);
             }, 100);
           }
         }
       }
       
-      // 2. Prüfung für Mathe-Asse ('m')
+      // 2. Prüfung für Mathe-Asse ('m') -> Alle Becher müssen identisch sein
       if (data.m.values.length > 0) {
         const firstValM = data.m.values[0];
-        const allEqualM = data.m.values.every(val => Math.abs(val - firstValM) < 0.1);
+        const allExactlyEqualM = data.m.values.every(val => Math.abs(val - firstValM) < 0.01);
         
-        if (allEqualM) {
+        if (allExactlyEqualM) {
           document.getElementById("avg-m").style.color = "var(--ok)";
           document.getElementById("avg-m").innerText = `${avgM.toFixed(1)} ml`;
           
           if (!congratulatedM) {
             congratulatedM = true; 
             setTimeout(() => {
-              alert(`🎉 Richtig. Gut gemacht!\nDu hast alle Becher der Mathe-Asse perfekt ausgeglichen. Der Ausgleichswert ist ${avgM.toFixed(1)} ml!`);
+              alert(`🎉 Richtig. Gut gemacht!\nDu hast alle Becher der Mathe-Asse auf genau ${avgM.toFixed(0)} ml ausgeglichen!`);
             }, 100);
           }
         }
@@ -651,12 +650,13 @@
       if (num === 1) {
         data.u.values = [15, 17, 12, 20];
         data.u.orig = [15, 17, 12, 20];
-        data.m.values = [13, 15, 15, 14, 18];
-        data.m.orig = [13, 15, 15, 14, 18];
+        data.m.values = [13, 16, 15, 13, 18];
+        data.m.orig = [13, 16, 15, 13, 18];
       } else if (num === 2) {
-        data.u.values = [8, 12, 16, 4];
+        // Preset 2 (Zahlen so angepasst, dass glatte Werte entstehen, falls gewünscht)
+        data.u.values = [8, 12, 16, 4]; // Summe 40 / 4 Kinder = exakt 10 ml
         data.u.orig = [8, 12, 16, 4];
-        data.m.values = [10, 10, 14, 12, 9];
+        data.m.values = [10, 10, 14, 12, 9]; // Summe 55 / 5 Kinder = exakt 11 ml
         data.m.orig = [10, 10, 14, 12, 9];
       }
       resetState();
@@ -679,7 +679,6 @@
       valuesRevealed = false; 
       umschüttenGestartet = false;
       
-      // Erfolgsstatus für Pop-ups beim Reset wieder freigeben
       congratulatedU = false;
       congratulatedM = false;
 
