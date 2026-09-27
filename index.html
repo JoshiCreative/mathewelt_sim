@@ -610,7 +610,8 @@
       if (delta > 0 && team.values.length < team.names.length) {
         team.values.push(10);
         team.orig.push(10);
-      } else if (delta < 0 && team.values.length > 1) {
+      } else if (delta < 0 && team.values.length > 2) {
+        // Minimum 2 Kinder pro Team, damit ein "Ausgleich" ueberhaupt sinnvoll moeglich ist
         team.values.pop();
         team.orig.pop();
       }
