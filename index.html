@@ -566,7 +566,8 @@
       // ----------------------------------------------------
       
       // 1. Prüfung für Unicorns ('u') -> Alle Becher müssen identisch sein
-      if (data.u.values.length > 0) {
+      // (mind. 2 Becher nötig, sonst ist "alle gleich" bei nur 1 Kind trivial erfüllt)
+      if (data.u.values.length > 1) {
         const firstValU = data.u.values[0];
         const allExactlyEqualU = data.u.values.every(val => Math.abs(val - firstValU) < 0.01);
         
@@ -584,7 +585,8 @@
       }
       
       // 2. Prüfung für Mathe-Asse ('m') -> Alle Becher müssen identisch sein
-      if (data.m.values.length > 0) {
+      // (mind. 2 Becher nötig, sonst ist "alle gleich" bei nur 1 Kind trivial erfüllt)
+      if (data.m.values.length > 1) {
         const firstValM = data.m.values[0];
         const allExactlyEqualM = data.m.values.every(val => Math.abs(val - firstValM) < 0.01);
         
