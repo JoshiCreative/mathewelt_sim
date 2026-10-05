@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mathewelt – Wasser balancieren (Simulation)</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #d1d5db;
+      --u: #8b5cf6;
+      --u-light: #f3e8ff;
+      --u-dark: #6b21a8;
+      --m: #0ea5e9;
+      --m-light: #e0f2fe;
+      --m-dark: #0369a1;
+      --ok: #16a34a;
+      --warn: #ea580c;
+      --danger: #ef4444;
+      --start: #f59e0b;
+      --water: linear-gradient(180deg, #7dd3fc 0%, #38bdf8 45%, #0284c7 100%);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    header {
+      padding: 24px;
+      background: #111827;
+      color: white;
+    }
+
+    header h1 { margin: 0 0 8px 0; font-size: 2rem; }
+    header p { margin: 0; color: #d1d5db; max-width: 950px; }
+
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .controls, .results, .team-card, .transfer-buffer, .student-input-section {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+      margin-bottom: 24px;
+    }
+
+    .transfer-buffer {
+      background: #f9fafb;
+      border: 2px dashed var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      transition: all 0.3s ease;
+    }
+
+    .transfer-buffer.active-u {
+      background: var(--u-light);
+      border-color: var(--u);
+    }
+
+    .transfer-buffer.active-m {
+      background: var(--m-light);
+      border-color: var(--m);
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      min-height: 44px; /* Tablet: mindestens 44 px hoch */
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      background: #111827;
+      color: white;
+      transition: all 0.2s ease;
+    }
+
+    button:hover { opacity: 0.9; transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    button:disabled { opacity: 0.25; cursor: not-allowed; transform: none !important; }
+    button.secondary { background: #4b5563; }
+    button.accent { background: var(--ok); }
+    button.warning { background: var(--warn); }
+
+    .btn-small {
+      padding: 8px 14px;
+      min-height: 44px;
+      font-size: 0.9rem;
+      border-radius: 8px;
+    }
+
+    /* Kleine Pfeil-Symbole in Erklärtexten (keine Schaltflächen) */
+    .arrow-chip {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 6px;
+      color: white;
+      font-weight: 700;
+    }
+
+    .teams-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .teams-grid.single { grid-template-columns: 1fr; }
+
+    @media (max-width: 1024px) {
+      .teams-grid { grid-template-columns: 1fr; }
+    }
+
+    .team-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #f3f4f6;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .cup-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .cup-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 110px;
+    }
+
+    .cup-name { font-weight: bold; text-align: center; font-size: 0.95rem; }
+
+    .cup-shell {
+      position: relative;
+      width: 70px;
+      height: 140px;
+      border: 3px solid #64748b;
+      border-top: none;
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+      background: rgba(255, 255, 255, 0.6);
+      overflow: hidden;
+    }
+
+    .water-fill {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background: var(--water);
+      transition: height 0.3s ease-in-out;
+    }
+
+    .cup-avg-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      border-top: 2px dashed var(--danger);
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 4px;
+      width: 100%;
+    }
+    .action-btns button {
+      flex: 1;
+      padding: 6px 2px;
+      min-height: 44px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+    }
+
+    .start-btns {
+      display: flex;
+      gap: 4px;
+      width: 100%;
+    }
+    .start-btns button {
+      flex: 1;
+      padding: 6px 2px;
+      min-height: 44px;
+      font-size: 0.8rem;
+      border-radius: 8px;
+      background: var(--start);
+      color: #111827;
+    }
+
+    .step-select {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .step-select button.step-active { background: var(--start); color: #111827; }
+
+    .explanation {
+      margin-top: 16px;
+      background: #f9fafb;
+      border-left: 4px solid #3b82f6;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-right: 8px;
+    }
+
+    .badge-u { background: var(--u-light); color: var(--u-dark); }
+    .badge-m { background: var(--m-light); color: var(--m-dark); }
+
+    /* Hinweis „?“: per Tippen oder Klick, nicht nur per Hover */
+    .info-help {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #9ca3af;
+      color: white;
+      border-radius: 50%;
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin-left: 4px;
+      position: relative;
+      user-select: none;
+    }
+
+    .info-help:hover, .info-help.open { background: #4b5563; }
+
+    .info-help .tooltiptext {
+      visibility: hidden;
+      width: 260px;
+      max-width: 70vw;
+      background-color: #1f2937;
+      color: #fff;
+      text-align: left;
+      border-radius: 8px;
+      padding: 12px;
+      position: absolute;
+      z-index: 20;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.2s;
+      font-family: sans-serif;
+      font-weight: normal;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .info-help.open .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .student-textarea {
+      width: 100%;
+      height: 100px;
+      border: 2px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: vertical;
+      margin-top: 12px;
+    }
+
+    .student-textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .submitted-card {
+      background: #f0fdf4;
+      border: 2px solid #bbf7d0;
+      color: #166534;
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .submitted-card.problem {
+      background: #fff7ed;
+      border-color: #fed7aa;
+      color: #9a3412;
+    }
+
+    .pipette-alert {
+      font-weight: bold;
+      color: var(--danger);
+      animation: pulse 1.5s infinite;
+      display: none;
+      margin-top: 4px;
+      font-size: 0.9rem;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
+    /* ===== Stufen-Anzeige in der Kopfzeile ===== */
+    .level-bar {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .level-chip {
+      background: #fde68a;
+      color: #111827;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 6px 14px;
+    }
+    .teacher-bar {
+      display: none;
+      margin-top: 10px;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* ===== Overlays: Willkommensfenster und Hinweiskarte ===== */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+      overflow-y: auto;
+    }
+    .overlay.show { display: flex; }
+
+    .overlay-card {
+      background: white;
+      border-radius: 22px;
+      padding: 28px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    .welcome-card { max-width: 760px; }
+    .welcome-top { display: flex; gap: 20px; align-items: center; }
+    .welcome-top h2 { margin: 0 0 6px 0; }
+    .welcome-card ol { margin: 8px 0 18px 0; padding-left: 22px; }
+    .welcome-card ol li { margin-bottom: 4px; }
+    .welcome-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: transparent;
+      color: #6b7280;
+      font-size: 1.4rem;
+      padding: 4px 10px;
+    }
+    .level-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 700px) {
+      .level-cards { grid-template-columns: 1fr; }
+      .welcome-top { flex-direction: column; text-align: center; }
+    }
+    .level-card {
+      background: #f9fafb;
+      color: var(--text);
+      border: 2px solid var(--line);
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 14px;
+      font-weight: 400;
+    }
+    .level-card:hover { border-color: #3b82f6; }
+    .level-card.last { border-color: var(--start); background: #fffbeb; }
+    .level-stars { font-size: 1.4rem; color: #d97706; }
+    .level-card strong { font-size: 1.05rem; }
+    .level-card span.desc { font-size: 0.9rem; color: var(--muted); }
+    .welcome-note { margin: 14px 0 0 0; font-size: 0.85rem; color: var(--muted); }
+
+    .hint-card { max-width: 480px; }
+    .hint-top { display: flex; gap: 16px; align-items: flex-start; }
+    .hint-top h3 { margin: 0 0 6px 0; }
+    .hint-top p { margin: 0; white-space: pre-line; font-size: 1.05rem; }
+    .hint-buttons { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Mathewelt – Wasser aufteilen</h1>
+    <p>
+      Hallo, dein Ziel ist es, das Wasser innerhalb der Teams gerecht zu verteilen. Mit der Pipette kannst du Wasser von einem Becher aufnehmen und auf andere Becher des Teams verteilen. Finde für beide Teams den Ausgleichswert.
+    </p>
+    <div class="level-bar">
+      <span style="font-size: 0.9rem; color: #9ca3af;">Stufe:</span>
+      <span class="level-chip" id="level-chip">★</span>
+      <button class="btn-small secondary" id="btn-change-level">Stufe wechseln</button>
+    </div>
+    <div class="teacher-bar" id="teacher-bar">
+      <span style="font-size: 0.9rem; color: #9ca3af;">Lehrkräfte-Bereich:</span>
+      <button class="btn-small secondary" onclick="loadPreset(1)">Aufgabe 1 (Heft)</button>
+      <button class="btn-small secondary" onclick="loadPreset(2)">Beispiel 2 (nicht aus dem Heft)</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="transfer-buffer" id="pipette-box">
+      <div>
+        <strong>Umschütt-Modus (Pipette):</strong>
+        <div id="buffer-info">Klicke bei einem Kind auf <span class="arrow-chip" style="background:#ea580c;">&rarr;</span>, um Wasser aufzusaugen.</div>
+        <div id="pipette-warn-msg" class="pipette-alert">⚠️ Die Pipette ist noch befüllt! Leere sie komplett aus, bevor du das Team wechselst.</div>
+        <div class="step-select" id="step-select">
+          <span>Pipette:</span>
+          <button class="btn-small secondary step-btn" data-step="1">1 ml</button>
+          <button class="btn-small secondary step-btn" data-step="0.5">0,5 ml</button>
+          <button class="btn-small secondary step-btn" data-step="0.1">0,1 ml</button>
+        </div>
+      </div>
+      <div id="buffer-display" style="font-weight: bold; font-size: 1.2rem; text-align: right;">Gefüllt: 0 ml<br><span style="font-size:0.85rem; font-weight:normal; color:var(--muted);">Team: Keins</span></div>
+    </section>
+
+    <section class="teams-grid" id="teams-grid">
+
+      <article class="team-card" id="card-u" style="border-top: 4px solid var(--u);">
+        <div class="team-header">
+          <h2 style="color: var(--u-dark);">Unicorns</h2>
+          <div id="count-btns-u">
+            <button class="btn-small secondary" id="btn-sub-u" onclick="changeCount('u', -1)">&minus; Kind</button>
+            <button class="btn-small secondary" id="btn-add-u" onclick="changeCount('u', 1)">&plus; Kind</button>
+          </div>
+        </div>
+        <div class="cup-container" id="container-u"></div>
+        <div style="margin-top: 20px;">
+          <span class="badge badge-u" id="sum-u">Summe: 0 ml</span>
+          <span class="badge badge-u">
+            Ausgleichswert
+            <span class="info-help" tabindex="0" role="button" aria-label="Erklärung zum Ausgleichswert">?
+              <span class="tooltiptext">Der Ausgleichswert gibt an, wie viel Milliliter Wasser in jedem Becher wären, wenn man das gesamte Wasser des Teams völlig gleichmäßig auf alle Kinder aufteilen würde.</span>
+            </span>:
+            <span id="avg-u" style="color: var(--warn); font-weight: bold;">gesucht...</span>
+          </span>
+        </div>
+      </article>
+
+      <article class="team-card" id="card-m" style="border-top: 4px solid var(--m);">
+        <div class="team-header" style="color: var(--m-dark);">
+          <h2>Mathe-Asse</h2>
+          <div id="count-btns-m">
+            <button class="btn-small secondary" id="btn-sub-m" onclick="changeCount('m', -1)">&minus; Kind</button>
+            <button class="btn-small secondary" id="btn-add-m" onclick="changeCount('m', 1)">&plus; Kind</button>
+          </div>
+        </div>
+        <div class="cup-container" id="container-m"></div>
+        <div style="margin-top: 20px;">
+          <span class="badge badge-m" id="sum-m">Summe: 0 ml</span>
+          <span class="badge badge-m">
+            Ausgleichswert
+            <span class="info-help" tabindex="0" role="button" aria-label="Erklärung zum Ausgleichswert">?
+              <span class="tooltiptext">Der Ausgleichswert gibt an, wie viel Milliliter Wasser in jedem Becher wären, wenn man das gesamte Wasser des Teams völlig gleichmäßig auf alle Kinder aufteilen würde.</span>
+            </span>:
+            <span id="avg-m" style="color: var(--warn); font-weight: bold;">gesucht...</span>
+          </span>
+        </div>
+      </article>
+
+    </section>
+
+    <section class="results">
+      <h2>Simulation & Auswertung</h2>
+      <div class="button-row">
+        <button class="accent" onclick="toggleAverage()">Ausgleichslinie ein/ausblenden</button>
+        <button class="warning" onclick="equalizeAll()">Mathematisch exakt ausgleichen</button>
+        <button class="secondary" onclick="resetToOriginal()">Simulation zurücksetzen</button>
+      </div>
+
+      <div class="explanation" id="info-box"></div>
+    </section>
+
+    <section class="student-input-section">
+      <h3>Deine mathematische Entdeckung ✍️</h3>
+      <label for="student-thought" style="font-weight: 500;">
+        Schau dir die Ausgleichswerte der beiden Gruppen an (schalte dazu die Ausgleichslinie ein oder nutze den automatischen Ausgleich). Was fällt dir beim Vergleich auf? Schreibe deine Beobachtung auf:
+      </label>
+      <textarea id="student-thought" class="student-textarea" placeholder="Ich habe beobachtet, dass..."></textarea>
+
+      <div class="button-row">
+        <button class="accent" onclick="submitThought()">Antwort speichern & kopieren</button>
+      </div>
+
+      <div id="submit-feedback" class="submitted-card"></div>
+    </section>
+  </main>
+
+  <!-- Willkommensfenster -->
+  <div class="overlay" id="welcome" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+    <div class="overlay-card welcome-card">
+      <button class="welcome-close" id="welcome-close" aria-label="Fenster schließen">✕</button>
+      <div class="welcome-top">
+        <div id="welcome-mascot"></div>
+        <div>
+          <h2 id="welcome-title">Willkommen in der Mathewelt!</h2>
+          <p style="margin:0;">Ich bin Tropfi und helfe dir beim Wasser-Ausgleichen.</p>
+        </div>
+      </div>
+      <h3 style="margin: 18px 0 0 0;">So funktioniert's</h3>
+      <ol>
+        <li>Zwei Teams haben unterschiedlich viel Wasser in ihren Bechern.</li>
+        <li>Mit der Pipette nimmst du Wasser aus einem Becher und gießt es in andere Becher desselben Teams.</li>
+        <li>Wenn alle Becher gleich voll sind, hast du den Ausgleichswert gefunden.</li>
+      </ol>
+      <h3 style="margin: 0 0 10px 0;">Wähle deine Stufe</h3>
+      <div class="level-cards">
+        <button class="level-card" data-level="1">
+          <span class="level-stars">★</span>
+          <strong>Einfach</strong>
+          <span class="desc">Ein Team nach dem anderen. Die Becher sind vorgegeben.</span>
+        </button>
+        <button class="level-card" data-level="2">
+          <span class="level-stars">★★</span>
+          <strong>Mittel</strong>
+          <span class="desc">Beide Teams. Du darfst Kinder hinzufügen oder wegnehmen.</span>
+        </button>
+        <button class="level-card" data-level="3">
+          <span class="level-stars">★★★</span>
+          <strong>Schwierig</strong>
+          <span class="desc">Du stellst die Becher selbst ein und rechnest mit Dezimalzahlen.</span>
+        </button>
+      </div>
+      <p class="welcome-note">Du kannst die Stufe oben jederzeit wechseln. Dann beginnt die Aufgabe von vorn.</p>
+    </div>
+  </div>
+
+  <!-- Hinweiskarte (ersetzt alert) -->
+  <div class="overlay" id="hint" role="dialog" aria-modal="true" aria-labelledby="hint-title">
+    <div class="overlay-card hint-card">
+      <div class="hint-top">
+        <div id="hint-mascot"></div>
+        <div>
+          <h3 id="hint-title"></h3>
+          <p id="hint-text"></p>
+        </div>
+      </div>
+      <div class="hint-buttons" id="hint-buttons"></div>
+    </div>
+  </div>
+
+  <script>
+    const MAX_ML = 20;
+    const IS_TEACHER = new URLSearchParams(location.search).get("lehrkraft") === "1";
+
+    // Heft-Werte (Arbeitsheft Aufgabe 1). Alle Summen sind durch die Kinderzahl teilbar.
+    const PRESET_1 = { u: [15, 17, 12, 20], m: [13, 15, 15, 14, 18] }; // 64 / 4 = 16 ml, 75 / 5 = 15 ml
+    const PRESET_2 = { u: [8, 12, 16, 4],   m: [10, 10, 14, 12, 9] };  // 40 / 4 = 10 ml, 55 / 5 = 11 ml (nicht aus dem Heft)
+
+    // Stufen: ★ und ★★ = Anfängermodus (ganze Zahlen), ★★★ = Expertenmodus (Dezimalzahlen)
+    const LEVELS = {
+      1: { label: "★",   name: "Einfach",    oneTeamAtATime: true,  countButtons: false, startEditor: false, decimals: false },
+      2: { label: "★★",  name: "Mittel",     oneTeamAtATime: false, countButtons: true,  startEditor: false, decimals: false },
+      3: { label: "★★★", name: "Schwierig",  oneTeamAtATime: false, countButtons: true,  startEditor: true,  decimals: true  }
+    };
+    const LEVEL_KEY = "mathewelt_stufe";
+    const TEAM_NAMES = { u: "Unicorns", m: "Mathe-Asse" };
+
+    let data = {
+      u: {
+        names: ["Marla", "Andi", "Hakan", "Francy", "Jakob", "Tina"],
+        values: PRESET_1.u.slice(),
+        orig: PRESET_1.u.slice()
+      },
+      m: {
+        names: ["Harald", "Sarah", "Monika", "Chris", "Flo", "Lisa"],
+        values: PRESET_1.m.slice(),
+        orig: PRESET_1.m.slice()
+      }
+    };
+
+    let level = 1;
+    let pipetteStep = 1;
+    let visibleTeams = { u: true, m: true };
+
+    let showAvgLine = false;
+    let valuesRevealed = false;
+    let pipetteBuffer = 0;
+    let pipetteSourceTeam = null;
+    let umschüttenGestartet = false;
+
+    let congratulatedU = false;
+    let congratulatedM = false;
+
+    // ===== Hilfsfunktionen =====
+    const $ = (id) => document.getElementById(id);
+    const r1 = (v) => Math.round(v * 10) / 10;
+    const sumOf = (arr) => arr.reduce((a, b) => a + b, 0);
+    // Zahl deutsch formatiert, höchstens 2 Nachkommastellen (16 -> "16", 14.8 -> "14,8")
+    const fmt = (v) => String(Math.round(v * 100) / 100).replace(".", ",");
+
+    const MASCOT_SVG = (size) => `
+      <svg width="${size}" height="${Math.round(size * 1.2)}" viewBox="0 0 100 120" aria-hidden="true">
+        <defs>
+          <linearGradient id="tropfi-g${size}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#7dd3fc"/>
+            <stop offset="100%" stop-color="#0284c7"/>
+          </linearGradient>
+        </defs>
+        <path d="M50 6 C50 6 12 52 12 78 a38 38 0 0 0 76 0 C88 52 50 6 50 6 Z" fill="url(#tropfi-g${size})" stroke="#0369a1" stroke-width="3"/>
+        <ellipse cx="34" cy="70" rx="11" ry="13" fill="#fff"/>
+        <ellipse cx="66" cy="70" rx="11" ry="13" fill="#fff"/>
+        <circle cx="36" cy="73" r="5.5" fill="#111827"/>
+        <circle cx="64" cy="73" r="5.5" fill="#111827"/>
+        <circle cx="38" cy="70.5" r="1.8" fill="#fff"/>
+        <circle cx="66" cy="70.5" r="1.8" fill="#fff"/>
+        <path d="M38 92 Q50 104 62 92" fill="none" stroke="#111827" stroke-width="3.5" stroke-linecap="round"/>
+        <ellipse cx="24" cy="88" rx="6" ry="4" fill="#f9a8d4" opacity="0.7"/>
+        <ellipse cx="76" cy="88" rx="6" ry="4" fill="#f9a8d4" opacity="0.7"/>
+      </svg>`;
+
+    // ===== Hinweiskarte (statt alert) =====
+    function zeigeHinweis(titel, text, buttons) {
+      $("hint-title").textContent = titel;
+      $("hint-text").textContent = text;
+      const row = $("hint-buttons");
+      row.innerHTML = "";
+      (buttons && buttons.length ? buttons : [{ label: "OK" }]).forEach((b, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = b.label;
+        if (b.cls) btn.className = b.cls;
+        btn.addEventListener("click", () => {
+          schliesseHinweis();
+          if (b.onClick) b.onClick();
+        });
+        row.appendChild(btn);
+        if (i === 0) setTimeout(() => btn.focus(), 0);
+      });
+      $("hint").classList.add("show");
+    }
+
+    function schliesseHinweis() {
+      $("hint").classList.remove("show");
+    }
+
+    // ===== Stufen =====
+    function getStoredLevel() {
+      try {
+        const s = parseInt(localStorage.getItem(LEVEL_KEY), 10);
+        if (s === 1 || s === 2 || s === 3) return s;
+      } catch (e) {}
+      return null;
+    }
+
+    function storeLevel(n) {
+      try { localStorage.setItem(LEVEL_KEY, String(n)); } catch (e) {}
+    }
+
+    // Startwerte je Stufe: ★/★★ feste Heftwerte, ★★★ alle Becher bei 0 (Kinderzahl bleibt)
+    function applyLevelData() {
+      if (level < 3) {
+        data.u.values = PRESET_1.u.slice(); data.u.orig = PRESET_1.u.slice();
+        data.m.values = PRESET_1.m.slice(); data.m.orig = PRESET_1.m.slice();
+      } else {
+        data.u.values = data.u.values.map(() => 0); data.u.orig = data.u.values.slice();
+        data.m.values = data.m.values.map(() => 0); data.m.orig = data.m.values.slice();
+      }
+    }
+
+    function setLevel(n) {
+      if (pipetteBuffer > 0) {
+        zeigeHinweis("Pipette zuerst leeren", "Leere die Pipette zuerst aus, bevor du die Stufe wechselst.");
+        return;
+      }
+      level = n;
+      pipetteStep = 1;
+      storeLevel(n);
+      applyLevelData();
+      resetState();
+      $("welcome").classList.remove("show");
+    }
+
+    function setStep(s) {
+      if (!LEVELS[level].decimals) return;
+      if (pipetteBuffer > 0) {
+        zeigeHinweis("Pipette zuerst leeren", "Wechsle die Pipette erst, wenn sie leer ist.");
+        return;
+      }
+      pipetteStep = s;
+      renderBoth();
+      updatePipetteUI();
+    }
+
+    function openWelcome() {
+      const last = getStoredLevel();
+      document.querySelectorAll(".level-card").forEach(c => {
+        c.classList.toggle("last", last !== null && parseInt(c.dataset.level, 10) === last);
+      });
+      $("welcome").classList.add("show");
+    }
+
+    function updateLevelUI() {
+      const L = LEVELS[level];
+      $("level-chip").textContent = `${L.label} ${L.name}`;
+      $("count-btns-u").style.display = L.countButtons ? "" : "none";
+      $("count-btns-m").style.display = L.countButtons ? "" : "none";
+      $("step-select").style.display = L.decimals ? "flex" : "none";
+      document.querySelectorAll(".step-btn").forEach(b => {
+        b.classList.toggle("step-active", parseFloat(b.dataset.step) === pipetteStep);
+      });
+      $("card-u").style.display = visibleTeams.u ? "" : "none";
+      $("card-m").style.display = visibleTeams.m ? "" : "none";
+      $("teams-grid").classList.toggle("single", !(visibleTeams.u && visibleTeams.m));
+    }
+
+    function defaultInfoText() {
+      if (level === 3) {
+        return "Stelle zuerst mit den Start-Knöpfen die Wassermenge jedes Bechers ein. Sobald du mit der Pipette umschüttest, sind die Startmengen festgelegt. Passt die Summe nicht gleichmäßig auf alle Becher, wähle eine kleinere Pipette (0,5 oder 0,1 ml). Versuche, alle Becher eines Teams gleich voll zu bekommen!";
+      }
+      if (level === 1) {
+        return "Gleiche zuerst die Unicorns aus. Nutze die Pfeiltasten über den Bechern, um Wasser umzuverteilen. Versuche, alle Becher auf die exakt gleiche Höhe zu bringen, um den Ausgleichswert freizuschalten!";
+      }
+      return "Nutze die Pfeiltasten über den Bechern, um Wasser umzuverteilen. Versuche, alle Becher innerhalb eines Teams auf die exakt gleiche Höhe zu bringen, um den Ausgleichswert freizuschalten!";
+    }
+
+    // ===== Start und Darstellung =====
+    function init() {
+      renderBoth();
+      updateAnalysis();
+    }
+
+    function renderBoth() {
+      renderTeam('u');
+      renderTeam('m');
+      updateLevelUI();
+    }
+
+    function setStartAmount(key, idx, delta) {
+      if (!LEVELS[level].startEditor || umschüttenGestartet) return;
+      const team = data[key];
+      const v = team.values[idx] + delta;
+      if (v < 0 || v > MAX_ML) return;
+      team.values[idx] = v;
+      team.orig[idx] = v;
+      renderTeam(key);
+      updateAnalysis();
+    }
+
+    function renderTeam(key) {
+      const container = $(`container-${key}`);
+      container.innerHTML = "";
+
+      const L = LEVELS[level];
+      const team = data[key];
+      const avg = sumOf(team.values) / team.values.length;
+      const showStartEditor = L.startEditor && !umschüttenGestartet;
+
+      $(`btn-add-${key}`).disabled = umschüttenGestartet || pipetteBuffer > 0 || team.values.length >= team.names.length;
+      $(`btn-sub-${key}`).disabled = umschüttenGestartet || pipetteBuffer > 0 || team.values.length <= 2;
+
+      team.values.forEach((val, idx) => {
+        const name = team.names[idx] || `Kind ${idx + 1}`;
+        const heightPercent = (val / MAX_ML) * 100;
+
+        const cupItem = document.createElement("div");
+        cupItem.className = "cup-item";
+
+        let avgLineHtml = "";
+        if (showAvgLine) {
+          const avgPercent = (avg / MAX_ML) * 100;
+          avgLineHtml = `<div class="cup-avg-line" style="bottom: ${avgPercent}%;"></div>`;
+        }
+
+        const canTake = (pipetteSourceTeam === null || pipetteSourceTeam === key) && val + 1e-9 >= pipetteStep;
+        const canGive = pipetteSourceTeam === key && pipetteBuffer > 0 && val + pipetteStep <= MAX_ML + 1e-9;
+
+        const startBtnsHtml = showStartEditor ? `
+          <div class="start-btns" title="Startmenge festlegen, bevor pipettiert wird">
+            <button onclick="setStartAmount('${key}', ${idx}, -1)" ${val <= 0 ? 'disabled' : ''}>&minus; Start</button>
+            <button onclick="setStartAmount('${key}', ${idx}, 1)" ${val >= MAX_ML ? 'disabled' : ''}>&plus; Start</button>
+          </div>
+        ` : "";
+
+        cupItem.innerHTML = `
+          <div class="cup-name">${name}</div>
+          <div style="font-size:0.85rem; color:var(--muted);">${fmt(val)} ml</div>
+
+          ${startBtnsHtml}
+
+          <div class="action-btns">
+            <button class="warning" onclick="takeWater('${key}', ${idx})" title="${fmt(pipetteStep)} ml absaugen" ${!canTake ? 'disabled' : ''}>&rarr;</button>
+            <button class="accent" onclick="giveWater('${key}', ${idx})" title="${fmt(pipetteStep)} ml reinleeren" ${!canGive ? 'disabled' : ''}>&larr;</button>
+          </div>
+
+          <div class="cup-shell">
+            ${avgLineHtml}
+            <div class="water-fill" style="height: ${heightPercent}%;"></div>
+          </div>
+        `;
+        container.appendChild(cupItem);
+      });
+    }
+
+    function takeWater(key, idx) {
+      if (pipetteSourceTeam !== null && pipetteSourceTeam !== key) return;
+
+      if (data[key].values[idx] + 1e-9 >= pipetteStep) {
+        umschüttenGestartet = true;
+        data[key].values[idx] = r1(data[key].values[idx] - pipetteStep);
+        pipetteBuffer = r1(pipetteBuffer + pipetteStep);
+        pipetteSourceTeam = key;
+
+        updatePipetteUI();
+        renderBoth();
+        updateAnalysis();
+      }
+    }
+
+    function giveWater(key, idx) {
+      if (pipetteSourceTeam !== key) return;
+
+      if (pipetteBuffer + 1e-9 >= pipetteStep && data[key].values[idx] + pipetteStep <= MAX_ML + 1e-9) {
+        data[key].values[idx] = r1(data[key].values[idx] + pipetteStep);
+        pipetteBuffer = r1(pipetteBuffer - pipetteStep);
+
+        if (pipetteBuffer <= 0.0001) {
+          pipetteBuffer = 0;
+          pipetteSourceTeam = null;
+        }
+
+        updatePipetteUI();
+        renderBoth();
+        updateAnalysis();
+      }
+    }
+
+    function updatePipetteUI() {
+      const display = $("buffer-display");
+      const info = $("buffer-info");
+      const box = $("pipette-box");
+      const alertMsg = $("pipette-warn-msg");
+
+      box.className = "transfer-buffer";
+      alertMsg.style.display = "none";
+
+      if (pipetteBuffer > 0) {
+        const teamName = TEAM_NAMES[pipetteSourceTeam];
+        const teamColor = pipetteSourceTeam === 'u' ? 'var(--u-dark)' : 'var(--m-dark)';
+
+        box.classList.add(pipetteSourceTeam === 'u' ? 'active-u' : 'active-m');
+        alertMsg.style.display = "block";
+        alertMsg.innerText = `⚠️ Die Pipette ist noch mit ${fmt(pipetteBuffer)} ml der ${teamName} gefüllt!`;
+
+        display.innerHTML = `Gefüllt: <span style="color:var(--danger);">${fmt(pipetteBuffer)} ml</span><br><span style="font-size:0.85rem; font-weight:bold; color:${teamColor};">Team: ${teamName}</span>`;
+        info.innerHTML = `Du verteilst gerade Wasser innerhalb der <strong>${teamName}</strong>. Gieße es mit <span class="arrow-chip" style="background:#16a34a;">&larr;</span> wieder in deren Becher zurück.`;
+      } else {
+        display.innerHTML = `Gefüllt: 0 ml<br><span style="font-size:0.85rem; font-weight:normal; color:var(--muted);">Team: Keins</span>`;
+        info.innerHTML = `Klicke bei einem Kind auf <span class="arrow-chip" style="background:#ea580c;">&rarr;</span>, um Wasser aufzusaugen.`;
+      }
+    }
+
+    // Ist das Team ausgeglichen? ★/★★: alle Becher exakt gleich. ★★★: höchstens 0,1 ml Abstand.
+    function isBalanced(key) {
+      const v = data[key].values;
+      if (v.length < 2 || !umschüttenGestartet) return false;
+      if (pipetteSourceTeam === key && pipetteBuffer > 0) return false;
+      if (sumOf(v) <= 0) return false;
+      const tol = LEVELS[level].decimals ? 0.1 + 1e-9 : 1e-9;
+      return (Math.max(...v) - Math.min(...v)) <= tol;
+    }
+
+    function updateAnalysis() {
+      const sums = { u: sumOf(data.u.values), m: sumOf(data.m.values) };
+      const avgs = {
+        u: data.u.values.length ? sums.u / data.u.values.length : 0,
+        m: data.m.values.length ? sums.m / data.m.values.length : 0
+      };
+
+      ['u', 'm'].forEach(key => {
+        $(`sum-${key}`).innerText = `Summe: ${fmt(sums[key])} ml`;
+        const avgEl = $(`avg-${key}`);
+        if (valuesRevealed) {
+          avgEl.style.color = "inherit";
+          avgEl.innerText = `${fmt(avgs[key])} ml`;
+        } else {
+          avgEl.style.color = "var(--warn)";
+          avgEl.innerText = "gesucht...";
+        }
+      });
+
+      ['u', 'm'].forEach(key => {
+        if (!isBalanced(key)) return;
+        const avgEl = $(`avg-${key}`);
+        avgEl.style.color = "var(--ok)";
+        avgEl.innerText = `${fmt(avgs[key])} ml`;
+
+        const done = key === 'u' ? congratulatedU : congratulatedM;
+        if (!done) {
+          if (key === 'u') congratulatedU = true; else congratulatedM = true;
+          erfolgsHinweis(key, avgs[key]);
+        }
+      });
+
+      const bothDone = congratulatedU && congratulatedM;
+      if (valuesRevealed || bothDone) {
+        $("info-box").innerHTML = `
+          <strong>Unicorns (Ausgleichswert):</strong> ${fmt(avgs.u)} ml <br>
+          <strong>Mathe-Asse (Ausgleichswert):</strong> ${fmt(avgs.m)} ml <br><br>
+          <span style="font-size: 1.2rem; color: #111827; font-weight: bold;">&rarr; Was fällt dir beim Vergleich auf?</span>
+        `;
+      }
+    }
+
+    function erfolgsHinweis(key, avg) {
+      const name = TEAM_NAMES[key];
+      let text = `Du hast alle Becher der ${name} auf genau ${fmt(avg)} ml ausgeglichen!`;
+      const buttons = [{ label: "OK", cls: "accent" }];
+
+      if (LEVELS[level].oneTeamAtATime && key === 'u' && !visibleTeams.m) {
+        buttons[0] = {
+          label: "Weiter zu den Mathe-Asse",
+          cls: "accent",
+          onClick: () => {
+            visibleTeams.m = true;
+            renderBoth();
+            updateAnalysis();
+            $("card-m").scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        };
+      } else if (congratulatedU && congratulatedM) {
+        text += "\nJetzt sind beide Teams ausgeglichen. Vergleiche die beiden Ausgleichswerte!";
+      }
+      // Hinweis erst nach dem Neuzeichnen zeigen
+      setTimeout(() => zeigeHinweis("🎉 Richtig. Gut gemacht!", text, buttons), 100);
+    }
+
+    // ===== Kinderzahl ändern =====
+    // ★★ (Anfängermodus): Die Summe bleibt durch die Kinderzahl teilbar.
+    //   "+ Kind" bringt den bisherigen Ausgleichswert mit, "- Kind" nimmt einen Ausgleichswert weg.
+    // ★★★: neues Kind startet mit 0 ml, "- Kind" entfernt den letzten Becher.
+    function changeCount(key, delta) {
+      if (pipetteBuffer > 0 || umschüttenGestartet) return;
+      const team = data[key];
+      const n = team.values.length;
+      let hint = "";
+
+      if (LEVELS[level].decimals) {
+        if (delta > 0 && n < team.names.length) {
+          team.values.push(0);
+          hint = "Das neue Kind startet mit 0 ml. Stelle seine Startmenge mit den Start-Knöpfen ein.";
+        } else if (delta < 0 && n > 2) {
+          team.values.pop();
+          hint = "Ein Kind geht. Sein Becher fällt weg.";
+        } else return;
+      } else {
+        const m = sumOf(team.values) / n; // ganze Zahl, weil die Summe immer teilbar bleibt
+        if (delta > 0 && n < team.names.length) {
+          team.values.push(m);
+          hint = `Ein Kind kommt dazu und bringt ${fmt(m)} ml mit. Summe jetzt ${fmt(sumOf(team.values))} ml. Der Ausgleichswert bleibt ${fmt(m)} ml.`;
+        } else if (delta < 0 && n > 2) {
+          const v = team.values.pop();
+          let diff = v - m; // so viele ml müssen auf die übrigen Becher verteilt (diff > 0) oder von ihnen genommen werden (diff < 0)
+          const k = team.values.length;
+          let guard = 0;
+          let i = 0;
+          while (diff !== 0 && guard < 1000) {
+            const step = diff > 0 ? 1 : -1;
+            const next = team.values[i % k] + step;
+            if (next >= 0 && next <= MAX_ML) {
+              team.values[i % k] = next;
+              diff -= step;
+            }
+            i++; guard++;
+          }
+          // Nicht schon fertig ausgeglichen starten
+          if (team.values.every(x => x === team.values[0])) {
+            if (team.values[0] < MAX_ML && team.values[k - 1] > 0) {
+              team.values[0] += 1;
+              team.values[k - 1] -= 1;
+            }
+          }
+          hint = `Ein Kind geht und nimmt ${fmt(m)} ml mit. Summe jetzt ${fmt(sumOf(team.values))} ml. Der Ausgleichswert bleibt ${fmt(m)} ml.`;
+        } else return;
+      }
+
+      team.orig = team.values.slice();
+      renderTeam(key);
+      updateAnalysis();
+      $("info-box").innerText = hint;
+    }
+
+    function toggleAverage() {
+      showAvgLine = !showAvgLine;
+      if (showAvgLine) {
+        valuesRevealed = true;
+      }
+      renderBoth();
+      updateAnalysis();
+    }
+
+    function equalizeAll() {
+      if (pipetteBuffer > 0) {
+        zeigeHinweis("Pipette zuerst leeren", "Bitte leere zuerst die Pipette aus, bevor du den automatischen Ausgleich nutzt!");
+        return;
+      }
+      valuesRevealed = true;
+      umschüttenGestartet = true;
+      // Der automatische Ausgleich ist keine eigene Leistung: keine Erfolgskarte
+      congratulatedU = true;
+      congratulatedM = true;
+      visibleTeams = { u: true, m: true };
+      ['u', 'm'].forEach(key => {
+        const team = data[key];
+        const avg = sumOf(team.values) / team.values.length;
+        team.values = team.values.map(() => avg);
+      });
+      renderBoth();
+      updateAnalysis();
+    }
+
+    // Presets: nur im Lehrkräfte-Bereich (?lehrkraft=1)
+    function loadPreset(num) {
+      if (pipetteBuffer > 0) {
+        zeigeHinweis("Pipette zuerst leeren", "Bitte leere zuerst die Pipette!");
+        return;
+      }
+      const p = num === 1 ? PRESET_1 : PRESET_2;
+      data.u.values = p.u.slice();
+      data.u.orig = p.u.slice();
+      data.m.values = p.m.slice();
+      data.m.orig = p.m.slice();
+      resetState();
+    }
+
+    function resetToOriginal() {
+      if (pipetteBuffer > 0) {
+        zeigeHinweis("Pipette zuerst leeren", "Bitte leere zuerst die Pipette aus, bevor du die Simulation zurücksetzt!");
+        return;
+      }
+      data.u.values = [...data.u.orig];
+      data.m.values = [...data.m.orig];
+      resetState();
+    }
+
+    function resetState() {
+      pipetteBuffer = 0;
+      pipetteSourceTeam = null;
+      showAvgLine = false;
+      valuesRevealed = false;
+      umschüttenGestartet = false;
+
+      congratulatedU = false;
+      congratulatedM = false;
+      visibleTeams = LEVELS[level].oneTeamAtATime ? { u: true, m: false } : { u: true, m: true };
+
+      $("student-thought").value = "";
+      $("submit-feedback").style.display = "none";
+      $("info-box").innerText = defaultInfoText();
+      updatePipetteUI();
+      init();
+    }
+
+    // ===== Entdeckungsbox =====
+    function zeigeFeedback(ok, html) {
+      const fb = $("submit-feedback");
+      fb.className = "submitted-card" + (ok ? "" : " problem");
+      fb.innerHTML = html;
+      fb.style.display = "block";
+    }
+
+    function submitThought() {
+      const ta = $("student-thought");
+      const text = ta.value.trim();
+      if (text === "") {
+        zeigeHinweis("Noch nichts aufgeschrieben", "Bitte schreibe zuerst eine Beobachtung in das Freifeld!");
+        return;
+      }
+
+      const copyFailed = () => {
+        ta.focus();
+        ta.select();
+        zeigeFeedback(false, "<strong>Kopieren hat nicht geklappt.</strong> Dein Text ist markiert. Kopiere ihn selbst mit <kbd>STRG</kbd> + <kbd>C</kbd> (am Tablet: lang drücken und „Kopieren“ wählen).");
+      };
+
+      if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        copyFailed();
+        return;
+      }
+      navigator.clipboard.writeText(text).then(() => {
+        zeigeFeedback(true, "<strong>✓ Super aufgeschrieben!</strong> Deine Antwort wurde in den Zwischenspeicher kopiert. Du kannst sie jetzt mit <kbd>STRG</kbd> + <kbd>V</kbd> (oder langem Drücken am Tablet) auf der digitalen Pinnwand der Klasse einfügen.");
+      }).catch(copyFailed);
+    }
+
+    // ===== Start der Seite =====
+    function startApp() {
+      $("welcome-mascot").innerHTML = MASCOT_SVG(90);
+      $("hint-mascot").innerHTML = MASCOT_SVG(56);
+
+      if (IS_TEACHER) $("teacher-bar").style.display = "flex";
+
+      // „?“-Hinweise per Tippen oder Klick öffnen
+      document.querySelectorAll(".info-help").forEach(el => {
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const wasOpen = el.classList.contains("open");
+          document.querySelectorAll(".info-help.open").forEach(o => o.classList.remove("open"));
+          if (!wasOpen) el.classList.add("open");
+        });
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); el.click(); }
+        });
+      });
+      document.addEventListener("click", () => {
+        document.querySelectorAll(".info-help.open").forEach(o => o.classList.remove("open"));
+      });
+
+      document.querySelectorAll(".level-card").forEach(c => {
+        c.addEventListener("click", () => setLevel(parseInt(c.dataset.level, 10)));
+      });
+      document.querySelectorAll(".step-btn").forEach(b => {
+        b.addEventListener("click", () => setStep(parseFloat(b.dataset.step)));
+      });
+      $("btn-change-level").addEventListener("click", openWelcome);
+      $("welcome-close").addEventListener("click", () => $("welcome").classList.remove("show"));
+      $("hint").addEventListener("click", (e) => { if (e.target === $("hint")) schliesseHinweis(); });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          if ($("hint").classList.contains("show")) schliesseHinweis();
+          else $("welcome").classList.remove("show");
+        }
+      });
+
+      level = getStoredLevel() || 1;
+      applyLevelData();
+      resetState();
+      openWelcome();
+    }
+
+    window.onload = startApp;
+  </script>
+</body>
+</html>
