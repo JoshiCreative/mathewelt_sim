@@ -293,23 +293,182 @@
       50% { opacity: 1; }
       100% { opacity: 0.6; }
     }
+
+    /* ===== Willkommensfenster ===== */
+    .willkommen {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(17, 24, 39, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .willkommen[hidden] { display: none; }
+    .willkommen-karte {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 28px;
+      max-width: 560px;
+      width: 100%;
+      font-size: 1.15rem;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
+    }
+    .willkommen-karte h2 { margin-top: 0; }
+    .willkommen-klein { font-size: 1rem; color: var(--muted); margin-bottom: 0; }
+
+    /* ===== Lernpfad ===== */
+    .lp-knopf {
+      min-height: 52px;
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      border-radius: 14px;
+      background: #1d4ed8;
+    }
+    .lp-knopf.zweit { background: #4b5563; }
+    .lp-knopf.warning { background: #c2410c; } /* dunkler als --warn: besserer Kontrast */
+
+    .btn-modus { margin-left: auto; min-height: 48px; }
+
+    body:not(.lernpfad) .lp-nur { display: none; }
+    body.lernpfad header .intro,
+    body.lernpfad .lehrkraft-presets,
+    body.lernpfad #pipette-box,
+    body.lernpfad .team-header button,
+    body.lernpfad .action-btns,
+    body.lernpfad #info-box,
+    body.lernpfad #btn-linie,
+    body.lernpfad #btn-reset,
+    body.lernpfad .student-input-section,
+    body.lernpfad .results,
+    body.lp-pause .teams-grid { display: none; }
+    body.lernpfad { padding-bottom: 120px; }
+
+    .lp-rahmen {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 20px 24px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+      margin-bottom: 24px;
+    }
+    .lp-leitfrage { margin: 0 0 12px 0; font-size: 1.15rem; }
+    .lp-teile {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0;
+      margin: 0 0 16px 0;
+    }
+    .lp-teil {
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 2px solid var(--line);
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .lp-teil.aktiv { border-color: #1d4ed8; color: #1d4ed8; background: #eff6ff; }
+    .lp-teil.fertig { border-color: #bbf7d0; color: #166534; background: #f0fdf4; }
+    .lp-titel { margin: 0 0 12px 0; font-size: 1.4rem; }
+
+    .lp-auftrag {
+      border-left: 6px solid #1d4ed8;
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 1.15rem;
+    }
+    .lp-auftrag-kopf {
+      margin: 0 0 4px 0;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #1d4ed8;
+    }
+    .lp-auftrag p:last-child { margin-bottom: 0; }
+
+    .lp-optionen { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+    .lp-option {
+      min-height: 52px;
+      background: var(--card);
+      color: var(--text);
+      border: 2px solid var(--line);
+      font-size: 1.05rem;
+    }
+    .lp-option[aria-pressed="true"] { border-color: #1d4ed8; background: #eff6ff; }
+
+    .lp-rueckmeldung {
+      margin-top: 14px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      border: 2px solid;
+    }
+    .lp-rueckmeldung.richtig { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+    .lp-rueckmeldung.nochmal { background: #fff7ed; border-color: #fed7aa; color: #9a3412; }
+
+    .lp-erklaerung {
+      margin-top: 14px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      background: #fefce8;
+      border: 2px solid #fde68a;
+    }
+
+    .lp-fuss {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      background: rgba(255, 255, 255, 0.96);
+      border-top: 1px solid var(--line);
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    }
+    .lp-fuss-reihe {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .lp-hinweis { flex: 1; margin: 0; font-weight: 600; color: var(--muted); }
+    @media (max-width: 600px) {
+      .lp-fuss-reihe { flex-wrap: wrap; }
+      .lp-hinweis { flex-basis: 100%; order: -1; }
+      .lp-fuss-reihe .lp-knopf { flex: 1; }
+    }
   </style>
 </head>
 <body>
 
   <header>
     <h1>Mathewelt – Wasser aufteilen</h1>
-    <p>
+    <p class="intro">
       Hallo, dein Ziel ist es, das Wasser innerhalb der Teams gerecht zu verteilen. Mit der Pipette kannst du Wasser von einem Becher aufnehmen und auf andere Becher des Teams verteilen. Finde für beide Teams den Ausgleichswert.
     </p>
-    <div style="margin-top: 15px; display: flex; gap: 10px; align-items: center;">
-      <span style="font-size: 0.9rem; color: #9ca3af;">Lehrkräfte-Presets:</span>
-      <button class="btn-small secondary" onclick="loadPreset(1)">Aufgabe 1 (Wasser)</button>
-      <button class="btn-small secondary" onclick="loadPreset(2)">Aufgabe 3 (Medaillen-Struktur)</button>
+    <div style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+      <span class="lehrkraft-presets" style="font-size: 0.9rem; color: #9ca3af;">Lehrkräfte-Presets:</span>
+      <button class="btn-small secondary lehrkraft-presets" onclick="loadPreset(1)">Aufgabe 1 (Wasser)</button>
+      <button class="btn-small secondary lehrkraft-presets" onclick="loadPreset(2)">Aufgabe 3 (Medaillen-Struktur)</button>
+      <button class="secondary btn-modus" id="btn-modus" onclick="modusWechseln()">Zum Lernpfad</button>
     </div>
   </header>
 
   <main>
+    <section class="lp-rahmen lp-nur" aria-label="Lernpfad">
+      <p class="lp-leitfrage">🔍 <strong>Unsere Frage:</strong> Wie kann man Wasser gerecht aufteilen?</p>
+      <ol class="lp-teile" id="lp-teile"></ol>
+      <h2 class="lp-titel" id="lp-titel"></h2>
+      <div class="lp-auftrag" id="lp-auftrag-karte">
+        <p class="lp-auftrag-kopf">📋 Dein Auftrag</p>
+        <p id="lp-auftrag"></p>
+      </div>
+      <div id="lp-inhalt"></div>
+    </section>
+
     <section class="transfer-buffer" id="pipette-box">
       <div>
         <strong>Umschütt-Modus (Pipette):</strong> 
@@ -368,9 +527,9 @@
     <section class="results">
       <h2>Simulation & Auswertung</h2>
       <div class="button-row">
-        <button class="accent" onclick="toggleAverage()">Ausgleichslinie ein/ausblenden</button>
-        <button class="warning" onclick="equalizeAll()">Mathematisch exakt ausgleichen</button>
-        <button class="secondary" onclick="resetToOriginal()">Simulation zurücksetzen</button>
+        <button class="accent" id="btn-linie" onclick="toggleAverage()">Ausgleichslinie ein/ausblenden</button>
+        <button class="warning" id="btn-ausgleich" onclick="equalizeAll()">Mathematisch exakt ausgleichen</button>
+        <button class="secondary" id="btn-reset" onclick="resetToOriginal()">Simulation zurücksetzen</button>
       </div>
 
       <div class="explanation" id="info-box">
@@ -394,6 +553,26 @@
       </div>
     </section>
   </main>
+
+  <footer class="lp-fuss lp-nur">
+    <div class="lp-fuss-reihe">
+      <button class="lp-knopf zweit" id="lp-zurueck" onclick="lpGehe(-1)">&larr; Zurück</button>
+      <p class="lp-hinweis" id="lp-hinweis" aria-live="polite"></p>
+      <button class="lp-knopf" id="lp-weiter" onclick="lpGehe(1)">Weiter &rarr;</button>
+    </div>
+  </footer>
+
+  <div id="willkommen" class="willkommen" role="dialog" aria-modal="true" aria-labelledby="willkommen-titel" hidden>
+    <div class="willkommen-karte">
+      <h2 id="willkommen-titel">Willkommen in der Mathewelt! 💧</h2>
+      <p>Zwei Teams haben Wasser in ihren Bechern, aber nicht alle gleich viel. Finde heraus, wie man das Wasser gerecht aufteilt.</p>
+      <div class="button-row">
+        <button class="lp-knopf" onclick="modusWaehlen('lernpfad')">Los geht's!</button>
+        <button class="lp-knopf zweit" onclick="modusWaehlen('labor')">Freies Labor</button>
+      </div>
+      <p class="willkommen-klein">„Los geht's" führt dich Schritt für Schritt. Im Freien Labor probierst du alles selbst aus.</p>
+    </div>
+  </div>
 
   <script>
     /* LOGIC-START */
@@ -618,8 +797,9 @@
           document.getElementById("avg-u").innerText = `${avgU.toFixed(1)} ml`;
           
           if (!congratulatedU) {
-            congratulatedU = true; 
-            setTimeout(() => {
+            congratulatedU = true;
+            // Im Lernpfad keine alert()-Meldung, dort gibt es Text auf der Seite
+            if (modus !== "lernpfad") setTimeout(() => {
               alert(`🎉 Richtig. Gut gemacht!\nDu hast alle Becher der Unicorns auf genau ${avgU.toFixed(0)} ml ausgeglichen!`);
             }, 100);
           }
@@ -636,13 +816,15 @@
           document.getElementById("avg-m").innerText = `${avgM.toFixed(1)} ml`;
           
           if (!congratulatedM) {
-            congratulatedM = true; 
-            setTimeout(() => {
+            congratulatedM = true;
+            if (modus !== "lernpfad") setTimeout(() => {
               alert(`🎉 Richtig. Gut gemacht!\nDu hast alle Becher der Mathe-Asse auf genau ${avgM.toFixed(0)} ml ausgeglichen!`);
             }, 100);
           }
         }
       }
+
+      lpAktualisieren();
     }
 
     function changeCount(key, delta) {
@@ -747,7 +929,171 @@
       });
     }
 
-    window.onload = init;
+    // ===== Lernpfad: Beobachten → Vorhersagen → Selbst machen =====
+    // Didaktischer Aufbau nach dem Lernpfad-Prinzip (siehe docs/didaktik.md).
+    // Gespeichert wird nur die Moduswahl in sessionStorage, keine Antworten.
+    const TEILE = ["Beobachten", "Vorhersagen", "Selbst machen"];
+    let modus = null; // "lernpfad" oder "labor"
+    let lpSchritt = 0;
+    let lpAntworten = {};
+
+    function lpRichtigesTeam() {
+      const su = summe(data.u.values), sm = summe(data.m.values);
+      return su > sm ? 0 : sm > su ? 1 : 2;
+    }
+
+    const LP_STATIONEN = [
+      {
+        teil: 0,
+        titel: "Die Becher ansehen",
+        auftrag: () => "Schau dir die Becher beider Teams an. Welches Team hat <strong>insgesamt</strong> mehr Wasser?",
+        inhalt: () => lpFrage("mehr", ["Unicorns", "Mathe-Asse", "Beide gleich viel"], lpRichtigesTeam(),
+          `Genau. Die Mathe-Asse haben zusammen ${summe(data.m.values)} ml, die Unicorns ${summe(data.u.values)} ml.`,
+          "Schau auf die Summe unter den Bechern. Welche Zahl ist größer?"),
+        sperre: () => lpAntworten.mehr === lpRichtigesTeam() ? null
+          : lpAntworten.mehr === undefined ? "Wähle zuerst eine Antwort." : "Probiere es noch einmal."
+      },
+      {
+        teil: 0,
+        titel: "Gerecht verteilen",
+        auftrag: () => "Tippe auf <strong>„Mathematisch exakt ausgleichen“</strong>. Schau genau hin: Was passiert mit dem Wasser in den Bechern?",
+        inhalt: () => `<div class="button-row"><button class="lp-knopf warning" onclick="equalizeAll()">Mathematisch exakt ausgleichen</button></div>`,
+        sperre: () => (istAusgeglichen(data.u.values) && istAusgeglichen(data.m.values))
+          ? null : "Tippe zuerst auf „Mathematisch exakt ausgleichen“."
+      },
+      {
+        teil: 0,
+        titel: "Was ist gleich geblieben?",
+        auftrag: () => "Jetzt hat in jedem Team jedes Kind gleich viel. Was ist beim Ausgleichen <strong>gleich geblieben</strong>?",
+        inhalt: () => lpFrage("gleich", ["Die Summe des Teams", "Die Menge in jedem Becher", "Nichts ist gleich geblieben"], 0,
+          "Richtig. Es geht kein Wasser verloren. Es wird nur anders verteilt.",
+          "Schau auf die Summe unter den Bechern. Hat sie sich verändert?")
+          + (lpAntworten.gleich === 0 ? `
+          <div class="lp-erklaerung">
+            <strong>Neues Wort: Ausgleichswert</strong><br>
+            So viel Wasser bekommt jedes Kind, wenn alles gerecht verteilt ist.
+            Bei den Unicorns sind es ${ausgleichswert(data.u.values)} ml, bei den Mathe-Assen ${ausgleichswert(data.m.values)} ml.
+          </div>` : ""),
+        sperre: () => lpAntworten.gleich === 0 ? null
+          : lpAntworten.gleich === undefined ? "Wähle zuerst eine Antwort." : "Probiere es noch einmal."
+      },
+      {
+        teil: 0,
+        titel: "Teil 1 geschafft ✓",
+        pause: true,
+        letzte: true,
+        auftrag: () => "",
+        inhalt: () => `
+          <p>Du hast <strong>beobachtet</strong>: Beim Ausgleichen bleibt die Summe gleich. Jedes Kind bekommt den Ausgleichswert.</p>
+          <p class="lp-erklaerung">Als Nächstes: Kannst du den Ausgleichswert <strong>vorher</strong> ausrechnen? Teil 2 kommt bald.
+          Bis dahin kannst du im Freien Labor selbst Wasser umfüllen.</p>
+          <div class="button-row"><button class="lp-knopf" onclick="modusWaehlen('labor')">Zum Freien Labor</button></div>`,
+        sperre: () => null
+      }
+    ];
+
+    // Auswahlfrage mit Rückmeldung als Text (richtig: Bestätigung, falsch: Denkanstoß)
+    function lpFrage(schluessel, optionen, richtig, textRichtig, textNochmal) {
+      const gewaehlt = lpAntworten[schluessel];
+      const knoepfe = optionen.map((o, i) =>
+        `<button class="lp-option" aria-pressed="${gewaehlt === i}" onclick="lpAntworte('${schluessel}', ${i})">${gewaehlt === i ? "● " : "○ "}${o}</button>`
+      ).join("");
+      let rueckmeldung = "";
+      if (gewaehlt !== undefined) {
+        rueckmeldung = gewaehlt === richtig
+          ? `<p class="lp-rueckmeldung richtig">✓ ${textRichtig}</p>`
+          : `<p class="lp-rueckmeldung nochmal">↻ ${textNochmal}</p>`;
+      }
+      return `<div class="lp-optionen">${knoepfe}</div><div aria-live="polite">${rueckmeldung}</div>`;
+    }
+
+    function lpAntworte(schluessel, i) {
+      lpAntworten[schluessel] = i;
+      lpZeigen();
+    }
+
+    function lpZeigen() {
+      const st = LP_STATIONEN[lpSchritt];
+      document.body.classList.toggle("lp-pause", !!st.pause);
+
+      document.getElementById("lp-teile").innerHTML = TEILE.map((t, i) => {
+        const zustand = (i < st.teil || (st.pause && i === st.teil)) ? "fertig" : i === st.teil ? "aktiv" : "";
+        const zeichen = zustand === "fertig" ? "✓ " : zustand === "aktiv" ? "▶ " : "";
+        return `<li class="lp-teil ${zustand}"${zustand === "aktiv" ? ' aria-current="step"' : ""}>${zeichen}${i + 1}. ${t}</li>`;
+      }).join("");
+
+      const imTeil = LP_STATIONEN.filter(s => s.teil === st.teil && !s.pause);
+      document.getElementById("lp-titel").textContent = st.pause
+        ? st.titel
+        : `Schritt ${imTeil.indexOf(st) + 1} von ${imTeil.length}: ${st.titel}`;
+
+      const auftrag = st.auftrag();
+      document.getElementById("lp-auftrag-karte").hidden = !auftrag;
+      document.getElementById("lp-auftrag").innerHTML = auftrag;
+      document.getElementById("lp-inhalt").innerHTML = st.inhalt();
+      lpAktualisieren();
+    }
+
+    // Prüft die Sperre der aktuellen Station und stellt die Fußleiste ein
+    function lpAktualisieren() {
+      if (modus !== "lernpfad") return;
+      const st = LP_STATIONEN[lpSchritt];
+      const hinweis = st.sperre();
+      const weiter = document.getElementById("lp-weiter");
+      weiter.hidden = !!st.letzte;
+      weiter.disabled = !!hinweis;
+      weiter.innerHTML = hinweis ? "🔒 Weiter" : "Weiter &rarr;";
+      document.getElementById("lp-zurueck").disabled = lpSchritt === 0;
+      document.getElementById("lp-hinweis").textContent = st.letzte ? "" : (hinweis || "Gut gemacht! Tippe auf „Weiter“.");
+    }
+
+    function lpGehe(richtung) {
+      if (richtung > 0 && LP_STATIONEN[lpSchritt].sperre()) return;
+      const ziel = lpSchritt + richtung;
+      if (ziel < 0 || ziel >= LP_STATIONEN.length) return;
+      lpSchritt = ziel;
+      lpZeigen();
+      window.scrollTo(0, 0);
+    }
+
+    function modusWaehlen(neu) {
+      modus = neu;
+      try { sessionStorage.setItem("mw_modus", neu); } catch (e) { /* Speichern nicht möglich: egal */ }
+      document.getElementById("willkommen").hidden = true;
+      document.body.classList.toggle("lernpfad", neu === "lernpfad");
+      document.getElementById("btn-modus").textContent = neu === "lernpfad" ? "Zum Freien Labor" : "Zum Lernpfad";
+      if (neu === "lernpfad") {
+        // Lernpfad startet immer mit den Startmengen von Aufgabe 1
+        pipetteBuffer = 0;
+        pipetteSourceTeam = null;
+        lpSchritt = 0;
+        lpAntworten = {};
+        loadPreset(1);
+        lpZeigen();
+      } else {
+        document.body.classList.remove("lp-pause");
+      }
+      window.scrollTo(0, 0);
+    }
+
+    function modusWechseln() {
+      modusWaehlen(modus === "lernpfad" ? "labor" : "lernpfad");
+    }
+
+    function lpStart() {
+      let gespeichert = null;
+      try { gespeichert = sessionStorage.getItem("mw_modus"); } catch (e) { /* kein Speicher */ }
+      if (gespeichert === "lernpfad" || gespeichert === "labor") {
+        modusWaehlen(gespeichert);
+      } else {
+        document.getElementById("willkommen").hidden = false;
+      }
+    }
+
+    window.onload = () => {
+      init();
+      lpStart();
+    };
   </script>
 </body>
 </html>
