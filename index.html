@@ -505,7 +505,7 @@
       
       <article class="team-card" style="border-top: 4px solid var(--u);">
         <div class="team-header">
-          <h2 style="color: var(--u-dark);">Unicorns</h2>
+          <h2 style="color: var(--u-dark);"><span aria-hidden="true">🦄</span> Unicorns</h2>
           <div>
             <button class="btn-small secondary" id="btn-sub-u" onclick="changeCount('u', -1)">&minus; Kind</button>
             <button class="btn-small secondary" id="btn-add-u" onclick="changeCount('u', 1)">&plus; Kind</button>
@@ -524,9 +524,9 @@
         </div>
       </article>
 
-      <article class="team-card" style="border-top: 4px solid var(--m);">
+      <article class="team-card" style="border-top: 4px dashed var(--m);">
         <div class="team-header" style="color: var(--m-dark);">
-          <h2>Mathe-Asse</h2>
+          <h2><span aria-hidden="true">⭐</span> Mathe-Asse</h2>
           <div>
             <button class="btn-small secondary" id="btn-sub-m" onclick="changeCount('m', -1)">&minus; Kind</button>
             <button class="btn-small secondary" id="btn-add-m" onclick="changeCount('m', 1)">&plus; Kind</button>
@@ -761,13 +761,14 @@
 
       if (pipetteBuffer > 0) {
         const teamName = pipetteSourceTeam === 'u' ? 'Unicorns' : 'Mathe-Asse';
+        const teamSymbol = pipetteSourceTeam === 'u' ? '🦄' : '⭐';
         const teamColor = pipetteSourceTeam === 'u' ? 'var(--u-dark)' : 'var(--m-dark)';
         
         box.classList.add(pipetteSourceTeam === 'u' ? 'active-u' : 'active-m');
         alertMsg.style.display = "block";
         alertMsg.innerText = `⚠️ Die Pipette ist noch mit ${pipetteBuffer} ml der ${teamName} gefüllt!`;
         
-        display.innerHTML = `Gefüllt: <span style="color:var(--danger);">${pipetteBuffer} ml</span><br><span style="font-size:0.85rem; font-weight:bold; color:${teamColor};">Team: ${teamName}</span>`;
+        display.innerHTML = `Gefüllt: <span style="color:var(--danger);">${pipetteBuffer} ml</span><br><span style="font-size:0.85rem; font-weight:bold; color:${teamColor};">Team: ${teamSymbol} ${teamName}</span>`;
         info.innerHTML = `Du verteilst gerade Wasser innerhalb der <strong>${teamName}</strong>. Gieße es mit <button class="btn-small" style="background:var(--ok);">&larr;</button> wieder in deren Becher zurück.`;
       } else {
         display.innerHTML = `Gefüllt: 0 ml<br><span style="font-size:0.85rem; font-weight:normal; color:var(--muted);">Team: Keins</span>`;
