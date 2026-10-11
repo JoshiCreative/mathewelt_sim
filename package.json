@@ -1,0 +1,13 @@
+{
+  "name": "mathe-tools-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Digitale Mathe-Lerntools (MatheWelt) mit Tests und Claude-Code-Setup",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

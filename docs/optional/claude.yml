@@ -1,0 +1,27 @@
+# OPTIONAL: Claude per @claude in GitHub-Issues und Pull Requests ansprechen.
+# Aktivieren: Datei nach .github/workflows/claude.yml verschieben und im Repo
+# unter Settings > Secrets and variables > Actions das Secret ANTHROPIC_API_KEY anlegen.
+# Achtung: Das wird über die API abgerechnet, nicht über dein Claude-Abo.
+# Einfacher geht die Einrichtung in Claude Code mit dem Befehl /install-github-app.
+
+name: Claude
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  claude:
+    if: contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}

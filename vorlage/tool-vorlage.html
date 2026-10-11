@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mathe-Tool Vorlage – Lernpfad</title>
+<style>
+  :root {
+    --bg: #f4f7fb; --card: #ffffff; --text: #1f2937; --line: #d1d5db;
+    --primary: #1d4ed8; --ok: #15803d; --warn: #c2410c; --water: #38bdf8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, "Segoe UI", sans-serif; background: var(--bg);
+         color: var(--text); line-height: 1.5; font-size: 1.125rem; }
+  header { background: #111827; color: #fff; padding: 16px 20px; }
+  h1 { margin: 0; font-size: 1.5rem; }
+  main { max-width: 900px; margin: 0 auto; padding: 16px; }
+  .pfad { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  button { min-height: 48px; min-width: 48px; padding: 10px 18px; border: 0; border-radius: 12px;
+           font: inherit; font-weight: 600; background: #374151; color: #fff; cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--primary); }
+  button.ok { background: var(--ok); }
+  button.warn { background: var(--warn); }
+  button:disabled { opacity: .35; cursor: not-allowed; }
+  .karte { background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 16px;
+           box-shadow: 0 6px 18px rgba(15, 23, 42, .06); }
+  .reihe { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; justify-content: center; margin: 16px 0; }
+  .becher { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 96px; }
+  .glas { position: relative; width: 64px; height: 140px; border: 3px solid #64748b; border-top: 0;
+          border-radius: 0 0 14px 14px; background: #fff; overflow: hidden; }
+  .wasser { position: absolute; left: 0; bottom: 0; width: 100%; background: var(--water); transition: height .3s; }
+  .linie { position: absolute; left: 0; right: 0; border-top: 3px dashed #b91c1c; }
+  .knoepfe { display: flex; gap: 6px; }
+  input[type="number"] { font: inherit; min-height: 48px; width: 120px; padding: 6px 10px;
+                         border: 2px solid var(--line); border-radius: 10px; }
+  .rueckmeldung { margin-top: 12px; padding: 12px 14px; border-left: 5px solid var(--primary);
+                  background: #eff6ff; border-radius: 8px; }
+  .rueckmeldung.ok { border-color: var(--ok); background: #f0fdf4; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Wasser aufteilen – Vorlage</h1>
+</header>
+
+<main>
+  <nav class="pfad" aria-label="Lernpfad">
+    <button type="button" data-schritt="1" aria-pressed="true">1 Beobachten</button>
+    <button type="button" data-schritt="2" aria-pressed="false">2 Vorhersage</button>
+    <button type="button" data-schritt="3" aria-pressed="false">3 Selbst bauen</button>
+  </nav>
+
+  <section class="karte" id="schritt-1">
+    <p>Schau dir die Becher an. Jeder Becher hat unterschiedlich viel Wasser. Drücke auf den Knopf und beobachte, was passiert.</p>
+    <div class="reihe" id="reihe-1"></div>
+    <button type="button" class="ok" id="btn-ausgleichen">Wasser ausgleichen</button>
+    <div class="rueckmeldung" id="text-1" aria-live="polite">Das Wasser ist noch ungleich verteilt.</div>
+  </section>
+
+  <section class="karte" id="schritt-2" hidden>
+    <p>Wenn alle Becher gleich voll wären: Wie viel Milliliter wären in jedem Becher?</p>
+    <div class="reihe" id="reihe-2"></div>
+    <label for="vorhersage">Meine Vorhersage (ml):</label>
+    <input type="number" id="vorhersage" inputmode="decimal" step="any">
+    <button type="button" id="btn-pruefen">Prüfen</button>
+    <div class="rueckmeldung" id="text-2" aria-live="polite">Rechne oder schätze und gib deine Zahl ein.</div>
+  </section>
+
+  <section class="karte" id="schritt-3" hidden>
+    <p>Jetzt bist du dran. Nimm mit dem Pfeil nach rechts Wasser auf und gieße es mit dem Pfeil nach links in einen anderen Becher.</p>
+    <div class="reihe" id="reihe-3"></div>
+    <p>In der Pipette: <strong id="pipette-anzeige">0 ml</strong></p>
+    <div class="rueckmeldung" id="text-3" aria-live="polite">Versuche, alle Becher gleich voll zu machen.</div>
+  </section>
+</main>
+
+<script>
+/* LOGIC-START */
+const MAX_ML = 20;
+
+function summe(werte) {
+  return werte.reduce((a, b) => a + b, 0);
+}
+
+function ausgleichswert(werte) {
+  return werte.length ? summe(werte) / werte.length : 0;
+}
+
+function istAusgeglichen(werte, toleranz = 0.01) {
+  return werte.length > 0 && werte.every((w) => Math.abs(w - werte[0]) < toleranz);
+}
+
+function istGanzzahligTeilbar(werte) {
+  const s = summe(werte);
+  return werte.length > 0 && Number.isInteger(s) && s % werte.length === 0;
+}
+
+// Nimmt "menge" aus Becher idx. Gibt null zurück, wenn nicht genug drin ist.
+function nimmWasser(werte, idx, menge = 1) {
+  if (idx < 0 || idx >= werte.length || werte[idx] < menge) return null;
+  const neu = werte.slice();
+  neu[idx] -= menge;
+  return { werte: neu, pipette: menge };
+}
+
+// Gießt "menge" aus der Pipette in Becher idx. Gibt null zurück, wenn die Pipette
+// zu wenig enthält oder der Becher über "max" ml laufen würde.
+function gibWasser(werte, idx, pipette, menge = 1, max = MAX_ML) {
+  if (idx < 0 || idx >= werte.length || pipette < menge || werte[idx] + menge > max) return null;
+  const neu = werte.slice();
+  neu[idx] += menge;
+  return { werte: neu, pipette: pipette - menge };
+}
+
+function pruefeVorhersage(werte, eingabe, toleranz = 0.01) {
+  const soll = ausgleichswert(werte);
+  const text = String(eingabe).trim().replace(",", ".");
+  const zahl = text === "" ? NaN : Number(text);
+  return { soll, richtig: Number.isFinite(zahl) && Math.abs(zahl - soll) < toleranz };
+}
+
+const LOGIK = { MAX_ML, summe, ausgleichswert, istAusgeglichen, istGanzzahligTeilbar,
+                nimmWasser, gibWasser, pruefeVorhersage };
+/* LOGIC-END */
+
+// ===== Oberfläche (darf auf DOM zugreifen) =====
+const START = [15, 17, 12, 20];
+let werte = START.slice();
+let pipette = 0;
+
+function zeichneBecher(reiheId, liste, mitLinie, mitKnoepfen) {
+  const reihe = document.getElementById(reiheId);
+  reihe.innerHTML = "";
+  const mittel = ausgleichswert(liste);
+  liste.forEach((ml, idx) => {
+    const b = document.createElement("div");
+    b.className = "becher";
+    const linie = mitLinie ? `<div class="linie" style="bottom:${(mittel / MAX_ML) * 100}%"></div>` : "";
+    b.innerHTML = `<div>Kind ${idx + 1}</div><div>${ml.toFixed(1)} ml</div>` +
+      `<div class="glas">${linie}<div class="wasser" style="height:${(ml / MAX_ML) * 100}%"></div></div>`;
+    if (mitKnoepfen) {
+      const k = document.createElement("div");
+      k.className = "knoepfe";
+      const nimm = document.createElement("button");
+      nimm.type = "button"; nimm.className = "warn"; nimm.textContent = "→";
+      nimm.setAttribute("aria-label", `1 ml aus Kind ${idx + 1} aufnehmen`);
+      nimm.addEventListener("click", () => bewege("nimm", idx));
+      const gib = document.createElement("button");
+      gib.type = "button"; gib.className = "ok"; gib.textContent = "←";
+      gib.setAttribute("aria-label", `1 ml in Kind ${idx + 1} gießen`);
+      gib.addEventListener("click", () => bewege("gib", idx));
+      k.append(nimm, gib);
+      b.append(k);
+    }
+    reihe.append(b);
+  });
+}
+
+function bewege(art, idx) {
+  if (art === "nimm") {
+    const r = nimmWasser(werte, idx);
+    if (!r) return;
+    werte = r.werte; pipette += r.pipette;
+  } else {
+    const r = gibWasser(werte, idx, pipette);
+    if (!r) return;
+    werte = r.werte; pipette = r.pipette;
+  }
+  zeichneSchritt3();
+}
+
+function zeichneSchritt3() {
+  zeichneBecher("reihe-3", werte, false, true);
+  document.getElementById("pipette-anzeige").textContent = `${pipette} ml`;
+  const t = document.getElementById("text-3");
+  const fertig = pipette === 0 && istAusgeglichen(werte);
+  t.className = "rueckmeldung" + (fertig ? " ok" : "");
+  t.textContent = fertig
+    ? `Geschafft! Jeder Becher hat ${ausgleichswert(werte)} ml. Das ist der Ausgleichswert.`
+    : "Versuche, alle Becher gleich voll zu machen.";
+}
+
+function zeigeSchritt(n) {
+  document.querySelectorAll(".pfad button").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b.dataset.schritt === String(n)));
+  });
+  [1, 2, 3].forEach((i) => { document.getElementById(`schritt-${i}`).hidden = i !== n; });
+  if (n === 1) zeichneBecher("reihe-1", START, false, false);
+  if (n === 2) zeichneBecher("reihe-2", START, false, false);
+  if (n === 3) zeichneSchritt3();
+}
+
+document.querySelectorAll(".pfad button").forEach((b) => {
+  b.addEventListener("click", () => zeigeSchritt(Number(b.dataset.schritt)));
+});
+
+document.getElementById("btn-ausgleichen").addEventListener("click", () => {
+  const w = ausgleichswert(START);
+  zeichneBecher("reihe-1", START.map(() => w), true, false);
+  const t = document.getElementById("text-1");
+  t.className = "rueckmeldung ok";
+  t.textContent = `Jetzt ist in jedem Becher gleich viel: ${w} ml. Das nennt man den Ausgleichswert.`;
+});
+
+document.getElementById("btn-pruefen").addEventListener("click", () => {
+  const r = pruefeVorhersage(START, document.getElementById("vorhersage").value);
+  const t = document.getElementById("text-2");
+  t.className = "rueckmeldung" + (r.richtig ? " ok" : "");
+  t.textContent = r.richtig
+    ? `Richtig! Es sind ${r.soll} ml pro Becher.`
+    : "Noch nicht ganz. Tipp: Zähle alles Wasser zusammen und teile durch die Anzahl der Becher.";
+});
+
+zeigeSchritt(1);
+</script>
+</body>
+</html>
