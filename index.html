@@ -396,7 +396,48 @@
   </main>
 
   <script>
+    /* LOGIC-START */
+    // Reine Mathe-Logik ohne DOM-Zugriff. Wird von tests/mathewelt.logic.test.mjs geladen.
     const MAX_ML = 20;
+
+    function summe(werte) {
+      return werte.reduce((a, b) => a + b, 0);
+    }
+
+    function ausgleichswert(werte) {
+      return werte.length ? summe(werte) / werte.length : 0;
+    }
+
+    function istAusgeglichen(werte, toleranz = 0.01) {
+      return werte.length > 0 && werte.every((w) => Math.abs(w - werte[0]) < toleranz);
+    }
+
+    function istGanzzahligTeilbar(werte) {
+      const s = summe(werte);
+      return werte.length > 0 && Number.isInteger(s) && s % werte.length === 0;
+    }
+
+    // Nimmt "menge" aus Becher idx. Gibt null zurück, wenn nicht genug drin ist.
+    function nimmWasser(werte, idx, menge = 1) {
+      if (idx < 0 || idx >= werte.length || werte[idx] < menge) return null;
+      const neu = werte.slice();
+      neu[idx] -= menge;
+      return { werte: neu, pipette: menge };
+    }
+
+    // Gießt "menge" aus der Pipette in Becher idx. Gibt null zurück, wenn die Pipette
+    // zu wenig enthält oder der Becher schon voll (max) ist.
+    // Bekannte Lücke: Ein Becher mit 19,5 ml kann auf 20,5 ml kommen (siehe Lernprotokoll).
+    function gibWasser(werte, idx, pipette, menge = 1, max = MAX_ML) {
+      if (idx < 0 || idx >= werte.length || pipette < menge || werte[idx] >= max) return null;
+      const neu = werte.slice();
+      neu[idx] += menge;
+      return { werte: neu, pipette: pipette - menge };
+    }
+
+    const LOGIK = { MAX_ML, summe, ausgleichswert, istAusgeglichen, istGanzzahligTeilbar,
+                    nimmWasser, gibWasser };
+    /* LOGIC-END */
 
     // Start-Presets angepasst, damit die Summen glatt durch die Kinder-Anzahl teilbar sind!
     let data = {
@@ -432,7 +473,7 @@
       container.innerHTML = "";
 
       const team = data[key];
-      const avg = team.values.reduce((a, b) => a + b, 0) / team.values.length;
+      const avg = ausgleichswert(team.values);
 
       document.getElementById(`btn-add-${key}`).disabled = umschüttenGestartet;
       document.getElementById(`btn-sub-${key}`).disabled = umschüttenGestartet;
@@ -474,10 +515,11 @@
     function takeWater(key, idx) {
       if (pipetteSourceTeam !== null && pipetteSourceTeam !== key) return;
 
-      if (data[key].values[idx] >= 1) {
+      const ergebnis = nimmWasser(data[key].values, idx);
+      if (ergebnis) {
         umschüttenGestartet = true; 
-        data[key].values[idx] -= 1;
-        pipetteBuffer += 1;
+        data[key].values = ergebnis.werte;
+        pipetteBuffer += ergebnis.pipette;
         pipetteSourceTeam = key;
         
         updatePipetteUI();
@@ -490,9 +532,10 @@
     function giveWater(key, idx) {
       if (pipetteSourceTeam !== key) return;
 
-      if (pipetteBuffer >= 1 && data[key].values[idx] < MAX_ML) {
-        data[key].values[idx] += 1;
-        pipetteBuffer -= 1;
+      const ergebnis = gibWasser(data[key].values, idx, pipetteBuffer);
+      if (ergebnis) {
+        data[key].values = ergebnis.werte;
+        pipetteBuffer = ergebnis.pipette;
         
         if (pipetteBuffer === 0) {
           pipetteSourceTeam = null;
@@ -531,11 +574,11 @@
     }
 
     function updateAnalysis() {
-      const sumU = data.u.values.reduce((a,b) => a+b, 0);
-      const avgU = data.u.values.length ? (sumU / data.u.values.length) : 0;
+      const sumU = summe(data.u.values);
+      const avgU = ausgleichswert(data.u.values);
       
-      const sumM = data.m.values.reduce((a,b) => a+b, 0);
-      const avgM = data.m.values.length ? (sumM / data.m.values.length) : 0;
+      const sumM = summe(data.m.values);
+      const avgM = ausgleichswert(data.m.values);
 
       document.getElementById("sum-u").innerText = `Summe: ${sumU.toFixed(1)} ml`;
       document.getElementById("sum-m").innerText = `Summe: ${sumM.toFixed(1)} ml`;
@@ -568,8 +611,7 @@
       // 1. Prüfung für Unicorns ('u') -> Alle Becher müssen identisch sein
       // (mind. 2 Becher nötig, sonst ist "alle gleich" bei nur 1 Kind trivial erfüllt)
       if (data.u.values.length > 1) {
-        const firstValU = data.u.values[0];
-        const allExactlyEqualU = data.u.values.every(val => Math.abs(val - firstValU) < 0.01);
+        const allExactlyEqualU = istAusgeglichen(data.u.values);
         
         if (allExactlyEqualU) {
           document.getElementById("avg-u").style.color = "var(--ok)";
@@ -587,8 +629,7 @@
       // 2. Prüfung für Mathe-Asse ('m') -> Alle Becher müssen identisch sein
       // (mind. 2 Becher nötig, sonst ist "alle gleich" bei nur 1 Kind trivial erfüllt)
       if (data.m.values.length > 1) {
-        const firstValM = data.m.values[0];
-        const allExactlyEqualM = data.m.values.every(val => Math.abs(val - firstValM) < 0.01);
+        const allExactlyEqualM = istAusgeglichen(data.m.values);
         
         if (allExactlyEqualM) {
           document.getElementById("avg-m").style.color = "var(--ok)";
@@ -638,7 +679,7 @@
       umschüttenGestartet = true;
       ['u', 'm'].forEach(key => {
         const team = data[key];
-        const avg = team.values.reduce((a,b) => a+b, 0) / team.values.length;
+        const avg = ausgleichswert(team.values);
         team.values = team.values.map(() => avg);
         renderTeam(key);
       });
