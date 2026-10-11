@@ -5,22 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mathewelt – Wasser balancieren (Simulation)</title>
   <style>
+    /* Farbpalette: alle Paare für Text erreichen WCAG AA (mind. 4,5:1) */
     :root {
-      --bg: #f4f7fb;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --line: #d1d5db;
-      --u: #8b5cf6;
-      --u-light: #f3e8ff;
-      --u-dark: #6b21a8;
-      --m: #0ea5e9;
-      --m-light: #e0f2fe;
-      --m-dark: #0369a1;
-      --ok: #16a34a;
-      --warn: #ea580c;
-      --danger: #ef4444;
-      --water: linear-gradient(180deg, #7dd3fc 0%, #38bdf8 45%, #0284c7 100%);
+      --bg: #f5f7fa;          /* Hintergrund */
+      --card: #ffffff;        /* Fläche/Karten */
+      --flaeche: #f8fafc;     /* helle graue Fläche */
+      --text: #1b2433;        /* Text */
+      --muted: #536070;       /* Text gedämpft */
+      --line: #cbd3dd;
+      --kopf: #1b2433;        /* Kopfzeile */
+      --kopf-text: #d5dce6;
+      --primaer: #1d4ed8;     /* Buttons */
+      --primaer-dunkel: #1e40af;
+      --primaer-hell: #eef3ff;
+      --sekundaer: #4b5563;
+      --akzent: #0f766e;
+      --water: linear-gradient(180deg, #2a8fd4 0%, #1565a8 100%);
+      --becher-rand: #475569;
+      --linie: #1b2433;       /* Ausgleichslinie */
+      --u: #6d28d9;           /* Team Unicorns (dunkel, violett) */
+      --u-light: #f1ebff;
+      --u-dark: #5b21b6;
+      --m: #b7791f;           /* Team Mathe-Asse (hell, gold) */
+      --m-light: #fff4d6;
+      --m-dark: #7a4a00;
+      --ok: #15803d;          /* Erfolg */
+      --ok-hell: #eaf7ee;
+      --ok-rand: #bbe5c8;
+      --ok-text: #166534;
+      --warn: #c2410c;        /* Hinweis/Warnung */
+      --warn-hell: #fff1e8;
+      --warn-rand: #fdcfae;
+      --warn-text: #9a3412;
+      --danger: #b91c1c;      /* Fehler */
+      --danger-hell: #fdecec;
+      --tipp-hell: #fefce8;
+      --tipp-rand: #fde68a;
+      --fokus: #1d4ed8;
     }
 
     * { box-sizing: border-box; }
@@ -35,12 +56,12 @@
 
     header {
       padding: 24px;
-      background: #111827;
+      background: var(--kopf);
       color: white;
     }
 
     header h1 { margin: 0 0 8px 0; font-size: 2rem; }
-    header p { margin: 0; color: #d1d5db; max-width: 950px; }
+    header p { margin: 0; color: var(--kopf-text); max-width: 950px; }
 
     main {
       max-width: 1400px;
@@ -57,7 +78,7 @@
     }
 
     .transfer-buffer {
-      background: #f9fafb;
+      background: var(--flaeche);
       border: 2px dashed var(--line);
       display: flex;
       align-items: center;
@@ -89,7 +110,7 @@
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
-      background: #111827;
+      background: var(--primaer);
       color: white;
       transition: all 0.2s ease;
     }
@@ -97,7 +118,8 @@
     button:hover { opacity: 0.9; transform: translateY(-1px); }
     button:active { transform: translateY(0); }
     button:disabled { opacity: 0.25; cursor: not-allowed; transform: none !important; }
-    button.secondary { background: #4b5563; }
+    button.secondary { background: var(--sekundaer); }
+    button:focus-visible, .lp-option:focus-visible { outline: 3px solid var(--fokus); outline-offset: 2px; }
     button.accent { background: var(--ok); }
     button.warning { background: var(--warn); }
     
@@ -121,7 +143,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 2px solid #f3f4f6;
+      border-bottom: 2px solid var(--line);
       padding-bottom: 12px;
       margin-bottom: 16px;
     }
@@ -148,7 +170,7 @@
       position: relative;
       width: 70px;
       height: 140px;
-      border: 3px solid #64748b;
+      border: 3px solid var(--becher-rand);
       border-top: none;
       border-bottom-left-radius: 14px;
       border-bottom-right-radius: 14px;
@@ -169,7 +191,8 @@
       position: absolute;
       left: 0;
       right: 0;
-      border-top: 2px dashed var(--danger);
+      border-top: 3px dashed var(--linie);
+      box-shadow: 0 -1px 0 #fff, 0 1px 0 #fff; /* weißer Saum: sichtbar auf Wasser und leerem Becher */
       z-index: 10;
       pointer-events: none;
     }
@@ -188,8 +211,8 @@
 
     .explanation {
       margin-top: 16px;
-      background: #f9fafb;
-      border-left: 4px solid #3b82f6;
+      background: var(--flaeche);
+      border-left: 4px solid var(--primaer);
       padding: 14px;
       border-radius: 8px;
       font-size: 1.1rem;
@@ -199,7 +222,7 @@
       display: inline-block;
       padding: 6px 12px;
       border-radius: 999px;
-      background: #e5e7eb;
+      background: var(--line);
       font-weight: bold;
       font-size: 0.9rem;
       margin-right: 8px;
@@ -214,7 +237,7 @@
       justify-content: center;
       width: 18px;
       height: 18px;
-      background: #9ca3af;
+      background: var(--sekundaer);
       color: white;
       border-radius: 50%;
       font-size: 0.75rem;
@@ -223,12 +246,12 @@
       position: relative;
     }
 
-    .info-help:hover { background: #4b5563; }
+    .info-help:hover { background: var(--text); }
 
     .info-help .tooltiptext {
       visibility: hidden;
       width: 260px;
-      background-color: #1f2937;
+      background-color: var(--text);
       color: #fff;
       text-align: left;
       border-radius: 8px;
@@ -265,14 +288,14 @@
 
     .student-textarea:focus {
       outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      border-color: var(--fokus);
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
     }
 
     .submitted-card {
-      background: #f0fdf4;
-      border: 2px solid #bbf7d0;
-      color: #166534;
+      background: var(--ok-hell);
+      border: 2px solid var(--ok-rand);
+      color: var(--ok-text);
       padding: 16px;
       border-radius: 12px;
       margin-top: 12px;
@@ -324,10 +347,10 @@
       padding: 12px 24px;
       font-size: 1.1rem;
       border-radius: 14px;
-      background: #1d4ed8;
+      background: var(--primaer);
     }
-    .lp-knopf.zweit { background: #4b5563; }
-    .lp-knopf.warning { background: #c2410c; } /* dunkler als --warn: besserer Kontrast */
+    .lp-knopf.zweit { background: var(--sekundaer); }
+    .lp-knopf.warning { background: var(--warn); }
 
     .btn-modus { margin-left: auto; min-height: 48px; }
 
@@ -368,13 +391,13 @@
       color: var(--muted);
       font-weight: 600;
     }
-    .lp-teil.aktiv { border-color: #1d4ed8; color: #1d4ed8; background: #eff6ff; }
-    .lp-teil.fertig { border-color: #bbf7d0; color: #166534; background: #f0fdf4; }
+    .lp-teil.aktiv { border-color: var(--primaer); color: var(--primaer); background: var(--primaer-hell); }
+    .lp-teil.fertig { border-color: var(--ok-rand); color: var(--ok-text); background: var(--ok-hell); }
     .lp-titel { margin: 0 0 12px 0; font-size: 1.4rem; }
 
     .lp-auftrag {
-      border-left: 6px solid #1d4ed8;
-      background: #f9fafb;
+      border-left: 6px solid var(--primaer);
+      background: var(--flaeche);
       border-radius: 12px;
       padding: 14px 18px;
       font-size: 1.15rem;
@@ -385,7 +408,7 @@
       font-weight: 800;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: #1d4ed8;
+      color: var(--primaer);
     }
     .lp-auftrag p:last-child { margin-bottom: 0; }
 
@@ -397,7 +420,7 @@
       border: 2px solid var(--line);
       font-size: 1.05rem;
     }
-    .lp-option[aria-pressed="true"] { border-color: #1d4ed8; background: #eff6ff; }
+    .lp-option[aria-pressed="true"] { border-color: var(--primaer); background: var(--primaer-hell); }
 
     .lp-rueckmeldung {
       margin-top: 14px;
@@ -406,15 +429,15 @@
       font-weight: 600;
       border: 2px solid;
     }
-    .lp-rueckmeldung.richtig { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
-    .lp-rueckmeldung.nochmal { background: #fff7ed; border-color: #fed7aa; color: #9a3412; }
+    .lp-rueckmeldung.richtig { background: var(--ok-hell); border-color: var(--ok-rand); color: var(--ok-text); }
+    .lp-rueckmeldung.nochmal { background: var(--warn-hell); border-color: var(--warn-rand); color: var(--warn-text); }
 
     .lp-erklaerung {
       margin-top: 14px;
       padding: 14px 18px;
       border-radius: 12px;
-      background: #fefce8;
-      border: 2px solid #fde68a;
+      background: var(--tipp-hell);
+      border: 2px solid var(--tipp-rand);
     }
 
     .lp-fuss {
@@ -450,7 +473,7 @@
       Hallo, dein Ziel ist es, das Wasser innerhalb der Teams gerecht zu verteilen. Mit der Pipette kannst du Wasser von einem Becher aufnehmen und auf andere Becher des Teams verteilen. Finde für beide Teams den Ausgleichswert.
     </p>
     <div style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-      <span class="lehrkraft-presets" style="font-size: 0.9rem; color: #9ca3af;">Lehrkräfte-Presets:</span>
+      <span class="lehrkraft-presets" style="font-size: 0.9rem; color: var(--kopf-text);">Lehrkräfte-Presets:</span>
       <button class="btn-small secondary lehrkraft-presets" onclick="loadPreset(1)">Aufgabe 1 (Wasser)</button>
       <button class="btn-small secondary lehrkraft-presets" onclick="loadPreset(2)">Aufgabe 3 (Medaillen-Struktur)</button>
       <button class="secondary btn-modus" id="btn-modus" onclick="modusWechseln()">Zum Lernpfad</button>
@@ -472,7 +495,7 @@
     <section class="transfer-buffer" id="pipette-box">
       <div>
         <strong>Umschütt-Modus (Pipette):</strong> 
-        <div id="buffer-info">Klicke bei einem Kind auf <button class="btn-small" style="background:#ea580c;">&rarr;</button>, um Wasser aufzusaugen.</div>
+        <div id="buffer-info">Klicke bei einem Kind auf <button class="btn-small" style="background:var(--warn);">&rarr;</button>, um Wasser aufzusaugen.</div>
         <div id="pipette-warn-msg" class="pipette-alert">⚠️ Die Pipette ist noch befüllt! Leere sie komplett aus, bevor du das Team wechselst.</div>
       </div>
       <div id="buffer-display" style="font-weight: bold; font-size: 1.2rem; text-align: right;">Gefüllt: 0 ml<br><span style="font-size:0.85rem; font-weight:normal; color:var(--muted);">Team: Keins</span></div>
@@ -496,7 +519,7 @@
             <span class="info-help">?
               <span class="tooltiptext">Der Ausgleichswert gibt an, wie viel Milliliter Wasser in jedem Becher wären, wenn man das gesamte Wasser des Teams völlig gleichmäßig auf alle Kinder aufteilen würde.</span>
             </span>: 
-            <span id="avg-u" style="color: var(--warn); font-weight: bold;">gesucht...</span>
+            <span id="avg-u" style="color: var(--warn-text); font-weight: bold;">gesucht...</span>
           </span>
         </div>
       </article>
@@ -517,7 +540,7 @@
             <span class="info-help">?
               <span class="tooltiptext">Der Ausgleichswert gibt an, wie viel Milliliter Wasser in jedem Becher wären, wenn man das gesamte Wasser des Teams völlig gleichmäßig auf alle Kinder aufteilen würde.</span>
             </span>: 
-            <span id="avg-m" style="color: var(--warn); font-weight: bold;">gesucht...</span>
+            <span id="avg-m" style="color: var(--warn-text); font-weight: bold;">gesucht...</span>
           </span>
         </div>
       </article>
@@ -745,10 +768,10 @@
         alertMsg.innerText = `⚠️ Die Pipette ist noch mit ${pipetteBuffer} ml der ${teamName} gefüllt!`;
         
         display.innerHTML = `Gefüllt: <span style="color:var(--danger);">${pipetteBuffer} ml</span><br><span style="font-size:0.85rem; font-weight:bold; color:${teamColor};">Team: ${teamName}</span>`;
-        info.innerHTML = `Du verteilst gerade Wasser innerhalb der <strong>${teamName}</strong>. Gieße es mit <button class="btn-small" style="background:#16a34a;">&larr;</button> wieder in deren Becher zurück.`;
+        info.innerHTML = `Du verteilst gerade Wasser innerhalb der <strong>${teamName}</strong>. Gieße es mit <button class="btn-small" style="background:var(--ok);">&larr;</button> wieder in deren Becher zurück.`;
       } else {
         display.innerHTML = `Gefüllt: 0 ml<br><span style="font-size:0.85rem; font-weight:normal; color:var(--muted);">Team: Keins</span>`;
-        info.innerHTML = `Klicke bei einem Kind auf <button class="btn-small" style="background:#ea580c;">&rarr;</button>, um Wasser aufzusaugen.`;
+        info.innerHTML = `Klicke bei einem Kind auf <button class="btn-small" style="background:var(--warn);">&rarr;</button>, um Wasser aufzusaugen.`;
       }
     }
 
@@ -773,13 +796,13 @@
           infoBox.innerHTML = `
             <strong>Unicorns (Ausgleichswert):</strong> ${avgU.toFixed(2)} ml <br>
             <strong>Mathe-Asse (Ausgleichswert):</strong> ${avgM.toFixed(2)} ml <br><br>
-            <span style="font-size: 1.2rem; color: #111827; font-weight: bold;">&rarr; Was fällt dir beim Vergleich auf?</span>
+            <span style="font-size: 1.2rem; color: var(--text); font-weight: bold;">&rarr; Was fällt dir beim Vergleich auf?</span>
           `;
         }
       } else {
-        document.getElementById("avg-u").style.color = "var(--warn)";
+        document.getElementById("avg-u").style.color = "var(--warn-text)";
         document.getElementById("avg-u").innerText = "gesucht...";
-        document.getElementById("avg-m").style.color = "var(--warn)";
+        document.getElementById("avg-m").style.color = "var(--warn-text)";
         document.getElementById("avg-m").innerText = "gesucht...";
       }
 
@@ -793,7 +816,7 @@
         const allExactlyEqualU = istAusgeglichen(data.u.values);
         
         if (allExactlyEqualU) {
-          document.getElementById("avg-u").style.color = "var(--ok)";
+          document.getElementById("avg-u").style.color = "var(--ok-text)";
           document.getElementById("avg-u").innerText = `${avgU.toFixed(1)} ml`;
           
           if (!congratulatedU) {
@@ -812,7 +835,7 @@
         const allExactlyEqualM = istAusgeglichen(data.m.values);
         
         if (allExactlyEqualM) {
-          document.getElementById("avg-m").style.color = "var(--ok)";
+          document.getElementById("avg-m").style.color = "var(--ok-text)";
           document.getElementById("avg-m").innerText = `${avgM.toFixed(1)} ml`;
           
           if (!congratulatedM) {
