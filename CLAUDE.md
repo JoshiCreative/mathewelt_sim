@@ -44,4 +44,5 @@ Du lernst nicht von selbst dazu, aber dieses Projekt tut es über Dateien:
 - Ehrlich bleiben: Fehler benennen, nicht verstecken; Unsicherheit als Unsicherheit kennzeichnen.
 
 ## Regeln aus Erfahrung
-_(noch leer – wird gemeinsam mit dem Lernprotokoll gefüllt)_
+- Nach jeder Änderung an Rückmeldungen oder Lob selbst im Browser durchspielen, mit falscher Antwort und Randfällen (0 ml, leeres Team). Code-Lesen durch Prüfer-Agenten reicht nicht. _(Lernprotokoll 2026-10-11, 2026-11-02)_
+- `index.html` nur mit dem Edit-Werkzeug ändern, nie mit sed oder Skripten; vor jedem Commit `file index.html` (CRLF) und `git diff --stat` prüfen. _(Lernprotokoll 2026-10-11, 2026-11-02)_
