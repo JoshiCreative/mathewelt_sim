@@ -75,6 +75,12 @@ export function ausgleichSuite(L) {
       assert.equal(L.MAX_ML, 20);
       assert.equal(L.gibWasser([20, 5], 0, 1), null);
     });
+    it("gibWasser: 19,5 ml + 1 ml wäre über 20 ml -> nicht möglich", () => {
+      assert.equal(L.gibWasser([19.5, 5], 0, 1), null);
+    });
+    it("gibWasser: 19 ml + 1 ml = genau 20 ml ist erlaubt", () => {
+      assert.deepEqual(L.gibWasser([19, 5], 0, 1).werte, [20, 5]);
+    });
     it("gibWasser: leere Pipette gießt nichts", () => {
       assert.equal(L.gibWasser([5, 5], 0, 0), null);
     });

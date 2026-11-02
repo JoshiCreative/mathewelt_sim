@@ -628,10 +628,9 @@
     }
 
     // Gießt "menge" aus der Pipette in Becher idx. Gibt null zurück, wenn die Pipette
-    // zu wenig enthält oder der Becher schon voll (max) ist.
-    // Bekannte Lücke: Ein Becher mit 19,5 ml kann auf 20,5 ml kommen (siehe Lernprotokoll).
+    // zu wenig enthält oder der Becher über "max" ml laufen würde.
     function gibWasser(werte, idx, pipette, menge = 1, max = MAX_ML) {
-      if (idx < 0 || idx >= werte.length || pipette < menge || werte[idx] >= max) return null;
+      if (idx < 0 || idx >= werte.length || pipette < menge || werte[idx] + menge > max) return null;
       const neu = werte.slice();
       neu[idx] += menge;
       return { werte: neu, pipette: pipette - menge };
@@ -694,7 +693,7 @@
         }
 
         const canTake = (pipetteSourceTeam === null || pipetteSourceTeam === key) && val > 0;
-        const canGive = pipetteSourceTeam === key && pipetteBuffer > 0 && val < MAX_ML;
+        const canGive = pipetteSourceTeam === key && pipetteBuffer > 0 && val + 1 <= MAX_ML;
 
         cupItem.innerHTML = `
           <div class="cup-name">${name}</div>
