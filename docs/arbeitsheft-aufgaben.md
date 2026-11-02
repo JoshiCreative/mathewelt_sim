@@ -7,7 +7,6 @@ Fachwort: im Heft „Ausgleichswert", ab Aufgabe 3 auch „Durchschnitt". Rechne
 ## Aufgabe 1: Wasser balancieren (ml)
 - Unicorns: 15, 17, 12, 20 (Summe 64, Ausgleichswert **16**)
 - Mathe-Asse: 13, 15, 15, 14, 18 (Summe 75, Ausgleichswert **15**)
-- Achtung: Das Tool nutzt bei den Mathe-Assen 13, 16, 15, 13, 18 (ebenfalls Summe 75). Das Heft ist die Vorlage.
 - a) Argumente: Marla („höchster Wert") und Monika („Summe") sind nicht fair. Marla: nur ein Kind zählt. Monika: Teams unterschiedlich groß.
 - b) Wasser umschütten (Tippkarten 1, 2). c) Säulen umstapeln (Tippkarten 3, 4). d) Begründen, Sieger: **Unicorns**.
 - Übung: Link „Ausgleichen" (extern). Im Tool durch ein „Freies Labor" ersetzen.

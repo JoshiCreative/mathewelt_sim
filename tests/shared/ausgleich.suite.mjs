@@ -15,7 +15,7 @@ export function ausgleichSuite(L) {
       assert.equal(L.ausgleichswert([15, 17, 12, 20]), 16);
     });
     it("Aufgabe 1: Mathe-Asse 75 ml auf 5 Kinder = 15 ml", () => {
-      assert.equal(L.ausgleichswert([13, 16, 15, 13, 18]), 15);
+      assert.equal(L.ausgleichswert([13, 15, 15, 14, 18]), 15);
     });
     it("Aufgabe 3 (Medaillen-Struktur): 10 ml und 11 ml", () => {
       assert.equal(L.ausgleichswert([8, 12, 16, 4]), 10);
@@ -47,7 +47,7 @@ export function ausgleichSuite(L) {
   describe("Anfängermodus: Gesamtmenge durch Kinderzahl teilbar", () => {
     it("Startmengen von Aufgabe 1 sind teilbar", () => {
       assert.equal(L.istGanzzahligTeilbar([15, 17, 12, 20]), true);
-      assert.equal(L.istGanzzahligTeilbar([13, 16, 15, 13, 18]), true);
+      assert.equal(L.istGanzzahligTeilbar([13, 15, 15, 14, 18]), true);
     });
     it("nicht teilbar: 3 ml auf 2 Kinder", () => {
       assert.equal(L.istGanzzahligTeilbar([1, 2]), false);

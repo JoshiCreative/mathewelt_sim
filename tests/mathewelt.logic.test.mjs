@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import { loadLogic } from "./helpers/loadLogic.mjs";
 import { ausgleichSuite } from "./shared/ausgleich.suite.mjs";
+import { modusSuite } from "./shared/modus.suite.mjs";
 
 // Testet die Logik des MatheWelt-Tools im Hauptordner (index.html).
 // Solange index.html keinen LOGIC-Block mit `const LOGIK` hat, werden die Tests
@@ -12,6 +13,7 @@ const L = loadLogic(pfad);
 if (L) {
   describe("MatheWelt index.html", () => {
     ausgleichSuite(L);
+    modusSuite(L);
   });
 } else {
   describe(

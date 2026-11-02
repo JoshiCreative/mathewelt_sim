@@ -357,6 +357,7 @@
     body:not(.lernpfad) .lp-nur { display: none; }
     body.lernpfad header .intro,
     body.lernpfad .lehrkraft-presets,
+    body.lernpfad .stufe-box,
     body.lernpfad #pipette-box,
     body.lernpfad .team-header button,
     body.lernpfad .action-btns,
@@ -463,6 +464,36 @@
       .lp-hinweis { flex-basis: 100%; order: -1; }
       .lp-fuss-reihe .lp-knopf { flex: 1; }
     }
+
+    /* ===== Stufen: Anfänger / Experte (nur Freies Labor) ===== */
+    .stufe-box {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+    }
+    .stufe-reihe { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 8px; }
+    .stufe-reihe .stufe-name { font-weight: 700; }
+    .stufe-knopf {
+      min-height: 48px;
+      min-width: 44px;
+      background: var(--card);
+      color: var(--text);
+      border: 3px solid var(--line);
+      font-size: 1.05rem;
+    }
+    .stufe-knopf[aria-pressed="true"] { border-color: var(--primaer); background: var(--primaer-hell); }
+    .stufe-satz { margin: 4px 0 0 0; }
+    .stufe-meldung { margin: 8px 0 0 0; font-weight: 600; color: var(--warn-text); }
+    .stufe-meldung:empty { display: none; }
+    .nur-experte { display: none; }
+    body.stufe-experte .nur-experte { display: flex; }
+    body.stufe-experte .cup-item { width: 130px; }
+    .start-reihe { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; width: 100%; }
+    .start-reihe button { min-height: 44px; min-width: 44px; padding: 4px; font-size: 0.95rem; border-radius: 8px; }
+    .action-btns button { min-height: 44px; }
+    .team-header .btn-small { min-height: 44px; min-width: 44px; }
   </style>
 </head>
 <body>
@@ -490,6 +521,22 @@
         <p id="lp-auftrag"></p>
       </div>
       <div id="lp-inhalt"></div>
+    </section>
+
+    <section class="stufe-box" id="stufe-box" aria-label="Anfänger oder Experte">
+      <div class="stufe-reihe">
+        <span class="stufe-name">Stufe:</span>
+        <button class="stufe-knopf" id="stufe-anfaenger" aria-pressed="true" onclick="stufeWaehlen('anfaenger')">🌱 Anfänger</button>
+        <button class="stufe-knopf" id="stufe-experte" aria-pressed="false" onclick="stufeWaehlen('experte')">🎓 Experte</button>
+      </div>
+      <div class="stufe-reihe nur-experte" role="group" aria-label="Menge der Pipette">
+        <span class="stufe-name">Pipette:</span>
+        <button class="stufe-knopf" id="schritt-1" aria-pressed="true" onclick="pipetteSchrittWaehlen(1)">1 ml</button>
+        <button class="stufe-knopf" id="schritt-0.5" aria-pressed="false" onclick="pipetteSchrittWaehlen(0.5)">0,5 ml</button>
+        <button class="stufe-knopf" id="schritt-0.1" aria-pressed="false" onclick="pipetteSchrittWaehlen(0.1)">0,1 ml</button>
+      </div>
+      <p class="stufe-satz" id="stufe-satz"></p>
+      <p class="stufe-meldung" id="stufe-meldung" aria-live="polite"></p>
     </section>
 
     <section class="transfer-buffer" id="pipette-box">
@@ -636,8 +683,44 @@
       return { werte: neu, pipette: pipette - menge };
     }
 
+    // Rundet auf eine Nachkommastelle (gegen Fehler wie 0,1 + 0,2 = 0,30000000000000004).
+    function runde(x) {
+      return Math.round(x * 10) / 10;
+    }
+
+    // Anfängermodus: Neues Kind bringt den Ausgleichswert mit, so bleibt alles gerecht.
+    // Gibt ein neues Array zurück, oder null (Gruppe voll / Summe nicht ganzzahlig teilbar).
+    function kindDazuAnfaenger(werte, maxKinder) {
+      if (werte.length >= maxKinder || !istGanzzahligTeilbar(werte)) return null;
+      return [...werte, summe(werte) / werte.length];
+    }
+
+    // Anfängermodus: Entfernt den letzten Becher. Der Unterschied zum Ausgleichswert wird in
+    // ganzen ml auf die übrigen Becher verteilt, damit der Ausgleichswert gleich bleibt.
+    // Gibt null zurück bei zu wenig Kindern, nicht teilbarer Summe oder wenn es nicht passt.
+    function kindWegAnfaenger(werte, minKinder = 2) {
+      if (werte.length <= minKinder || !istGanzzahligTeilbar(werte)) return null;
+      const ausgleich = summe(werte) / werte.length;
+      const rest = werte.slice(0, -1);
+      let diff = werte[werte.length - 1] - ausgleich; // >0: Wasser dazu, <0: Wasser weg
+      const schritt = diff > 0 ? 1 : -1;
+      // Endet sicher: Pro Durchlauf rückt diff um 1 näher an 0, oder es folgt return null.
+      while (diff !== 0) {
+        // Becher mit dem meisten Platz (bei Zugabe: der leerste, bei Entnahme: der vollste)
+        let best = -1;
+        for (let i = 0; i < rest.length; i++) {
+          const frei = schritt > 0 ? rest[i] < MAX_ML : rest[i] > 0;
+          if (frei && (best < 0 || (schritt > 0 ? rest[i] < rest[best] : rest[i] > rest[best]))) best = i;
+        }
+        if (best < 0) return null;
+        rest[best] += schritt;
+        diff -= schritt;
+      }
+      return diff === 0 ? rest : null;
+    }
+
     const LOGIK = { MAX_ML, summe, ausgleichswert, istAusgeglichen, istGanzzahligTeilbar,
-                    nimmWasser, gibWasser };
+                    nimmWasser, gibWasser, runde, kindDazuAnfaenger, kindWegAnfaenger };
     /* LOGIC-END */
 
     // Start-Presets angepasst, damit die Summen glatt durch die Kinder-Anzahl teilbar sind!
@@ -649,8 +732,8 @@
       },
       m: {
         names: ["Harald", "Sarah", "Monika", "Chris", "Flo", "Lisa"],
-        values: [13, 16, 15, 13, 18], // Summe 75 / 5 Kinder = exakt 15 ml
-        orig: [13, 16, 15, 13, 18]
+        values: [13, 15, 15, 14, 18], // Summe 75 / 5 Kinder = exakt 15 ml
+        orig: [13, 15, 15, 14, 18]
       }
     };
 
@@ -659,6 +742,93 @@
     let pipetteBuffer = 0;
     let pipetteSourceTeam = null;
     let umschüttenGestartet = false;
+
+    // Stufe im Freien Labor: "anfaenger" oder "experte" (Lernpfad läuft immer im Anfängermodus)
+    let stufe = "anfaenger";
+    let pipetteSchritt = 1;
+
+    // Zahl für Kinder anzeigen: Komma, höchstens eine Nachkommastelle, ganze Zahlen ohne ",0"
+    function fmt(x) {
+      return String(runde(x)).replace(".", ",");
+    }
+    function schritt() { return stufe === "experte" ? pipetteSchritt : 1; }
+    function toleranz() { return stufe === "experte" ? 0.1 + 1e-9 : 0.01; }
+    function stufeMeldung(text) { document.getElementById("stufe-meldung").textContent = text; }
+
+    function stufeUI() {
+      const exp = stufe === "experte";
+      document.body.classList.toggle("stufe-experte", exp);
+      [["anfaenger", "🌱 Anfänger"], ["experte", "🎓 Experte"]].forEach(([k, text]) => {
+        const b = document.getElementById("stufe-" + k);
+        const aktiv = stufe === k;
+        b.setAttribute("aria-pressed", String(aktiv));
+        b.textContent = (aktiv ? "✓ " : "") + text;
+      });
+      [1, 0.5, 0.1].forEach(s => {
+        const b = document.getElementById("schritt-" + s);
+        const aktiv = pipetteSchritt === s;
+        b.setAttribute("aria-pressed", String(aktiv));
+        b.textContent = (aktiv ? "✓ " : "") + fmt(s) + " ml";
+      });
+      document.getElementById("stufe-satz").textContent = exp
+        ? "Die Becher sind leer. Stelle die Wassermenge für jedes Kind ein. Danach schüttest du um."
+        : "Feste Startmengen, nur ganze Milliliter.";
+    }
+
+    // Setzt die Aufgabe passend zur Stufe zurück
+    function stufeStarten() {
+      ["u", "m"].forEach(key => {
+        const team = data[key];
+        if (stufe === "experte") {
+          team.values = team.values.map(() => 0);
+        } else {
+          team.values = key === "u" ? [15, 17, 12, 20] : [13, 15, 15, 14, 18];
+        }
+        team.orig = [...team.values];
+      });
+      resetState();
+      stufeUI();
+    }
+
+    function stufeWaehlen(neu) {
+      if (pipetteBuffer > 0) {
+        stufeMeldung("Leere zuerst die Pipette. Dann kannst du die Stufe wechseln.");
+        return;
+      }
+      if (neu === stufe) return;
+      stufe = neu;
+      pipetteSchritt = 1;
+      try { sessionStorage.setItem("mw_stufe", neu); } catch (e) { /* Speichern nicht möglich: egal */ }
+      stufeStarten();
+      stufeMeldung(neu === "experte"
+        ? "Experte: Die Becher sind leer. Stelle die Wassermenge ein."
+        : "Anfänger: Die Startmengen sind wieder da.");
+    }
+
+    function pipetteSchrittWaehlen(s) {
+      if (pipetteBuffer > 0) {
+        stufeMeldung("Leere zuerst die Pipette. Dann kannst du die Menge ändern.");
+        return;
+      }
+      pipetteSchritt = s;
+      stufeMeldung("");
+      stufeUI();
+      renderTeam('u');
+      renderTeam('m');
+    }
+
+    // Startmenge eines Bechers ändern (Experte, nur vor dem ersten Umschütten)
+    function startAendern(key, idx, delta) {
+      if (stufe !== "experte" || umschüttenGestartet || pipetteBuffer > 0) return;
+      const team = data[key];
+      if (!team || !Number.isInteger(idx) || idx < 0 || idx >= team.values.length) return;
+      const neu = Math.min(MAX_ML, Math.max(0, runde(team.values[idx] + delta)));
+      if (!Number.isFinite(neu)) return;
+      team.values[idx] = neu;
+      team.orig[idx] = neu;
+      renderTeam(key);
+      updateAnalysis();
+    }
 
     let congratulatedU = false;
     let congratulatedM = false;
@@ -692,16 +862,26 @@
           avgLineHtml = `<div class="cup-avg-line" style="bottom: ${avgPercent}%;"></div>`;
         }
 
-        const canTake = (pipetteSourceTeam === null || pipetteSourceTeam === key) && val > 0;
-        const canGive = pipetteSourceTeam === key && pipetteBuffer > 0 && val + 1 <= MAX_ML;
+        const s = schritt();
+        const canTake = (pipetteSourceTeam === null || pipetteSourceTeam === key) && val >= s - 1e-9;
+        const canGive = pipetteSourceTeam === key && pipetteBuffer >= s - 1e-9 && val + s <= MAX_ML + 1e-9;
+
+        let startHtml = "";
+        if (stufe === "experte" && !umschüttenGestartet) {
+          const knopf = (d, text, label) =>
+            `<button class="secondary" aria-label="${label}" onclick="startAendern('${key}', ${idx}, ${d})" ${(d < 0 ? val <= 0 : val >= MAX_ML) ? 'disabled' : ''}>${text}</button>`;
+          startHtml = `<div class="start-reihe" role="group" aria-label="Startmenge von ${name}">
+            ${knopf(-1, "&minus;1", "1 ml weniger")}${knopf(-0.5, "&minus;0,5", "0,5 ml weniger")}${knopf(0.5, "+0,5", "0,5 ml mehr")}${knopf(1, "+1", "1 ml mehr")}
+          </div>`;
+        }
 
         cupItem.innerHTML = `
           <div class="cup-name">${name}</div>
-          <div style="font-size:0.85rem; color:var(--muted);">${val.toFixed(1)} ml</div>
-          
+          <div style="font-size:0.85rem; color:var(--muted);">${fmt(val)} ml</div>
+          ${startHtml}
           <div class="action-btns">
-            <button class="warning" onclick="takeWater('${key}', ${idx})" title="1ml absaugen" ${!canTake ? 'disabled' : ''}>&rarr;</button>
-            <button class="accent" onclick="giveWater('${key}', ${idx})" title="1ml reinleeren" ${!canGive ? 'disabled' : ''}>&larr;</button>
+            <button class="warning" onclick="takeWater('${key}', ${idx})" title="${fmt(s)} ml absaugen" aria-label="${fmt(s)} ml absaugen" ${!canTake ? 'disabled' : ''}>&rarr;</button>
+            <button class="accent" onclick="giveWater('${key}', ${idx})" title="${fmt(s)} ml reinleeren" aria-label="${fmt(s)} ml reinleeren" ${!canGive ? 'disabled' : ''}>&larr;</button>
           </div>
 
           <div class="cup-shell">
@@ -716,11 +896,12 @@
     function takeWater(key, idx) {
       if (pipetteSourceTeam !== null && pipetteSourceTeam !== key) return;
 
-      const ergebnis = nimmWasser(data[key].values, idx);
+      const ergebnis = nimmWasser(data[key].values, idx, schritt());
       if (ergebnis) {
-        umschüttenGestartet = true; 
-        data[key].values = ergebnis.werte;
-        pipetteBuffer += ergebnis.pipette;
+        umschüttenGestartet = true;
+        stufeMeldung("");
+        data[key].values = ergebnis.werte.map(runde);
+        pipetteBuffer = runde(pipetteBuffer + ergebnis.pipette);
         pipetteSourceTeam = key;
         
         updatePipetteUI();
@@ -733,10 +914,10 @@
     function giveWater(key, idx) {
       if (pipetteSourceTeam !== key) return;
 
-      const ergebnis = gibWasser(data[key].values, idx, pipetteBuffer);
+      const ergebnis = gibWasser(data[key].values, idx, pipetteBuffer, schritt());
       if (ergebnis) {
-        data[key].values = ergebnis.werte;
-        pipetteBuffer = ergebnis.pipette;
+        data[key].values = ergebnis.werte.map(runde);
+        pipetteBuffer = runde(ergebnis.pipette);
         
         if (pipetteBuffer === 0) {
           pipetteSourceTeam = null;
@@ -765,14 +946,23 @@
         
         box.classList.add(pipetteSourceTeam === 'u' ? 'active-u' : 'active-m');
         alertMsg.style.display = "block";
-        alertMsg.innerText = `⚠️ Die Pipette ist noch mit ${pipetteBuffer} ml der ${teamName} gefüllt!`;
+        alertMsg.innerText = `⚠️ Die Pipette ist noch mit ${fmt(pipetteBuffer)} ml der ${teamName} gefüllt!`;
         
-        display.innerHTML = `Gefüllt: <span style="color:var(--danger);">${pipetteBuffer} ml</span><br><span style="font-size:0.85rem; font-weight:bold; color:${teamColor};">Team: ${teamSymbol} ${teamName}</span>`;
+        display.innerHTML = `Gefüllt: <span style="color:var(--danger);">${fmt(pipetteBuffer)} ml</span><br><span style="font-size:0.85rem; font-weight:bold; color:${teamColor};">Team: ${teamSymbol} ${teamName}</span>`;
         info.innerHTML = `Du verteilst gerade Wasser innerhalb der <strong>${teamName}</strong>. Gieße es mit <button class="btn-small" style="background:var(--ok);">&larr;</button> wieder in deren Becher zurück.`;
       } else {
         display.innerHTML = `Gefüllt: 0 ml<br><span style="font-size:0.85rem; font-weight:normal; color:var(--muted);">Team: Keins</span>`;
         info.innerHTML = `Klicke bei einem Kind auf <button class="btn-small" style="background:var(--warn);">&rarr;</button>, um Wasser aufzusaugen.`;
       }
+    }
+
+    // Lobtext: "genau" nur bei echtem Gleichstand, sonst "fast gleich" (Expertentoleranz)
+    function lobText(teamName, werte) {
+      const a = fmt(ausgleichswert(werte));
+      if (istAusgeglichen(werte, 0.01)) {
+        return `🎉 Richtig. Gut gemacht! Du hast alle Becher der ${teamName} auf genau ${a} ml ausgeglichen!`;
+      }
+      return `Sehr gut! Alle Becher sind fast gleich, höchstens 0,1 ml Unterschied. Der Ausgleichswert ist ${a} ml.`;
     }
 
     function updateAnalysis() {
@@ -782,20 +972,20 @@
       const sumM = summe(data.m.values);
       const avgM = ausgleichswert(data.m.values);
 
-      document.getElementById("sum-u").innerText = `Summe: ${sumU.toFixed(1)} ml`;
-      document.getElementById("sum-m").innerText = `Summe: ${sumM.toFixed(1)} ml`;
+      document.getElementById("sum-u").innerText = `Summe: ${fmt(sumU)} ml`;
+      document.getElementById("sum-m").innerText = `Summe: ${fmt(sumM)} ml`;
       
       if (valuesRevealed) {
         document.getElementById("avg-u").style.color = "inherit";
-        document.getElementById("avg-u").innerText = `${avgU.toFixed(2)} ml`;
+        document.getElementById("avg-u").innerText = `${fmt(avgU)} ml`;
         document.getElementById("avg-m").style.color = "inherit";
-        document.getElementById("avg-m").innerText = `${avgM.toFixed(2)} ml`;
+        document.getElementById("avg-m").innerText = `${fmt(avgM)} ml`;
         
         let infoBox = document.getElementById("info-box");
         if (data.u.values.length > 0 && data.m.values.length > 0) {
           infoBox.innerHTML = `
-            <strong>Unicorns (Ausgleichswert):</strong> ${avgU.toFixed(2)} ml <br>
-            <strong>Mathe-Asse (Ausgleichswert):</strong> ${avgM.toFixed(2)} ml <br><br>
+            <strong>Unicorns (Ausgleichswert):</strong> ${fmt(avgU)} ml <br>
+            <strong>Mathe-Asse (Ausgleichswert):</strong> ${fmt(avgM)} ml <br><br>
             <span style="font-size: 1.2rem; color: var(--text); font-weight: bold;">&rarr; Was fällt dir beim Vergleich auf?</span>
           `;
         }
@@ -813,18 +1003,16 @@
       // 1. Prüfung für Unicorns ('u') -> Alle Becher müssen identisch sein
       // (mind. 2 Becher nötig, sonst ist "alle gleich" bei nur 1 Kind trivial erfüllt)
       if (data.u.values.length > 1) {
-        const allExactlyEqualU = istAusgeglichen(data.u.values);
-        
+        const allExactlyEqualU = umschüttenGestartet && sumU > 0 && istAusgeglichen(data.u.values, toleranz());
+
         if (allExactlyEqualU) {
           document.getElementById("avg-u").style.color = "var(--ok-text)";
-          document.getElementById("avg-u").innerText = `${avgU.toFixed(1)} ml`;
+          document.getElementById("avg-u").innerText = `${fmt(avgU)} ml`;
           
           if (!congratulatedU) {
             congratulatedU = true;
             // Im Lernpfad keine alert()-Meldung, dort gibt es Text auf der Seite
-            if (modus !== "lernpfad") setTimeout(() => {
-              alert(`🎉 Richtig. Gut gemacht!\nDu hast alle Becher der Unicorns auf genau ${avgU.toFixed(0)} ml ausgeglichen!`);
-            }, 100);
+            if (modus !== "lernpfad") stufeMeldung(lobText("Unicorns", data.u.values));
           }
         }
       }
@@ -832,17 +1020,15 @@
       // 2. Prüfung für Mathe-Asse ('m') -> Alle Becher müssen identisch sein
       // (mind. 2 Becher nötig, sonst ist "alle gleich" bei nur 1 Kind trivial erfüllt)
       if (data.m.values.length > 1) {
-        const allExactlyEqualM = istAusgeglichen(data.m.values);
-        
+        const allExactlyEqualM = umschüttenGestartet && sumM > 0 && istAusgeglichen(data.m.values, toleranz());
+
         if (allExactlyEqualM) {
           document.getElementById("avg-m").style.color = "var(--ok-text)";
-          document.getElementById("avg-m").innerText = `${avgM.toFixed(1)} ml`;
+          document.getElementById("avg-m").innerText = `${fmt(avgM)} ml`;
           
           if (!congratulatedM) {
             congratulatedM = true;
-            if (modus !== "lernpfad") setTimeout(() => {
-              alert(`🎉 Richtig. Gut gemacht!\nDu hast alle Becher der Mathe-Asse auf genau ${avgM.toFixed(0)} ml ausgeglichen!`);
-            }, 100);
+            if (modus !== "lernpfad") stufeMeldung(lobText("Mathe-Asse", data.m.values));
           }
         }
       }
@@ -850,16 +1036,59 @@
       lpAktualisieren();
     }
 
+    function nichtTeilbarText(summeMl, anzahl) {
+      return `Das geht hier nicht: ${fmt(summeMl)} ml lassen sich nicht in ganzen ml auf ${anzahl} Kinder verteilen. Im Expertenmodus geht es.`;
+    }
+
     function changeCount(key, delta) {
       if (pipetteBuffer > 0 || umschüttenGestartet) return;
       const team = data[key];
-      if (delta > 0 && team.values.length < team.names.length) {
-        team.values.push(10);
-        team.orig.push(10);
-      } else if (delta < 0 && team.values.length > 2) {
-        // Minimum 2 Kinder pro Team, damit ein "Ausgleich" ueberhaupt sinnvoll moeglich ist
-        team.values.pop();
-        team.orig.pop();
+      const teamName = key === 'u' ? 'den Unicorns' : 'den Mathe-Assen';
+      // Minimum 2 Kinder pro Team, damit ein "Ausgleich" ueberhaupt sinnvoll moeglich ist
+      if (stufe === "experte") {
+        if (delta > 0 && team.values.length < team.names.length) {
+          team.values.push(0);
+          team.orig.push(0);
+          stufeMeldung(`Bei ${teamName} kommt ein Kind dazu. Es startet mit 0 ml. Es zählt trotzdem mit.`);
+        } else if (delta < 0 && team.values.length > 2) {
+          team.values.pop();
+          team.orig.pop();
+          stufeMeldung(`Bei ${teamName} geht das letzte Kind und nimmt sein Wasser mit. Die Summe ändert sich.`);
+        } else {
+          stufeMeldung(delta > 0 ? "Mehr Kinder passen nicht in dieses Team." : "Es müssen mindestens 2 Kinder bleiben.");
+        }
+      } else if (delta > 0) {
+        const alteSumme = summe(team.values);
+        const neu = kindDazuAnfaenger(team.values, team.names.length);
+        if (neu) {
+          team.values = neu;
+          team.orig = [...neu];
+          stufeMeldung(`Bei ${teamName} kommt ein Kind dazu und bringt ${fmt(neu[neu.length - 1])} ml mit. Zusammen sind es jetzt ${fmt(summe(neu))} ml statt ${fmt(alteSumme)} ml. Der Ausgleichswert bleibt ${fmt(ausgleichswert(neu))} ml.`);
+        } else if (team.values.length >= team.names.length) {
+          stufeMeldung("Mehr Kinder passen nicht in dieses Team.");
+        } else {
+          stufeMeldung(nichtTeilbarText(alteSumme, team.values.length + 1));
+        }
+      } else if (delta < 0) {
+        const alt = team.values;
+        const neu = kindWegAnfaenger(alt);
+        if (neu) {
+          const w = alt[alt.length - 1];
+          const a = ausgleichswert(alt);
+          let satz;
+          if (w > a) satz = `Es nimmt ${fmt(a)} ml mit, die übrigen ${fmt(w - a)} ml gibt es den anderen.`;
+          else if (w < a) satz = `Es nimmt ${fmt(a)} ml mit und bekommt ${fmt(a - w)} ml von den anderen dazu.`;
+          else satz = `Es nimmt seine ${fmt(a)} ml mit.`;
+          team.values = neu;
+          team.orig = [...neu];
+          stufeMeldung(`Bei ${teamName} geht das letzte Kind. ${satz} Zusammen sind es jetzt ${fmt(summe(neu))} ml bei ${neu.length} Kindern. Der Ausgleichswert bleibt ${fmt(ausgleichswert(neu))} ml.`);
+        } else if (alt.length <= 2) {
+          stufeMeldung("Es müssen mindestens 2 Kinder bleiben.");
+        } else if (!istGanzzahligTeilbar(alt)) {
+          stufeMeldung(nichtTeilbarText(summe(alt), alt.length));
+        } else {
+          stufeMeldung("Das geht hier nicht: Das Wasser passt nicht in die anderen Becher. In einen Becher passen höchstens 20 ml.");
+        }
       }
       renderTeam(key);
       updateAnalysis();
@@ -899,8 +1128,8 @@
       if (num === 1) {
         data.u.values = [15, 17, 12, 20];
         data.u.orig = [15, 17, 12, 20];
-        data.m.values = [13, 16, 15, 13, 18];
-        data.m.orig = [13, 16, 15, 13, 18];
+        data.m.values = [13, 15, 15, 14, 18];
+        data.m.orig = [13, 15, 15, 14, 18];
       } else if (num === 2) {
         // Preset 2 (Zahlen so angepasst, dass glatte Werte entstehen, falls gewünscht)
         data.u.values = [8, 12, 16, 4]; // Summe 40 / 4 Kinder = exakt 10 ml
@@ -931,6 +1160,7 @@
       congratulatedU = false;
       congratulatedM = false;
 
+      stufeMeldung("");
       document.getElementById("student-thought").value = "";
       document.getElementById("submit-feedback").style.display = "none";
       document.getElementById("info-box").innerText = "Nutze die Pfeiltasten über den Bechern, um Wasser umzuverteilen. Versuche, alle Becher innerhalb eines Teams auf die exakt gleiche Höhe zu bringen, um den Ausgleichswert freizuschalten!";
@@ -1091,10 +1321,19 @@
         pipetteSourceTeam = null;
         lpSchritt = 0;
         lpAntworten = {};
+        stufe = "anfaenger"; // Lernpfad läuft immer im Anfängermodus
+        pipetteSchritt = 1;
         loadPreset(1);
+        stufeUI();
         lpZeigen();
       } else {
         document.body.classList.remove("lp-pause");
+        let gespeichert = null;
+        try { gespeichert = sessionStorage.getItem("mw_stufe"); } catch (e) { /* kein Speicher */ }
+        const ziel = gespeichert === "experte" ? "experte" : "anfaenger";
+        stufe = ziel;
+        pipetteSchritt = 1;
+        stufeStarten(); // immer frisch starten (Lernpfad-Werte nicht mitnehmen)
       }
       window.scrollTo(0, 0);
     }
