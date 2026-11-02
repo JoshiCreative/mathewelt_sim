@@ -8,6 +8,8 @@ Digitale Lern-Tools (Simulationen) für Mathematik/MINT. Aktuelles Tool: **„Ma
 - Kontext: Portfolio „Bildungsprodukt MINT" (Raster in `docs/bewertungsraster.md`) sowie spätere Weiterentwicklung in Forschungsprojekt und Hiwi-Stelle. Alles muss nachvollziehbar bleiben.
 
 @docs/didaktik.md
+   @docs/lernziele.md
+   @docs/arbeitsheft-aufgaben.md
 
 ## Technik-Regeln (nicht verhandelbar)
 - Jedes Tool ist **eine einzelne `index.html`** (HTML + CSS + Vanilla-JS). Kein Framework, kein Build-Schritt, keine CDN-/Fremd-Abhängigkeiten (Schul-WLAN, Offline-Betrieb).
@@ -32,7 +34,7 @@ Digitale Lern-Tools (Simulationen) für Mathematik/MINT. Aktuelles Tool: **„Ma
 4. Bei Änderungen an der Oberfläche: `/tablet-check` durchgehen. Was du nicht prüfen konntest (z. B. echtes Touch-Verhalten), schreibst du ausdrücklich als „nicht geprüft".
 5. Keine Dateien löschen, kein `git push`, keine Installation von Paketen ohne Rückfrage.
 6. Am Ende jeder Aufgabe: ein bis drei Sätze, was jetzt anders ist, und ein sinnvoller nächster Schritt.
-
+7. Bei größeren Aufgaben arbeite ich mit `/team`: Master koordiniert, `entwickler` und `gui-designer` nie gleichzeitig an `index.html`, vor dem Commit `didaktik-pruefer` und `qa-pruefer`.
 ## Selbstverbesserung (Lernprotokoll)
 Du lernst nicht von selbst dazu, aber dieses Projekt tut es über Dateien:
 
