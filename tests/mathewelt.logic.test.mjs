@@ -50,6 +50,68 @@ if (L) {
         assert.equal(L.summeSichtbar("tipp", 0, 0, true), true);
       });
     });
+
+    // Balkenwaage: Neigung in Grad (links schwerer = negativ, linke Seite sinkt)
+    describe("waageNeigung", () => {
+      it("(14, 6) wird auf -12 Grad begrenzt", () => {
+        assert.equal(L.waageNeigung(14, 6), -12);
+      });
+      it("(11, 9) ist -3 Grad", () => {
+        assert.equal(L.waageNeigung(11, 9), -3);
+      });
+      it("(9, 11) ist 3 Grad", () => {
+        assert.equal(L.waageNeigung(9, 11), 3);
+      });
+      it("(10, 10) und (0, 0) sind 0 Grad", () => {
+        assert.equal(L.waageNeigung(10, 10), 0);
+        assert.equal(L.waageNeigung(0, 0), 0);
+      });
+      it("(20, 0) wird auf -12 Grad begrenzt", () => {
+        assert.equal(L.waageNeigung(20, 0), -12);
+      });
+      it("Rundungsunterschied unter der Toleranz gibt 0", () => {
+        assert.equal(L.waageNeigung(10.004, 10), 0);
+      });
+      it("eigenes Maximum wird beachtet", () => {
+        assert.equal(L.waageNeigung(0, 20, 5), 5);
+      });
+    });
+
+    // Umgießen von einem Becher in den anderen (Waage am Lernpfad-Anfang)
+    describe("umgiessen", () => {
+      it("[14, 6] von 0 gibt [13, 7]", () => {
+        assert.deepEqual(L.umgiessen([14, 6], 0), [13, 7]);
+      });
+      it("von 1 gießt in die andere Richtung", () => {
+        assert.deepEqual(L.umgiessen([14, 6], 1), [15, 5]);
+      });
+      it("Summe bleibt 20 nach mehreren Schritten", () => {
+        let w = [14, 6];
+        for (let i = 0; i < 3; i++) w = L.umgiessen(w, 0);
+        w = L.umgiessen(w, 1);
+        assert.equal(L.summe(w), 20);
+      });
+      it("aus leerem Becher geht nichts (null)", () => {
+        assert.equal(L.umgiessen([0, 10], 0), null);
+      });
+      it("Ziel würde über 20 ml steigen (null)", () => {
+        assert.equal(L.umgiessen([5, 20], 0), null);
+      });
+      it("Eingabe wird nicht verändert", () => {
+        const w = [14, 6];
+        L.umgiessen(w, 0);
+        assert.deepEqual(w, [14, 6]);
+      });
+      it("ungültiger Index gibt null", () => {
+        assert.equal(L.umgiessen([14, 6], 2), null);
+      });
+      it("viermal von 0 gibt [10, 10], Waage steht gerade", () => {
+        let w = [14, 6];
+        for (let i = 0; i < 4; i++) w = L.umgiessen(w, 0);
+        assert.deepEqual(w, [10, 10]);
+        assert.equal(L.waageNeigung(w[0], w[1]), 0);
+      });
+    });
   });
 } else {
   describe(

@@ -917,8 +917,31 @@
       return false; // unbekannt oder fehlend: lieber verstecken (Spoiler-Regel)
     }
 
+    // Balkenwaage: Neigung in Grad. 0 bei Gleichstand (auch bei Rundungsunterschieden).
+    // Vorzeichen: links schwerer = NEGATIV (linke Seite sinkt), rechts schwerer = POSITIV.
+    // 1,5 Grad pro ml Unterschied, begrenzt auf +/- maxGrad.
+    function waageNeigung(links, rechts, maxGrad = 12) {
+      if (istAusgeglichen([links, rechts])) return 0;
+      const grad = (rechts - links) * 1.5;
+      return Math.max(-maxGrad, Math.min(maxGrad, grad));
+    }
+
+    // Gießt "menge" ml aus Becher "von" (0 oder 1) in den anderen Becher.
+    // Gibt ein NEUES Array zurück (Eingabe bleibt unverändert) oder null, wenn es nicht geht
+    // (zu wenig im Becher, Ziel würde über "max" laufen, ungültiger Index). Summe bleibt gleich.
+    function umgiessen(werte, von, menge = 1, max = MAX_ML) {
+      if (werte.length !== 2 || (von !== 0 && von !== 1)) return null;
+      const nach = 1 - von;
+      const genommen = nimmWasser(werte, von, menge);
+      if (!genommen) return null;
+      const gegeben = gibWasser(genommen.werte, nach, genommen.pipette, menge, max);
+      if (!gegeben) return null;
+      return gegeben.werte.map(runde);
+    }
+
     const LOGIK = { MAX_ML, summe, ausgleichswert, istAusgeglichen, istGanzzahligTeilbar,
-                    nimmWasser, gibWasser, runde, kindDazuAnfaenger, kindWegAnfaenger, summeSichtbar };
+                    nimmWasser, gibWasser, runde, kindDazuAnfaenger, kindWegAnfaenger, summeSichtbar,
+                    waageNeigung, umgiessen };
     /* LOGIC-END */
 
     // Start-Presets angepasst, damit die Summen glatt durch die Kinder-Anzahl teilbar sind!
