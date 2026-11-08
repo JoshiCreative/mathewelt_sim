@@ -14,6 +14,11 @@
   - *Wippe mit Gleichgewichtspunkt* (Aufgabe 5/6): Werte sitzen an ihrer Stelle auf einem Zahlenstrahl, der **Abstand** zählt. Wird als neue Idee eingeführt („Diese Waage funktioniert anders"), damit die Kinder die beiden nicht verwechseln.
 
 ## Gemeinsamer Baustein: Säulen-Werkstatt (Kästchen im Koordinatensystem)
+**Status:** Entwurf `vorlage/entwurf-saeulen.html` von Josh freigegeben (08.11.2026).
+- Festgelegt sind: Kästchen in hellem Lila (Blau bleibt dem Wasser vorbehalten), Tippen–Tippen, vier gestufte Tipps (Zähler ab Tipp 3, Ausgleichslinie ab Tipp 4) und „Vergleichen“ erst nach dem ersten Umstapeln.
+- Die Balkenwaage kennt nur drei Zustände (gerade, links tiefer, rechts tiefer).
+- Nächster Schritt: Die Logik für das Umstapeln wird testgetrieben gebaut, danach kommt die Station in `index.html`.
+
 - Koordinatensystem mit Kästchen-Raster. Rechtsachse: die Kinder des Teams (Name + Teamsymbol). Hochachse: Menge (ml, Punkte, cm, Sprünge).
 - **1 Kästchen = 1 Einheit.** 10 gestapelte Kästchen = 10 ml. Säulen lassen sich aus dem Wasser „übersetzen": Ein Knopf „Becher → Säule" stellt neben jeden Becher die Säule aus Kästchen (LZ7).
 - **Umstapeln per Tippen–Tippen:** oberstes Kästchen einer Säule antippen (hebt sich an), dann eine andere Säule antippen (Kästchen landet oben). Kein Ziehen nötig. Entspricht Heft-Tippkarte 4 („oberstes Kästchen der höchsten Säule auf die niedrigste").
