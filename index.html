@@ -615,6 +615,8 @@
     .stufe-satz { margin: 4px 0 0 0; }
     .stufe-meldung { margin: 8px 0 0 0; font-weight: 600; color: var(--warn-text); }
     .stufe-meldung:empty { display: none; }
+    .aktions-meldung { margin: 10px 0 0 0; padding: 10px 14px; border: 2px solid var(--warn-rand); border-radius: 12px; background: var(--warn-hell); color: var(--warn-text); font-weight: 600; }
+    .aktions-meldung:empty { display: none; }
     .nur-experte { display: none; }
     body.stufe-experte .nur-experte { display: flex; }
     body.stufe-experte .cup-item { width: 130px; }
@@ -677,6 +679,7 @@
       <button class="btn-small secondary lehrkraft-presets" onclick="loadPreset(2)">Aufgabe 3 (Medaillen-Struktur)</button>
       <button class="secondary btn-modus" id="btn-modus" onclick="modusWechseln()">Zum Lernpfad</button>
     </div>
+    <p id="meldung-preset" class="aktions-meldung" role="status" aria-live="polite"></p>
   </header>
 
   <main>
@@ -769,6 +772,7 @@
         <button class="warning" id="btn-ausgleich" onclick="equalizeAll()">Mathematisch exakt ausgleichen</button>
         <button class="secondary" id="btn-reset" onclick="resetToOriginal()">Simulation zurücksetzen</button>
       </div>
+      <p id="meldung-aktion" class="aktions-meldung" role="status" aria-live="polite"></p>
 
       <div class="explanation" id="info-box">
         Nutze die Pfeiltasten über den Bechern, um Wasser umzuverteilen. Versuche, alle Becher innerhalb eines Teams auf die exakt gleiche Höhe zu bringen, um den Ausgleichswert freizuschalten!
@@ -785,6 +789,7 @@
       <div class="button-row">
         <button class="accent" onclick="submitThought()">Antwort speichern & kopieren</button>
       </div>
+      <p id="meldung-gedanke" class="aktions-meldung" role="status" aria-live="polite"></p>
 
       <div id="submit-feedback" class="submitted-card">
         <strong>✓ Super aufgeschrieben!</strong> Deine Antwort wurde in den Zwischenspeicher kopiert. Du kannst sie jetzt mit <kbd>STRG</kbd> + <kbd>V</kbd> (oder langem Drücken am Tablet) auf der digitalen Pinnwand der Klasse einfügen.
@@ -922,6 +927,8 @@
     function schritt() { return stufe === "experte" ? pipetteSchritt : 1; }
     function toleranz() { return stufe === "experte" ? 0.1 + 1e-9 : 0.01; }
     function stufeMeldung(text) { document.getElementById("stufe-meldung").textContent = text; }
+    function aktionsMeldung(id, text) { document.getElementById(id).textContent = text; }
+    const PIPETTE_VOLL_TEXT = "Deine Pipette ist noch voll. Gieße das Wasser erst zurück in einen Becher.";
 
     function stufeUI() {
       const exp = stufe === "experte";
@@ -1128,6 +1135,10 @@
       
       box.className = "transfer-buffer";
       alertMsg.style.display = "none";
+      if (pipetteBuffer === 0) {
+        aktionsMeldung("meldung-aktion", "");
+        aktionsMeldung("meldung-preset", "");
+      }
 
       if (pipetteBuffer > 0) {
         const teamName = pipetteSourceTeam === 'u' ? 'Unicorns' : 'Mathe-Asse';
@@ -1296,9 +1307,10 @@
 
     function equalizeAll() {
       if (pipetteBuffer > 0) {
-        alert("Bitte leere zuerst die Pipette aus, bevor du den automatischen Ausgleich nutzt!");
+        aktionsMeldung("meldung-aktion", PIPETTE_VOLL_TEXT);
         return;
       }
+      aktionsMeldung("meldung-aktion", "");
       valuesRevealed = true; 
       umschüttenGestartet = true;
       ['u', 'm'].forEach(key => {
@@ -1312,9 +1324,10 @@
 
     function loadPreset(num) {
       if (pipetteBuffer > 0) {
-        alert("Bitte leere zuerst die Pipette!");
+        aktionsMeldung("meldung-preset", PIPETTE_VOLL_TEXT);
         return;
       }
+      aktionsMeldung("meldung-preset", "");
       if (num === 1) {
         data.u.values = [15, 17, 12, 20];
         data.u.orig = [15, 17, 12, 20];
@@ -1332,9 +1345,10 @@
 
     function resetToOriginal() {
       if (pipetteBuffer > 0) {
-        alert("Bitte leere zuerst die Pipette aus, bevor du die Simulation zurücksetzt!");
+        aktionsMeldung("meldung-aktion", PIPETTE_VOLL_TEXT);
         return;
       }
+      aktionsMeldung("meldung-aktion", "");
       data.u.values = [...data.u.orig];
       data.m.values = [...data.m.orig];
       resetState();
@@ -1361,10 +1375,11 @@
     function submitThought() {
       const text = document.getElementById("student-thought").value.trim();
       if (text === "") {
-        alert("Bitte schreibe zuerst eine Beobachtung in das Freifeld!");
+        aktionsMeldung("meldung-gedanke", "Schreib zuerst auf, was du beobachtet hast.");
         return;
       }
-      
+      aktionsMeldung("meldung-gedanke", "");
+
       navigator.clipboard.writeText(text).then(() => {
         document.getElementById("submit-feedback").style.display = "block";
       }).catch(err => {
