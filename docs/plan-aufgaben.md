@@ -35,8 +35,16 @@
 - **Teil 1 Beobachten:**
   - Einstieg mit zwei Bechern auf der Balkenwaage (14 ml und 6 ml). Erste Frage: „Ist das fair verteilt?" Danach umgießen, bis die Waage gerade steht. Dabei kommt das Wort „Ausgleichswert" (10 ml), und es wird geklärt, dass die Gesamtmenge gleich bleibt.
   - Danach die Teams: Wer hat insgesamt mehr? Ist das ein fairer Vergleich? Die Fairness-Argumente von Marla (höchster Wert) und Monika (Summe) kommen als Auswahlkarten. Dann den automatischen Ausgleich ansehen.
-- **Teil 2 Vorhersagen:** „Wie viel ml hat jedes Kind, wenn wir gerecht verteilen?" Erst schätzen (Zahl antippen), dann prüfen. Hier wird „alles zusammen, dann durch die Anzahl teilen" schon vorbereitet, denn bei zwei Bechern liegt „die Hälfte" nahe, und das trägt bei 4 oder 5 Kindern nicht. Die Fehlerfalle „falsche Anzahl" kommt schon hier (Kinder als Chips mit Zähler, „Du hast durch 4 geteilt, die Mathe-Asse sind aber 5 Kinder").
-- **Teil 3 Selbst machen:** Mit der Pipette selbst ausgleichen, danach in der Säulen-Werkstatt dieselben Werte umstapeln (Heft 1c). Sieger begründen (Satzbaustein „Die Unicorns gewinnen, weil …").
+- **Neues Team für Teil 2 und 3 (entschieden 08.11.2026):** Teil 1 nennt am Ende schon die Ausgleichswerte von Unicorns (16) und Mathe-Asse (15). Damit die Vorhersage echt bleibt, schätzt und stapelt das Kind deshalb mit Team **ZORRO** aus dem Heft. Die Wasserwerte sind ausgedacht: Zoran 14, Otto 9, Riva 17, Renée 11, Olivia 9 (Summe 60, 5 Kinder, Ausgleichswert 12). Dieser Datensatz trennt Mitte (13), häufigsten Wert (9) und Ausgleichswert (12) sauber.
+- **Teil 2 Vorhersagen:** ZORRO steht als Säulen da, nur zum Ansehen. Frage: „Wie hoch werden die Säulen, wenn alle gleich hoch sind?" Antwortkarten mit eigener Rückmeldung je Fehlvorstellung:
+  - 12: richtig
+  - 15: falsche Anzahl („Du hast durch 4 geteilt. ZORRO hat aber 5 Kinder.")
+  - 9: häufigster Wert
+  - 13: Mitte zwischen kleinstem und größtem Wert
+
+  Die Summe ist per Tipp sichtbar. Hier wird „alles zusammen, dann durch die Anzahl teilen" vorbereitet. Bei zwei Bechern lag „die Hälfte" nahe, und das trägt bei 4 oder 5 Kindern nicht.
+- **Teil 3 Selbst machen:** In der Säulen-Werkstatt die ZORRO-Säulen umstapeln, bis alle gleich hoch sind. Die Rückmeldung bezieht sich auf die eigene Vorhersage: „Du hattest … geschätzt." Danach folgt die Rechnung „60 geteilt durch 5 ist 12". Zum Abschluss ein Rückblick auf Wasser, Waage und Säulen (LZ2, LZ7).
+- **Später:** Die Pipette im Lernpfad, der Sieger-Vergleich Unicorns gegen Mathe-Asse mit Satzbaustein („Die Unicorns gewinnen, weil …") und der Umschalter „Becher ↔ Säulen" im Freien Labor (nur Anfängermodus).
 - **LZ:** 1, 4, 7. **Fehlerfallen:** Summe statt Durchschnitt (Fairness-Prüfer), Gesamtmenge nicht erhalten.
 
 ### Aufgabe 2: Würfel ziehen
