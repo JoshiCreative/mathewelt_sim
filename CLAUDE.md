@@ -10,6 +10,7 @@ Digitale Lern-Tools (Simulationen) für Mathematik/MINT. Aktuelles Tool: **„Ma
 @docs/didaktik.md
    @docs/lernziele.md
    @docs/arbeitsheft-aufgaben.md
+   @docs/gestaltung.md
 
 ## Technik-Regeln (nicht verhandelbar)
 - Jedes Tool ist **eine einzelne `index.html`** (HTML + CSS + Vanilla-JS). Kein Framework, kein Build-Schritt, keine CDN-/Fremd-Abhängigkeiten (Schul-WLAN, Offline-Betrieb).
@@ -20,7 +21,8 @@ Digitale Lern-Tools (Simulationen) für Mathematik/MINT. Aktuelles Tool: **„Ma
 - Barrierefreiheit: gute Kontraste, Team-Unterscheidung nie nur über Farbe (zusätzlich Text/Symbol).
 - Neue Tools liegen unter `tools/<name>/index.html`, das MatheWelt-Tool bleibt `index.html` im Hauptordner (GitHub Pages).
 - Den Quellcode des Dozenten-Tools „Wasserlabor" nicht kopieren; übernommen wird nur der didaktische Aufbau.
-
+- - **Keine Spoiler:** Eine Anzeige darf nie die Antwort auf die aktuelle Frage verraten. Antwortrelevante Zahlen (z. B. Summen) werden erst nach der Antwort oder über einen Tipp gezeigt. Ein Hilfetext darf nie auf etwas verweisen, das gerade nicht sichtbar ist.
+- - **Tipps:** Hilfen sind gestuft (ein Tipp pro Tippen auf einen großen „Tipp"-Knopf, der letzte Tipp darf die Antwort verraten). Pro Schritt legt die Station fest, ob die Summe sichtbar ist (`ja`, `nein` oder `per Tipp`).
 ## Mathe-Logik
 - Reine Rechenlogik steht in einem Block `/* LOGIC-START */ … /* LOGIC-END */` innerhalb der `index.html`, **ohne DOM-Zugriff**. Am Ende des Blocks steht `const LOGIK = { … };`. Die Tests laden genau diesen Block.
 - Regeln des Tools: Becher max. 20 ml; Pipette nur innerhalb eines Teams; Anfängermodus nur ganze Zahlen und Gesamtmenge durch Kinderzahl teilbar; Expertenmodus erlaubt Dezimalzahlen.
@@ -34,7 +36,7 @@ Digitale Lern-Tools (Simulationen) für Mathematik/MINT. Aktuelles Tool: **„Ma
 4. Bei Änderungen an der Oberfläche: `/tablet-check` durchgehen. Was du nicht prüfen konntest (z. B. echtes Touch-Verhalten), schreibst du ausdrücklich als „nicht geprüft".
 5. Keine Dateien löschen, kein `git push`, keine Installation von Paketen ohne Rückfrage.
 6. Am Ende jeder Aufgabe: ein bis drei Sätze, was jetzt anders ist, und ein sinnvoller nächster Schritt.
-7. Bei größeren Aufgaben arbeite ich mit `/team`: Master koordiniert, `entwickler` und `gui-designer` nie gleichzeitig an `index.html`, vor dem Commit `didaktik-pruefer` und `qa-pruefer`.
+7. Bei größeren Aufgaben arbeite ich mit `/team`: Master koordiniert, `entwickler` und `gui-designer` nie gleichzeitig an `index.html`, vor dem Commit `didaktik-pruefer` und `qa-pruefer`. In Schritt 5 prüft `didaktik-pruefer` ausdrücklich die Spoiler-Regel.
 ## Selbstverbesserung (Lernprotokoll)
 Du lernst nicht von selbst dazu, aber dieses Projekt tut es über Dateien:
 
@@ -44,5 +46,5 @@ Du lernst nicht von selbst dazu, aber dieses Projekt tut es über Dateien:
 - Ehrlich bleiben: Fehler benennen, nicht verstecken; Unsicherheit als Unsicherheit kennzeichnen.
 
 ## Regeln aus Erfahrung
-- Nach jeder Änderung an Rückmeldungen oder Lob selbst im Browser durchspielen, mit falscher Antwort und Randfällen (0 ml, leeres Team). Code-Lesen durch Prüfer-Agenten reicht nicht. _(Lernprotokoll 2026-10-11, 2026-11-02)_
+- Nach jeder Änderung an Rückmeldungen oder Lob selbst im Browser durchspielen, mit falscher und richtiger Antwort und Randfällen (0 ml, leeres Team, keine Zwischenablage). Eine Rückmeldung nennt nur, was wirklich passiert ist. Code-Lesen durch Prüfer-Agenten reicht nicht. _(Lernprotokoll 2026-10-11, 2026-11-02, 2026-11-08)_
 - `index.html` nur mit dem Edit-Werkzeug ändern, nie mit sed oder Skripten; vor jedem Commit `file index.html` (CRLF) und `git diff --stat` prüfen. _(Lernprotokoll 2026-10-11, 2026-11-02)_
