@@ -30,7 +30,7 @@
 - **Teil 1 Beobachten:**
   - Einstieg mit zwei Bechern auf der Balkenwaage (14 ml und 6 ml). Erste Frage: „Ist das fair verteilt?" Danach umgießen, bis die Waage gerade steht. Dabei kommt das Wort „Ausgleichswert" (10 ml), und es wird geklärt, dass die Gesamtmenge gleich bleibt.
   - Danach die Teams: Wer hat insgesamt mehr? Ist das ein fairer Vergleich? Die Fairness-Argumente von Marla (höchster Wert) und Monika (Summe) kommen als Auswahlkarten. Dann den automatischen Ausgleich ansehen.
-- **Teil 2 Vorhersagen:** „Wie viel ml hat jedes Kind, wenn wir gerecht verteilen?" Erst schätzen (Zahl antippen), dann prüfen.
+- **Teil 2 Vorhersagen:** „Wie viel ml hat jedes Kind, wenn wir gerecht verteilen?" Erst schätzen (Zahl antippen), dann prüfen. Hier wird „alles zusammen, dann durch die Anzahl teilen" schon vorbereitet, denn bei zwei Bechern liegt „die Hälfte" nahe, und das trägt bei 4 oder 5 Kindern nicht. Die Fehlerfalle „falsche Anzahl" kommt schon hier (Kinder als Chips mit Zähler, „Du hast durch 4 geteilt, die Mathe-Asse sind aber 5 Kinder").
 - **Teil 3 Selbst machen:** Mit der Pipette selbst ausgleichen, danach in der Säulen-Werkstatt dieselben Werte umstapeln (Heft 1c). Sieger begründen (Satzbaustein „Die Unicorns gewinnen, weil …").
 - **LZ:** 1, 4, 7. **Fehlerfallen:** Summe statt Durchschnitt (Fairness-Prüfer), Gesamtmenge nicht erhalten.
 
@@ -53,6 +53,7 @@
   - **3c Rechnung:** Die Kinder ordnen die Rechenschritte „alles zusammen" und „durch die Anzahl teilen" den Handlungen zu (Wasser zusammenschütten, Würfel stapeln, Schnur anhängen, Säulen aufeinandersetzen). Das läuft als Zuordnungsspiel (LZ2, LZ7).
 - **3d/3e:** ZORRO mit Durchschnitt 20: mehrere Lösungen per Regler, Live-Summe gegen das Ziel 100. Dazu Chris' Satz „alle haben 20 geschnippt" als Behauptung prüfen.
 - **Merkkasten:** Er erscheint nach Teil 3 als Lernkarte (Satzbausteine zum Antippen).
+- **Vom Ausgleichswert zum Durchschnitt:** Ab hier nennt das Heft den Ausgleichswert auch „Durchschnitt". Eine eigene Station verbindet die Wörter: „Der Ausgleichswert heißt auch Durchschnitt." Danach stehen beide Wörter nebeneinander, bis Aufgabe 4.
 - **LZ:** 2, 4, 5, 7.
 
 ### Aufgabe 4: Seilspringen
@@ -89,6 +90,7 @@
   - Schätzen: blaues ▲ auf die Wippe setzen.
   - Rechnen: rotes ▲ erscheint. Dann vergleichen, wie gut die Schätzung war.
 - **Ankreuz-Karten:** „Immer in der Mitte?", „Immer der häufigste Wert?", „Muss als Datenpunkt vorkommen?". Jede Karte bekommt ein Beispiel-Knopf, der den passenden Datensatz auf die Wippe legt (LZ6).
+- **Fehlvorstellung „Durchschnitt = Mitte" bewusst aufgreifen:** Beim Waage-Einstieg (zwei Becher) und bei den Unicorns (12 und 20 ergeben 16) liegt der Ausgleichswert zufällig genau in der Mitte zwischen kleinstem und größtem Wert. Hier wird das widerlegt, mit Anknüpfung an die Waage vom Anfang: Bei den Mathe-Asse liegt die Mitte bei 15,5, der Ausgleichswert ist aber 15. Bei der 6a liegt die Mitte bei 22,5, der Durchschnitt ist 21.
 
 ### Aufgabe 7: Medaillen und Brötchen
 - **Szene:** Siegerehrung mit Kisten.
@@ -101,15 +103,17 @@
 - **LZ:** 2, 4, 5.
 
 ## Querschnitt
-- **Einstiegs-Check (3–5 Aufgaben):** Wer ihn schafft, überspringt die Basis-Stationen („das haben wir schon gemacht", `docs/lernziele.md`).
-- **Vorlesen-Knopf** pro Station, keine Pflicht zum Schreiben. Antworten per Antippen oder per Diktat (LZ8).
+- **Einstiegs-Check (3–5 Aufgaben):** Wer ihn schafft, überspringt die Basis-Stationen („das haben wir schon gemacht", `docs/lernziele.md`). Er wird gebaut, sobald Aufgabe 1 bis 3 stehen (siehe Reihenfolge), denn erst dann gibt es Stationen zum Überspringen.
+- **Vorlesen-Knopf** in jeder Station jeder Aufgabe, keine Pflicht zum Schreiben. Antworten per Antippen oder per Diktat (LZ8). Bei jedem neuen Baustein gehört er zur Abnahme dazu.
+- **Waage-Grenze:** Am Ende von Aufgabe 1, Teil 1 kommt ein Satz: „Die Waage zeigt, ob zwei Becher gleich viel haben. Welches Team besser ist, zeigt sie nicht." So entsteht nicht die Idee „Waage gerade = Teams gleich gut".
+- **Schriftgröße:** Der kompakte Lernpfad nutzt teils 12–15 px (QA-Hinweis 08.11.2026). Für die 4. Klasse am iPad prüfen und, wenn nötig, lieber eine Station mehr als kleinere Schrift.
 - **Keine Daten von Kindern speichern.** Gespeichert wird höchstens die Moduswahl (`CLAUDE.md`).
 
 ## Vorgeschlagene Reihenfolge der Umsetzung
 1. Aufgabe 1 fertig: Waage-Einstieg (läuft), dann Teil 2 Vorhersage und Teil 3 Selbst machen.
 2. Säulen-Werkstatt als eigener Baustein, zuerst mit den Werten aus Aufgabe 1 (Brücke Becher → Säule).
 3. Aufgabe 2 (Würfel) nutzt die Werkstatt direkt, dazu kommt die erste Rückwärtsaufgabe (ZORRO).
-4. Aufgabe 3 (Schnur, Rechnung, Merkkasten), dann Aufgabe 4 (zeichnerisch und rechnerisch, Deutung, Rückwärts).
+4. Aufgabe 3 (Schnur, Rechnung, Merkkasten, Wort „Durchschnitt"), danach der Einstiegs-Check, dann Aufgabe 4 (zeichnerisch und rechnerisch, Deutung, Rückwärts).
 5. Häufigkeit und Wippe (Aufgaben 5 und 6), zuletzt Aufgabe 7.
 
 Ab Schritt 2 bekommt jeder Baustein zuerst einen Entwurf, den Josh freigibt (wie beim Schulfest-Entwurf). Danach geht es weiter mit Logik und Tests, Oberfläche und den Prüfern.
