@@ -53,7 +53,7 @@ if (L) {
 
     // Balkenwaage: Neigung in Grad (links schwerer = negativ, linke Seite sinkt)
     describe("waageNeigung", () => {
-      it("(14, 6) wird auf -12 Grad begrenzt", () => {
+      it("(14, 6) ergibt genau -12 Grad (8 ml mal 1,5)", () => {
         assert.equal(L.waageNeigung(14, 6), -12);
       });
       it("(11, 9) ist -3 Grad", () => {
@@ -104,6 +104,12 @@ if (L) {
       });
       it("ungültiger Index gibt null", () => {
         assert.equal(L.umgiessen([14, 6], 2), null);
+        assert.equal(L.umgiessen([14, 6], -1), null);
+      });
+      it("Array-Länge ungleich 2 gibt null", () => {
+        assert.equal(L.umgiessen([14], 0), null);
+        assert.equal(L.umgiessen([14, 6, 4], 0), null);
+        assert.equal(L.umgiessen([], 0), null);
       });
       it("viermal von 0 gibt [10, 10], Waage steht gerade", () => {
         let w = [14, 6];

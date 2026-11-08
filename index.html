@@ -204,6 +204,8 @@
       font-size: 1.1rem; line-height: 1.4;
     }
     .lp-tipp-text strong { font-weight: 800; color: var(--text); }
+    .lp-tipp-liste { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+    .lp-tipp-liste:empty { display: none; }
 
     .teams-grid {
       display: grid;
@@ -488,6 +490,13 @@
     }
     .lp-knopf.zweit { background: var(--sekundaer); }
     .lp-knopf.warning { background: var(--warn); }
+    /* Willkommen: ein großer Hauptknopf, Freies Labor klein und schlicht */
+    .lp-knopf.gross { width: 100%; min-height: 64px; font-size: 1.35rem; }
+    .willkommen-labor { margin-top: 14px; text-align: center; }
+    .lp-knopf.labor-klein {
+      min-height: 44px; padding: 8px 16px; font-size: 0.95rem; font-weight: 600;
+      background: var(--card); color: var(--text); border: 2px solid var(--kontur);
+    }
 
     .btn-modus { margin-left: auto; min-height: 48px; }
 
@@ -556,7 +565,57 @@
     .lp-knopf.waage-giessen { min-height: 56px; font-weight: 700; flex: 1 1 220px; }
     /* Spoiler-Regel: Summen-Badges verstecken (Platz bleibt, nichts springt) */
     body.lp-summe-aus #sum-u, body.lp-summe-aus #sum-m { visibility: hidden; }
-    body.lernpfad { padding-bottom: 120px; }
+    /* ===== Lernpfad kompakt: alles ohne Scrollen über der festen Fußleiste (nur Lernpfad) ===== */
+    body.lernpfad { padding-bottom: 96px; }
+    body.lernpfad header {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin: 8px auto 0; width: calc(100% - 32px); padding: 6px 14px; border-radius: 16px;
+    }
+    body.lernpfad header h1 { margin: 0; font-size: 1.15rem; }
+    body.lernpfad header > div { margin-top: 0 !important; }
+    body.lernpfad .btn-modus { min-height: 44px; padding: 6px 14px; font-size: 0.95rem; }
+    body.lernpfad main {
+      display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px 14px; align-items: start; padding: 10px 16px;
+    }
+    body.lernpfad .lp-rahmen { margin-bottom: 0; padding: 10px 16px; }
+    body.lernpfad .lp-leitfrage { margin: 0 0 6px 0; font-size: 0.95rem; }
+    body.lernpfad .lp-teile { margin: 0 0 8px 0; gap: 6px; }
+    body.lernpfad .lp-teil { padding: 2px 10px; font-size: 0.85rem; }
+    body.lernpfad .lp-titel { margin: 0 0 6px 0; font-size: 1.15rem; }
+    body.lernpfad .lp-auftrag { padding: 8px 14px; font-size: 1.05rem; }
+    body.lernpfad .lp-auftrag-kopf { font-size: 0.85rem; margin-bottom: 2px; }
+    body.lernpfad .lp-optionen { margin-top: 8px; gap: 6px; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+    body.lernpfad .lp-option { min-height: 44px; padding: 6px 12px; }
+    body.lernpfad .lp-rueckmeldung, body.lernpfad .lp-erklaerung { margin-top: 8px; padding: 8px 12px; }
+    body.lernpfad .lp-tipps { margin-top: 8px; gap: 8px; flex-direction: row; align-items: flex-start; flex-wrap: wrap; }
+    body.lernpfad .lp-tipp-liste { flex: 1 1 200px; width: auto; gap: 6px; }
+    body.lernpfad .lp-tipp-text { padding: 6px 12px; font-size: 0.95rem; line-height: 1.3; border-width: 2px; }
+    body.lernpfad button.lp-tipp { min-height: 56px; padding: 6px 18px; font-size: 1.1rem; }
+    body.lernpfad .lp-erklaerung { font-size: 0.95rem; line-height: 1.35; }
+    body.lernpfad .lp-erklaerung p { margin: 0 0 4px 0; }
+    body.lernpfad .team-card > div[style] { margin-top: 4px !important; }
+    body.lernpfad .team-header { padding: 2px 10px; margin-bottom: 6px; }
+    body.lernpfad .team-card { padding: 8px; }
+    body.lernpfad .cup-container { padding: 4px; }
+    body.lernpfad .team-card .cup-shell { height: 76px; }
+    body.lernpfad .button-row { margin-top: 10px; }
+    body.lernpfad .aktions-meldung { margin-top: 6px; padding: 6px 12px; }
+    body.lernpfad .waage-buehne { margin-bottom: 0; }
+    body.lernpfad .teams-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    body.lernpfad .team-card { padding: 10px; margin-bottom: 0; }
+    body.lernpfad .team-header { margin: -10px -10px 8px -10px; padding: 4px 10px; }
+    body.lernpfad .team-header h2 { font-size: 1.05rem; padding: 2px 12px; }
+    body.lernpfad .team-card > div[style] { margin-top: 8px !important; }
+    body.lernpfad .cup-container { padding: 8px 4px; gap: 6px; }
+    body.lernpfad .team-card .cup-item { width: 56px; gap: 2px; }
+    body.lernpfad .team-card .cup-name { font-size: 0.75rem; }
+    body.lernpfad .team-card .cup-shell { width: 44px; height: 84px; }
+    @media (orientation: landscape) and (min-width: 900px) {
+      body.lernpfad main { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); }
+      body.lernpfad .lp-rahmen { grid-column: 1; grid-row: 1; }
+      body.lernpfad .waage-buehne, body.lernpfad .teams-grid { grid-column: 2; grid-row: 1; }
+      body.lernpfad .teams-grid { grid-template-columns: 1fr; }
+    }
 
     .lp-rahmen {
       background: var(--card);
@@ -899,12 +958,14 @@
   <div id="willkommen" class="willkommen" role="dialog" aria-modal="true" aria-labelledby="willkommen-titel" hidden>
     <div class="willkommen-karte">
       <h2 id="willkommen-titel">Willkommen in der Mathewelt! 💧</h2>
-      <p>Zwei Teams haben Wasser in ihren Bechern, aber nicht alle gleich viel. Finde heraus, wie man das Wasser gerecht aufteilt.</p>
+      <p>Hier geht es um Wasser in Bechern. Finde heraus, wie man es gerecht aufteilt.</p>
       <div class="button-row">
-        <button class="lp-knopf" onclick="modusWaehlen('lernpfad')">Los geht's!</button>
-        <button class="lp-knopf zweit" onclick="modusWaehlen('labor')">Freies Labor</button>
+        <button class="lp-knopf gross" onclick="modusWaehlen('lernpfad')">Los geht's!</button>
       </div>
-      <p class="willkommen-klein">„Los geht's" führt dich Schritt für Schritt. Im Freien Labor probierst du alles selbst aus.</p>
+      <p class="willkommen-klein">„Los geht's" führt dich Schritt für Schritt.</p>
+      <div class="willkommen-labor">
+        <button class="lp-knopf labor-klein" onclick="modusWaehlen('labor')">Freies Labor (für Lehrkräfte)</button>
+      </div>
     </div>
   </div>
 
@@ -1572,7 +1633,8 @@
         auftrag: () => "Jetzt haben beide Becher gleich viel. Wie viel Wasser ist es <strong>zusammen</strong>?",
         inhalt: () => lpFrage("zusammen", ["10 ml", "20 ml", "14 ml"], 1,
           `Richtig. Es ist immer noch ${summe(lpWaage)} ml. Es ging kein Wasser verloren.`,
-          "Zähle das Wasser beider Becher zusammen.")
+          { 0: "10 ml ist in einem Becher. Wie viele Becher sind es?",
+            2: "14 ml hatte Becher A am Anfang. Zähle beide Becher zusammen." })
           + (lpAntworten.zusammen === 1 ? `
           <div class="lp-erklaerung">
             <strong>Neues Wort: Ausgleichswert</strong><br>
@@ -1586,7 +1648,7 @@
         teil: 0,
         zeige: "teams",
         titel: "Die Becher ansehen",
-        auftrag: () => "Jetzt sind es mehr Becher: zwei Teams. Schau dir die Becher beider Teams an. Welches Team hat <strong>insgesamt</strong> mehr Wasser?",
+        auftrag: () => "Jetzt hat jedes Kind einen Becher. Welches Team hat <strong>insgesamt</strong> mehr Wasser?",
         inhalt: () => lpFrage("mehr", ["Unicorns", "Mathe-Asse", "Beide gleich viel"], lpRichtigesTeam(),
           `Genau. Die Mathe-Asse haben zusammen ${summe(data.m.values)} ml, die Unicorns ${summe(data.u.values)} ml.`,
           "Rechne das Wasser jedes Teams zusammen. Der Tipp-Knopf hilft dir."),
@@ -1600,7 +1662,7 @@
         teil: 0,
         zeige: "teams",
         titel: "Gerecht verteilen",
-        auftrag: () => "Tippe auf <strong>„Mathematisch exakt ausgleichen“</strong>. Schau genau hin: Was passiert mit dem Wasser in den Bechern?",
+        auftrag: () => "Tippe auf <strong>„Mathematisch exakt ausgleichen“</strong>.",
         summe: "nein",
         inhalt: () => `<div class="button-row"><button class="lp-knopf warning" onclick="equalizeAll()">Mathematisch exakt ausgleichen</button></div>`,
         sperre: () => (istAusgeglichen(data.u.values) && istAusgeglichen(data.m.values))
@@ -1611,13 +1673,13 @@
         zeige: "teams",
         titel: "Was ist gleich geblieben?",
         summe: "tipp",
-        tipps: ["Weißt du noch, wie viel Wasser jedes Team am Anfang zusammen hatte? Das stand nach Schritt 1 unter den Bechern.",
+        tipps: ["Weißt du noch, wie viel Wasser jedes Team am Anfang zusammen hatte?",
                 "Unter den Bechern steht jetzt die Summe nach dem Ausgleichen. Vergleiche sie mit vorher."],
         geloest: () => lpAntworten.gleich === 0,
         auftrag: () => "Jetzt hat in jedem Team jedes Kind gleich viel. Was ist beim Ausgleichen <strong>gleich geblieben</strong>?",
         inhalt: () => lpFrage("gleich", ["Die Summe des Teams", "Die Menge in jedem Becher", "Nichts ist gleich geblieben"], 0,
           "Richtig. Es geht kein Wasser verloren. Es wird nur anders verteilt.",
-          "Denk an die Summe vom Anfang. Der Tipp-Knopf hilft dir.")
+          "Was ist vorher und nachher gleich? Der Tipp-Knopf hilft dir.")
           + (lpAntworten.gleich === 0 ? `
           <div class="lp-erklaerung">
             <strong>Wieder der Ausgleichswert</strong><br>
@@ -1636,12 +1698,19 @@
         auftrag: () => "",
         inhalt: () => `
           <p>Du hast <strong>beobachtet</strong>: Beim Ausgleichen bleibt die Summe gleich. Jedes Kind bekommt den Ausgleichswert.</p>
-          <p class="lp-erklaerung">Als Nächstes: Kannst du den Ausgleichswert <strong>vorher</strong> ausrechnen? Teil 2 kommt bald.
+          <p class="lp-erklaerung">Als Nächstes rechnest du den Ausgleichswert <strong>vorher</strong> aus.
           Bis dahin kannst du im Freien Labor selbst Wasser umfüllen.</p>
           <div class="button-row"><button class="lp-knopf" onclick="modusWaehlen('labor')">Zum Freien Labor</button></div>`,
         sperre: () => null
       }
     ];
+
+    // "textNochmal" ist ein String (für alle falschen Optionen) oder ein Objekt {Index: Text}
+    // mit eigener Rückmeldung pro falscher Option (erst die Vermutung des Kindes aufnehmen).
+    function lpNochmalText(textNochmal, gewaehlt) {
+      if (typeof textNochmal === "string") return textNochmal;
+      return textNochmal[gewaehlt] || "Probiere es noch einmal.";
+    }
 
     // Auswahlfrage mit Rückmeldung als Text (richtig: Bestätigung, falsch: Denkanstoß)
     function lpFrage(schluessel, optionen, richtig, textRichtig, textNochmal) {
@@ -1653,7 +1722,7 @@
       if (gewaehlt !== undefined) {
         rueckmeldung = gewaehlt === richtig
           ? `<p class="lp-rueckmeldung richtig">✓ ${textRichtig}</p>`
-          : `<p class="lp-rueckmeldung nochmal">↻ ${textNochmal}</p>`;
+          : `<p class="lp-rueckmeldung nochmal">↻ ${lpNochmalText(textNochmal, gewaehlt)}</p>`;
       }
       return `<div class="lp-optionen">${knoepfe}</div><div aria-live="polite">${rueckmeldung}</div>`;
     }
@@ -1685,7 +1754,7 @@
       const meldung = document.getElementById("waage-meldung");
       const neu = umgiessen(lpWaage, von);
       if (!neu) {
-        meldung.textContent = lpWaage[von] < 1 ? "Aus einem leeren Becher kann nichts fließen." : "Der Becher ist schon voll.";
+        meldung.textContent = lpWaage[von] < 1 ? "Aus einem leeren Becher kann nichts fließen." : "Der andere Becher ist schon voll.";
         return;
       }
       lpWaage = neu;
@@ -1707,13 +1776,14 @@
     function lpTippsHtml(st) {
       const alle = st.tipps || [];
       if (!alle.length) return "";
+      if (st.geloest && st.geloest()) return ""; // richtig beantwortet: Tipps nicht mehr nötig
       const genutzt = lpTipps[lpSchritt] || 0;
       const texte = alle.slice(0, genutzt)
         .map((t, i) => `<p class="lp-tipp-text"><strong>Tipp ${i + 1}:</strong> ${t}</p>`).join("");
       const knopf = genutzt >= alle.length
         ? `<button class="lp-tipp" disabled>Keine Tipps mehr</button>`
         : `<button class="lp-tipp" onclick="lpTipp()">💡 Tipp</button>`;
-      return `<div class="lp-tipps" aria-live="polite">${texte}${knopf}</div>`;
+      return `<div class="lp-tipps" aria-live="polite"><div class="lp-tipp-liste">${texte}</div>${knopf}</div>`;
     }
 
     function lpZeigen() {
