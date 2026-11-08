@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entwurf – Mathewelt Schulfest (Sommerwiese)</title>
+<style>
+  :root {
+    --himmel-oben: #D9F0FF;
+    --himmel-unten: #FFF3D6;
+    --wiese: #7CC36B;
+    --krone: #3F9E5A;
+    --stamm: #8A5A3B;
+    --holz: #E0B070;
+    --text: #1F2937;
+    --karte: #FFFFFF;
+    --u: #6D28D9;
+    --m: #F5B02E;
+    --wasser: #3B9DF0;
+    --wasser-rand: #1D6FB8;
+    --primaer: #1F7A45;
+    /* zusätzlich */
+    --text-leise: #4B5563;      /* auf Weiß 7,6 zu 1 */
+    --karte-rand: #B7C9B0;      /* nur Zierrand */
+    --kontur: #2F4A3A;          /* Umrisse in der Szene */
+    --weg: #F1DFA8;             /* Parcours-Pfad, nur Deko */
+    --huetchen: #E8743B;        /* Hütchen, nur Deko */
+    --weiss: #FFFFFF;
+    --rueck-hell: #F3F8F1;      /* Hintergrund der Rückmeldung */
+    --rosa: #F29EB8;            /* Wimpel, nur Deko */
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, "Segoe UI", sans-serif;
+    color: var(--text);
+    background: var(--wiese);
+    font-size: 18px;
+    line-height: 1.4;
+    overflow-x: hidden;
+  }
+  .szene { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  .seite { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 16px; }
+  .hinweis {
+    display: inline-block; background: var(--karte); border: 3px solid var(--kontur);
+    border-radius: 999px; padding: 8px 18px; font-weight: 700; margin: 0 0 14px;
+  }
+  .raster { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  @media (min-width: 900px) {
+    .raster { grid-template-columns: 1.15fr 1fr; align-items: start; }
+    .spalte-rechts { display: grid; gap: 16px; }
+  }
+  .spalte-rechts { display: grid; gap: 16px; }
+  .karte {
+    background: var(--karte); border: 3px solid var(--kontur); border-radius: 24px;
+    padding: 18px 20px; box-shadow: 0 5px 0 var(--karte-rand);
+  }
+  h1, h2 { margin: 0 0 8px; line-height: 1.2; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+  p { margin: 0 0 12px; }
+  .auftrag { font-size: 1.3rem; font-weight: 600; }
+  .knopfreihe { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  button {
+    font: inherit; font-weight: 700; cursor: pointer; min-height: 48px; min-width: 48px;
+    padding: 10px 22px; border-radius: 16px; border: 3px solid var(--kontur);
+    touch-action: manipulation;
+  }
+  button:focus-visible { outline: 4px solid var(--wasser-rand); outline-offset: 3px; }
+  .btn-weiter { background: var(--primaer); color: var(--weiss); font-size: 1.2rem; min-height: 56px; padding: 10px 34px; }
+  .btn-vorlesen { background: var(--karte); color: var(--text); }
+  .btn-tipp { background: var(--holz); color: var(--text); font-size: 1.3rem; min-height: 56px; min-width: 56px; padding: 12px 30px; }
+  .btn-tipp[disabled] { background: var(--karte); color: var(--text-leise); cursor: default; }
+
+  /* Teams */
+  .teams { display: grid; gap: 14px; }
+  .team { padding: 14px 14px 12px; border: 3px solid var(--kontur); }
+  .team-u { background: var(--u); color: var(--weiss); border-radius: 30px; }
+  .team-m { background: var(--m); color: var(--text); border-radius: 8px 28px 8px 28px; }
+  .team-kopf {
+    display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.15rem;
+    padding: 6px 16px; margin-bottom: 10px; background: var(--karte); color: var(--text);
+  }
+  .team-u .team-kopf { border-radius: 999px; border: 3px solid var(--kontur); }
+  .team-m .team-kopf { border-radius: 4px; border: 3px dashed var(--kontur); }
+  .becher-reihe { display: flex; flex-wrap: wrap; gap: 8px 14px; background: var(--karte); color: var(--text); border: 3px solid var(--kontur); border-radius: 18px; padding: 10px 12px; }
+  .becher { display: flex; flex-direction: column; align-items: center; width: 62px; margin: 0; }
+  .becher svg { width: 58px; height: 88px; display: block; }
+  .becher figcaption { font-weight: 800; font-size: 1.05rem; margin-top: 2px; }
+
+  /* Tipps */
+  .rueck { background: var(--rueck-hell); border: 2px solid var(--karte-rand); border-radius: 16px; padding: 12px 14px; margin: 0 0 12px; font-weight: 600; }
+  .tipps { margin: 0 0 12px; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .tipps li { background: var(--karte); border: 3px solid var(--kontur); border-radius: 14px; padding: 10px 14px; }
+  .tipps b { color: var(--text); font-weight: 800; }
+
+  /* Palette */
+  .palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; margin-top: 14px; }
+  .farbe { display: flex; align-items: center; gap: 10px; }
+  .muster { flex: none; width: 48px; height: 48px; border-radius: 12px; border: 3px solid var(--kontur); }
+  .farbe span { display: block; }
+  .farbe .hex { color: var(--text-leise); font-size: 0.95rem; }
+  .unten { margin-top: 16px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+  <!-- Szene: Parcours mit Wasserbecher (nur Deko) -->
+  <svg class="szene" aria-hidden="true" focusable="false" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="himmel" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" style="stop-color:var(--himmel-oben)"/>
+        <stop offset="1" style="stop-color:var(--himmel-unten)"/>
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="800" fill="url(#himmel)"/>
+    <g fill="none" stroke="var(--kontur)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+      <!-- Wimpelkette -->
+      <path d="M-10 90 Q300 190 600 110 T1210 120"/>
+    </g>
+    <g stroke="var(--kontur)" stroke-width="4" stroke-linejoin="round">
+      <polygon points="80,128 130,134 100,176" fill="var(--rosa)"/>
+      <polygon points="230,152 280,152 255,196" fill="var(--holz)"/>
+      <polygon points="390,152 440,146 418,192" fill="var(--primaer)"/>
+      <polygon points="560,122 610,116 590,162" fill="var(--huetchen)"/>
+      <polygon points="740,120 790,126 760,168" fill="var(--rosa)"/>
+      <polygon points="900,128 950,134 922,176" fill="var(--holz)"/>
+      <polygon points="1060,134 1110,128 1086,176" fill="var(--primaer)"/>
+    </g>
+    <!-- Hügel -->
+    <path d="M0 520 Q300 400 620 470 T1200 440 V800 H0 Z" fill="var(--wiese)" stroke="var(--kontur)" stroke-width="5" stroke-linejoin="round"/>
+    <!-- Pfad -->
+    <path d="M-20 720 Q250 600 520 660 T1000 560 T1220 600" fill="none" stroke="var(--weg)" stroke-width="46" stroke-linecap="round"/>
+    <!-- Hütchen -->
+    <g stroke="var(--kontur)" stroke-width="4" stroke-linejoin="round">
+      <polygon points="300,640 324,590 348,640" fill="var(--huetchen)"/>
+      <polygon points="640,660 664,610 688,660" fill="var(--huetchen)"/>
+      <polygon points="940,590 964,540 988,590" fill="var(--huetchen)"/>
+    </g>
+    <!-- Bäume -->
+    <g stroke="var(--kontur)" stroke-width="5" stroke-linejoin="round">
+      <rect x="132" y="430" width="34" height="100" rx="8" fill="var(--stamm)"/>
+      <circle cx="149" cy="400" r="80" fill="var(--krone)"/>
+      <rect x="1062" y="400" width="30" height="90" rx="8" fill="var(--stamm)"/>
+      <circle cx="1077" cy="372" r="68" fill="var(--krone)"/>
+    </g>
+  </svg>
+
+  <!-- Becherform für alle Becher (einmal definiert) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs><clipPath id="becherform"><path d="M6 10 H54 L48 80 H12 Z"/></clipPath></defs>
+  </svg>
+
+  <main class="seite">
+    <p class="hinweis">Entwurf – nur Ansicht</p>
+
+    <div class="raster">
+      <section class="karte teams-karte" aria-labelledby="t-titel">
+        <h2 id="t-titel">Die Becher der Teams</h2>
+        <div class="teams">
+          <div class="team team-u">
+            <div class="team-kopf">
+              <svg width="22" height="28" viewBox="0 0 22 28" aria-hidden="true" focusable="false"><polygon points="11,1 19,26 3,26" fill="var(--u)" stroke="var(--kontur)" stroke-width="2" stroke-linejoin="round"/><path d="M6 17 L16 13 M8 10 L14 8" stroke="var(--karte)" stroke-width="2" fill="none"/></svg>
+              Unicorns · 4 Kinder
+            </div>
+            <div class="becher-reihe">
+              <figure class="becher"><svg viewBox="0 0 60 90" aria-hidden="true"><rect x="0" y="27.5" width="60" height="55" fill="var(--wasser)" clip-path="url(#becherform)"/><line x1="0" y1="27.5" x2="60" y2="27.5" stroke="var(--wasser-rand)" stroke-width="3" clip-path="url(#becherform)"/><path d="M6 10 H54 L48 80 H12 Z" fill="none" stroke="var(--kontur)" stroke-width="3" stroke-linejoin="round"/></svg><figcaption>15 ml</figcaption></figure>
+              <figure class="becher"><svg viewBox="0 0 60 90" aria-hidden="true"><rect x="0" y="20.5" width="60" height="62" fill="var(--wasser)" clip-path="url(#becherform)"/><line x1="0" y1="20.5" x2="60" y2="20.5" stroke="var(--wasser-rand)" stroke-width="3" clip-path="url(#becherform)"/><path d="M6 10 H54 L48 80 H12 Z" fill="none" stroke="var(--kontur)" stroke-width="3" stroke-linejoin="round"/></svg><figcaption>17 ml</figcaption></figure>
+              <figure class="becher"><svg viewBox="0 0 60 90" aria-hidden="true"><rect x="0" y="38" width="60" height="45" fill="var(--wasser)" clip-path="url(#becherform)"/><line x1="0" y1="38" x2="60" y2="38" stroke="var(--wasser-rand)" stroke-width="3" clip-path="url(#becherform)"/><path d="M6 10 H54 L48 80 H12 Z" fill="none" stroke="var(--kontur)" stroke-width="3" stroke-linejoin="round"/></svg><figcaption>12 ml</figcaption></figure>
+              <figure class="becher"><svg viewBox="0 0 60 90" aria-hidden="true"><rect x="0" y="10" width="60" height="73" fill="var(--wasser)" clip-path="url(#becherform)"/><line x1="0" y1="10" x2="60" y2="10" stroke="var(--wasser-rand)" stroke-width="3" clip-path="url(#becherform)"/><path d="M6 10 H54 L48 80 H12 Z" fill="none" stroke="var(--kontur)" stroke-width="3" stroke-linejoin="round"/></svg><figcaption>20 ml</figcaption></figure>
+            </div>
+          </div>
+
+          <div class="team team-m">
+            <div class="team-kopf"><span aria-hidden="true">⭐</span> Mathe-Asse · 5 Kinder</div>
+            <div class="becher-reihe">
+              <figure class="becher"><svg viewBox="0 0 60 90" aria-hidden="true"><rect x="0" y="34.5" width="60" height="48" fill="var(--wasser)" clip-path="url(#becherform)"/><line x1="0" y1="34.5" x2="60" y2="34.5" stroke="var(--wasser-rand)" stroke-width="3" clip-path="url(#becherform)"/><path d="M6 10 H54 L48 80 H12 Z" fill="none" stroke="var(--kontur)" stroke-width="3" stroke-linejoin="round"/></svg><figcaption>13 ml</figcaption></figure>
+              <figure class="becher"><svg viewBox="0 0 60 90" aria-hidden="true"><rect x="0" y="27.5" width="60" height="55" fill="var(--wasser)" clip-path="url(#becherform)"/><line x1="0" y1="27.5" x2="60" y2="27.5" stroke="var(--wasser-rand)" stroke-width="3" clip-path="url(#becherform)"/><path d="M6 10 H54 L48 80 H12 Z" fill="none" stroke="var(--kontur)" stroke-width="3" stroke-linejoin="round"/></svg><figcaption>15 ml</figcaption></figure>
+              <figure class="becher"><svg viewBox="0 0 60 90" aria-hidden="true"><rect x="0" y="27.5" width="60" height="55" fill="var(--wasser)" clip-path="url(#becherform)"/><line x1="0" y1="27.5" x2="60" y2="27.5" stroke="var(--wasser-rand)" stroke-width="3" clip-path="url(#becherform)"/><path d="M6 10 H54 L48 80 H12 Z" fill="none" stroke="var(--kontur)" stroke-width="3" stroke-linejoin="round"/></svg><figcaption>15 ml</figcaption></figure>
+              <figure class="becher"><svg viewBox="0 0 60 90" aria-hidden="true"><rect x="0" y="31" width="60" height="52" fill="var(--wasser)" clip-path="url(#becherform)"/><line x1="0" y1="31" x2="60" y2="31" stroke="var(--wasser-rand)" stroke-width="3" clip-path="url(#becherform)"/><path d="M6 10 H54 L48 80 H12 Z" fill="none" stroke="var(--kontur)" stroke-width="3" stroke-linejoin="round"/></svg><figcaption>14 ml</figcaption></figure>
+              <figure class="becher"><svg viewBox="0 0 60 90" aria-hidden="true"><rect x="0" y="17" width="60" height="66" fill="var(--wasser)" clip-path="url(#becherform)"/><line x1="0" y1="17" x2="60" y2="17" stroke="var(--wasser-rand)" stroke-width="3" clip-path="url(#becherform)"/><path d="M6 10 H54 L48 80 H12 Z" fill="none" stroke="var(--kontur)" stroke-width="3" stroke-linejoin="round"/></svg><figcaption>18 ml</figcaption></figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="spalte-rechts">
+        <section class="karte" aria-labelledby="a-titel">
+          <h1 id="a-titel">Station 1: Wasser-Parcours</h1>
+          <p class="auftrag">Gleiche das Wasser in jedem Team aus. Welches Team ist besser?</p>
+          <div class="knopfreihe">
+            <button type="button" class="btn-vorlesen" aria-label="Auftrag vorlesen"><span aria-hidden="true">🔊</span> Vorlesen</button>
+            <button type="button" class="btn-weiter">Weiter</button>
+          </div>
+        </section>
+
+        <section class="karte" aria-labelledby="h-titel">
+          <h2 id="h-titel">Ich komme nicht weiter</h2>
+          <p class="rueck" role="status">Das ist nicht leicht. Ich helfe dir Schritt für Schritt.</p>
+          <ul class="tipps" id="tipps" aria-live="polite"></ul>
+          <button type="button" class="btn-tipp" id="tippknopf">Tipp</button>
+        </section>
+      </div>
+    </div>
+
+    <section class="karte unten" aria-labelledby="p-titel">
+      <h2 id="p-titel">Entwurf: Farben</h2>
+      <div class="palette">
+        <div class="farbe"><i class="muster" style="background:var(--himmel-oben)"></i><div><span>Himmel oben</span><span class="hex">#D9F0FF</span></div></div>
+        <div class="farbe"><i class="muster" style="background:var(--himmel-unten)"></i><div><span>Himmel unten</span><span class="hex">#FFF3D6</span></div></div>
+        <div class="farbe"><i class="muster" style="background:var(--wiese)"></i><div><span>Wiese</span><span class="hex">#7CC36B</span></div></div>
+        <div class="farbe"><i class="muster" style="background:var(--krone)"></i><div><span>Baumkrone</span><span class="hex">#3F9E5A</span></div></div>
+        <div class="farbe"><i class="muster" style="background:var(--stamm)"></i><div><span>Stamm</span><span class="hex">#8A5A3B</span></div></div>
+        <div class="farbe"><i class="muster" style="background:var(--holz)"></i><div><span>Holz</span><span class="hex">#E0B070</span></div></div>
+        <div class="farbe"><i class="muster" style="background:var(--text)"></i><div><span>Text</span><span class="hex">#1F2937</span></div></div>
+        <div class="farbe"><i class="muster" style="background:var(--karte)"></i><div><span>Karte</span><span class="hex">#FFFFFF</span></div></div>
+        <div class="farbe"><i class="muster" style="background:var(--u)"></i><div><span>Unicorns</span><span class="hex">#6D28D9</span></div></div>
+        <div class="farbe"><i class="muster" style="background:var(--m)"></i><div><span>Mathe-Asse</span><span class="hex">#F5B02E</span></div></div>
+        <div class="farbe"><i class="muster" style="background:var(--wasser)"></i><div><span>Wasser</span><span class="hex">#3B9DF0</span></div></div>
+        <div class="farbe"><i class="muster" style="background:var(--wasser-rand)"></i><div><span>Wasser-Rand</span><span class="hex">#1D6FB8</span></div></div>
+        <div class="farbe"><i class="muster" style="background:var(--primaer)"></i><div><span>Hauptknopf „Weiter“</span><span class="hex">#1F7A45</span></div></div>
+        <div class="farbe"><i class="muster" style="background:var(--text-leise)"></i><div><span>Text leise</span><span class="hex">#4B5563</span></div></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      var tipps = [
+        "Schütte Wasser aus einem vollen Becher in einen Becher mit wenig Wasser.",
+        "Mach es bei den Mathe-Assen genauso. Was fällt dir an der Wasserhöhe auf?"
+      ];
+      var n = 0;
+      var knopf = document.getElementById("tippknopf");
+      var liste = document.getElementById("tipps");
+      knopf.addEventListener("click", function () {
+        if (n >= tipps.length) return;
+        var li = document.createElement("li");
+        var b = document.createElement("b");
+        b.textContent = "Tipp " + (n + 1) + ": ";
+        li.appendChild(b);
+        li.appendChild(document.createTextNode(tipps[n]));
+        liste.appendChild(li);
+        n++;
+        if (n >= tipps.length) {
+          knopf.textContent = "Keine Tipps mehr";
+          knopf.disabled = true;
+        } else {
+          knopf.textContent = "Noch ein Tipp";
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
