@@ -23,6 +23,12 @@
       --weg: #F1DFA8;         /* nur Deko */
       --huetchen: #E8743B;    /* nur Deko */
       --rosa: #F29EB8;        /* nur Deko */
+      /* Säulen-Werkstatt (Entwurf vorlage/entwurf-saeulen.html) */
+      --kaestchen: #DDD0F7;       /* Kästchen, mit dunkler Kontur */
+      --kaestchen-fuenf: #BFA9EE; /* jedes 5. Kästchen etwas dunkler (Zählhilfe) */
+      --hand: #FFE08A;            /* aufgenommenes Kästchen */
+      --einh: clamp(10px, 1.8vh, 20px); /* Höhe von 1 Kästchen (1 ml) */
+      --nameh: 48px;              /* Platz für Namen unter den Säulen */
       --weiss: #FFFFFF;
       /* Hilfsfarben (Schatten, Schleier) */
       --schatten: rgba(15, 23, 42, 0.05);
@@ -563,6 +569,87 @@
     @media (max-height: 860px) { .waage-buehne { zoom: .85; } }
     @media (prefers-reduced-motion: reduce) { .waage-balken, .waage-ende { transition: none; } }
     .lp-knopf.waage-giessen { min-height: 56px; font-weight: 700; flex: 1 1 220px; }
+    /* Säulen-Werkstatt (Teil 2 und 3): nur Grundstruktur, Feinschliff macht der gui-designer */
+    body:not(.lp-zeige-saeulen) #saeulen-buehne { display: none; }
+    body.lernpfad.lp-zeige-saeulen .teams-grid { display: none; }
+    .saeulen-buehne { background: var(--card); border: 3px solid var(--kontur); border-radius: 18px; padding: 10px; margin: 0 auto 16px; max-width: 560px; width: 100%; box-sizing: border-box; }
+    .saeulen-leiste { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 8px; }
+    .saeulen-leiste .seg { display: inline-flex; }
+    .saeulen-leiste .seg[hidden] { display: none; }
+    .saeulen-leiste button { min-height: 48px; min-width: 48px; padding: 8px 14px; border: 3px solid var(--kontur); border-radius: 0; margin-left: -3px; background: var(--card); color: var(--text); font: inherit; font-weight: 700; cursor: pointer; touch-action: manipulation; }
+    .saeulen-leiste button:first-child { border-radius: 16px 0 0 16px; margin-left: 0; }
+    .saeulen-leiste button:last-child { border-radius: 0 16px 16px 0; }
+    .saeulen-leiste button[aria-pressed="true"] { background: var(--primaer); color: var(--weiss); }
+    .saeulen-leiste button[aria-pressed="true"]::before { content: "\2713\00a0"; }
+    .saeulen-leiste button:disabled { background: var(--flaeche); color: var(--text-leise); cursor: default; }
+    .saeulen-leiste button:focus-visible, .saeule:focus-visible { outline: 4px solid var(--wasser-rand); outline-offset: 3px; }
+    .saeulen-plot { display: grid; grid-template-columns: 46px 1fr; margin-top: 12px; }
+    .saeulen-achse { position: relative; height: calc(var(--einh) * 20 + var(--nameh)); }
+    .saeulen-achse .ml { position: absolute; top: -10px; left: 0; font-weight: 800; font-size: 0.85rem; line-height: 1.2; }
+    .saeulen-achse span.zahl { position: absolute; right: 6px; transform: translateY(50%); font-weight: 700; font-size: 0.95rem; bottom: calc(var(--nameh) + var(--einh) * var(--v)); }
+    .saeulen-gitter { position: absolute; left: 0; right: 0; top: 0; bottom: var(--nameh); pointer-events: none; }
+    .saeulen-gitter i { position: absolute; left: 0; right: 0; height: 0; border-top: 2px solid var(--line); bottom: calc(var(--einh) * var(--v)); }
+    .saeulen-gitter i.null { border-top: 3px solid var(--kontur); }
+    .saeulen-feld { position: relative; height: calc(var(--einh) * 20 + var(--nameh)); }
+    .saeulen-spalten { position: relative; z-index: 1; display: flex; gap: 6px; height: 100%; }
+    .saeule { position: relative; flex: 1; min-width: 44px; height: 100%; padding: 0 2px; display: flex; flex-direction: column; background: transparent; border: 3px solid transparent; border-radius: 12px; cursor: pointer; font: inherit; color: var(--text); touch-action: manipulation; }
+    .saeule[aria-pressed="true"] { background: var(--rueck-hell); border: 3px dashed var(--kontur); }
+    .saeule:disabled { cursor: default; opacity: 1; transform: none; }
+    /* gesperrte Säule (Schätzen, Gleichstand): normal aussehen, nur nicht reagieren; Rahmen nur für die gewählte Säule */
+    .saeule:disabled[aria-pressed="false"] { background: transparent; border: 3px solid transparent; color: var(--text); }
+    .saeule:hover { opacity: 1; transform: none; }
+    #saeulen-meldung { border-color: var(--karte-rand); background: var(--rueck-hell); color: var(--text); }
+    #saeulen-meldung.warnt { border-color: var(--warn-rand); background: var(--warn-hell); color: var(--warn-text); }
+    .saeule .stapel { height: calc(var(--einh) * 20); display: flex; flex-direction: column-reverse; align-items: center; }
+    .saeule .k { flex: none; width: 72%; max-width: 70px; height: var(--einh); background: var(--kaestchen); border: 2px solid var(--kontur); border-radius: 3px; box-sizing: border-box; }
+    .saeule .k:nth-child(5n) { background: var(--kaestchen-fuenf); }
+    .saeule .k.hand { background: var(--hand); border-width: 3px; transform: translateY(-10px); }
+    .saeule .name { height: var(--nameh); display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; line-height: 1.15; margin-top: auto; }
+    .saeule .ab { font-size: 0.8rem; border: 2px solid var(--kontur); border-radius: 6px; padding: 0 5px; background: var(--hand); }
+    .saeulen-linie { position: absolute; left: 0; right: 0; height: 0; border-top: 4px dashed var(--linie); bottom: calc(var(--nameh) + var(--einh) * var(--v)); pointer-events: none; z-index: 2; }
+    .saeulen-linie b { position: absolute; right: 2px; bottom: 2px; background: var(--card); color: var(--linie); font-size: 0.85rem; padding: 0 6px; border-radius: 6px; }
+    .saeulen-becher-reihe { display: flex; gap: 8px; align-items: flex-end; justify-content: space-around; height: calc(var(--einh) * 20 + var(--nameh)); }
+    .saeulen-becher-reihe figure { margin: 0; text-align: center; font-weight: 800; }
+    .saeulen-becher-reihe .cup-shell { position: relative; width: 56px; height: calc(var(--einh) * 20); margin: 0 auto; }
+    /* ml-Teilstriche im Becher: jeder ml ein feiner Strich, jeder 5. kräftiger und länger */
+    .saeulen-becher-reihe .cup-shell::after {
+      content: ""; position: absolute; left: 0; bottom: 0; width: 16px; height: 100%; pointer-events: none;
+      background-image: linear-gradient(to top, var(--kontur) 2px, transparent 2px), linear-gradient(to top, var(--kontur) 1px, transparent 1px);
+      background-size: 16px calc(var(--einh) * 5), 8px var(--einh);
+      background-repeat: repeat-y; background-position: left bottom;
+    }
+    .saeulen-waage { position: relative; margin-top: 6px; text-align: center; }
+    .saeulen-waage::before { content: ""; position: absolute; left: 50%; top: 14px; margin-left: -22px; border-left: 22px solid transparent; border-right: 22px solid transparent; border-bottom: 44px solid var(--stamm); z-index: 0; }
+    .saeulen-waage-balken { --neigung: 0deg; position: relative; z-index: 1; width: min(300px, 80%); height: 16px; margin: 10px auto 58px; background: var(--holz); border: 3px solid var(--kontur); border-radius: 8px; box-sizing: border-box; transition: transform .4s ease-in-out; }
+    .saeulen-waage-balken span { position: absolute; top: calc(100% + 14px); min-width: 96px; padding: 3px 6px; background: var(--card); color: var(--text); border: 3px solid var(--kontur); border-radius: 10px; font-weight: 800; font-size: 0.95rem; line-height: 1.2; transform: rotate(calc(-1 * var(--neigung))); transition: transform .4s ease-in-out; }
+    .saeulen-waage-balken span::before { content: ""; position: absolute; left: 50%; bottom: 100%; width: 3px; height: 14px; margin-left: -2px; background: var(--kontur); }
+    .saeulen-waage-balken span:first-child { left: -30px; }
+    .saeulen-waage-balken span:last-child { right: -30px; }
+    .saeulen-waage-text { margin: 0; font-weight: 700; }
+    .saeulen-zaehler { margin: 8px 0 0; padding: 6px 12px; border: 3px solid var(--kontur); border-radius: 14px; font-weight: 800; background: var(--card); }
+    .saeulen-zaehler[hidden], .saeulen-waage[hidden] { display: none; }
+    @media (prefers-reduced-motion: reduce) { .saeulen-waage-balken, .saeulen-waage-balken span { transition: none; } }
+    /* Höhe der Kästchen an die Bildschirmhöhe koppeln, damit die Bühne neben bzw. unter dem Auftrag ohne Scrollen passt */
+    @media (orientation: landscape) and (min-width: 900px) { :root { --einh: clamp(9px, 1.4vh, 18px); --nameh: 42px; } }
+    @media (orientation: portrait), (max-width: 899px) { :root { --einh: clamp(9px, 1vh, 15px); --nameh: 40px; } }
+    @media (orientation: portrait) {
+      .saeulen-buehne { max-width: none; padding: 6px 10px; }
+      .saeulen-leiste { margin-bottom: 2px; }
+      .saeulen-waage-balken { margin-bottom: 54px; }
+      /* Vergleichen: Waage und Zähler neben dem Säulenfeld statt darunter */
+      .saeulen-buehne.mit-waage { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); column-gap: 14px; align-items: start; }
+      .saeulen-buehne.mit-waage .saeulen-leiste, .saeulen-buehne.mit-waage .aktions-meldung { grid-column: 1 / -1; }
+      .saeulen-buehne.mit-waage .saeulen-leiste { grid-row: 1; }
+      .saeulen-buehne.mit-waage .saeulen-flaeche { grid-column: 1; grid-row: 2 / 4; }
+      .saeulen-buehne.mit-waage .saeulen-waage { grid-column: 2; grid-row: 2; }
+      .saeulen-buehne.mit-waage .saeulen-zaehler { grid-column: 2; grid-row: 3; align-self: start; }
+      .saeulen-buehne.mit-waage .aktions-meldung { grid-row: 4; }
+      /* Antwortknöpfe der Säulen-Stationen in einer Zeile (Schätzen) */
+      body.lernpfad.lp-zeige-saeulen .lp-optionen { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+      /* Tipps im Lernpfad 2-spaltig */
+      body.lernpfad .lp-tipp-liste { display: grid; grid-template-columns: 1fr 1fr; }
+      body.lernpfad .lp-tipps .lp-tipp-text { font-size: 0.88rem; padding: 4px 10px; }
+    }
     /* Spoiler-Regel: Summen-Badges verstecken (Platz bleibt, nichts springt) */
     body.lp-summe-aus #sum-u, body.lp-summe-aus #sum-m { visibility: hidden; }
     /* ===== Lernpfad kompakt: alles ohne Scrollen über der festen Fußleiste (nur Lernpfad) ===== */
@@ -613,7 +700,7 @@
     @media (orientation: landscape) and (min-width: 900px) {
       body.lernpfad main { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); }
       body.lernpfad .lp-rahmen { grid-column: 1; grid-row: 1; }
-      body.lernpfad .waage-buehne, body.lernpfad .teams-grid { grid-column: 2; grid-row: 1; }
+      body.lernpfad .waage-buehne, body.lernpfad .saeulen-buehne, body.lernpfad .teams-grid { grid-column: 2; grid-row: 1; }
       body.lernpfad .teams-grid { grid-template-columns: 1fr; }
     }
 
@@ -866,6 +953,29 @@
           <div id="waage-label-b" class="cup-name">Becher B</div>
         </div>
       </div>
+    </section>
+
+    <!-- Säulen-Werkstatt (Teil 2 und 3, Stationen mit zeige: "saeulen"). Gefüllt von saeulenZeigen(). -->
+    <section id="saeulen-buehne" class="saeulen-buehne" aria-label="Säulen-Werkstatt Team ZORRO">
+      <div class="saeulen-leiste">
+        <div class="seg" id="saeulen-modusgruppe" role="group" aria-label="Was möchtest du tun?" hidden>
+          <button type="button" id="saeulen-m-stapeln" aria-pressed="true" onclick="lpSaeulenModusWechseln('stapeln')">Umstapeln</button>
+          <button type="button" id="saeulen-m-vergleichen" aria-pressed="false" onclick="lpSaeulenModusWechseln('vergleichen')">Vergleichen</button>
+        </div>
+        <div class="seg" id="saeulen-ansichtgruppe" role="group" aria-label="Ansicht">
+          <button type="button" id="saeulen-a-becher" aria-pressed="false" onclick="lpSaeulenAnsichtWechseln('becher')">Becher</button>
+          <button type="button" id="saeulen-a-saeulen" aria-pressed="true" onclick="lpSaeulenAnsichtWechseln('saeulen')">Säulen</button>
+        </div>
+      </div>
+      <div id="saeulen-flaeche" class="saeulen-flaeche"></div>
+      <div id="saeulen-waage" class="saeulen-waage" hidden>
+        <div id="saeulen-waage-balken" class="saeulen-waage-balken" aria-hidden="true">
+          <span id="saeulen-waage-links">?</span><span id="saeulen-waage-rechts">?</span>
+        </div>
+        <p id="saeulen-waage-text" class="saeulen-waage-text"></p>
+      </div>
+      <p id="saeulen-zaehler" class="saeulen-zaehler" hidden></p>
+      <p id="saeulen-meldung" class="aktions-meldung" role="status" aria-live="polite"></p>
     </section>
 
     <section class="teams-grid">
@@ -1607,6 +1717,17 @@
     let lpAntworten = {};
     let lpTipps = {}; // Anzahl genutzter Tipps pro Stationsindex
     let lpWaage = [14, 6]; // Waage-Stationen: ml in Becher A und Becher B
+    // Teil 2 und 3: Team ZORRO (Arbeitsheft Aufgabe 2c). Summe 60, Ausgleichswert 12.
+    const LP_ZORRO_NAMEN = ["Zoran", "Otto", "Riva", "Renée", "Olivia"];
+    const LP_ZORRO_START = [14, 9, 17, 11, 9];
+    const LP_SCHAETZUNGEN = ["9", "12", "13", "15"]; // Antwortmöglichkeiten der Schätzung (Station Schätzen)
+    let lpSaeulen = LP_ZORRO_START.slice(); // aktuelle Säulenhöhen (Kästchen)
+    let lpSaeulenHand = null;               // Index der Säule, aus der ein Kästchen aufgenommen wurde
+    let lpSaeulenModus = "stapeln";         // "stapeln" | "vergleichen"
+    let lpSaeulenAnsicht = "saeulen";       // "saeulen" | "becher"
+    let lpVergleich = [];                   // bis zu zwei Säulen für die Balkenwaage
+    let lpGestapelt = false;                // erst nach dem ersten Umstapeln gibt es "Vergleichen"
+    let lpSaeulenMeldung = "";              // Text unter der Werkstatt
 
     function lpRichtigesTeam() {
       const su = summe(data.u.values), sm = summe(data.m.values);
@@ -1711,13 +1832,58 @@
         zeige: "keins",
         titel: "Teil 1 geschafft ✓",
         pause: true,
-        letzte: true,
         summe: "ja",
         auftrag: () => "",
         inhalt: () => `
           <p>Du hast <strong>beobachtet</strong>: Beim Ausgleichen bleibt die Summe gleich. Jedes Kind bekommt den Ausgleichswert.</p>
-          <p class="lp-erklaerung">Als Nächstes rechnest du den Ausgleichswert <strong>vorher</strong> aus.
-          Bis dahin kannst du im Freien Labor selbst Wasser umfüllen.</p>
+          <p class="lp-erklaerung">Als Nächstes schätzt du, bevor du rechnest. Tippe auf „Weiter“ für Teil 2.</p>`,
+        sperre: () => null
+      },
+      {
+        // Teil 2: Vorhersage. Säulen nur ansehen, die Schätzung wird in Teil 3 geprüft.
+        teil: 1,
+        zeige: "saeulen",
+        titel: "Schätzen",
+        summe: "tipp",
+        tipps: ["Zähle alle Kästchen von ZORRO zusammen.",
+                "Unter den Säulen steht jetzt, wie viele Kästchen es zusammen sind. Wie viele Kinder sind es?"],
+        geloest: () => lpAntworten.schaetzung === 1,
+        auftrag: () => "Das ist Team ZORRO 🦊. Wie hoch werden die Säulen, wenn <strong>alle gleich hoch</strong> sind?",
+        inhalt: () => lpFrage("schaetzung", LP_SCHAETZUNGEN, 1,
+          "Gute Schätzung! Prüfe sie gleich selbst.",
+          { 0: "9 kommt am häufigsten vor. Ob das reicht? Probiere es gleich aus.",
+            2: "13 liegt in der Mitte zwischen 9 und 17. Das kann passen, muss aber nicht. Prüfe es gleich.",
+            3: "Kann es sein, dass du durch 4 geteilt hast? ZORRO hat 5 Kinder." }),
+        // Es ist eine Schätzung: jede gewählte Antwort erlaubt „Weiter“ (geprüft wird in Teil 3)
+        sperre: () => lpAntworten.schaetzung === undefined ? "Wähle zuerst eine Antwort." : null
+      },
+      {
+        // Teil 3: Selbst machen. Kästchen umstapeln (Tippen, Tippen).
+        teil: 2,
+        zeige: "saeulen",
+        interaktiv: true,
+        titel: "Selbst umstapeln",
+        summe: "tipp",
+        tipps: ["Such einen Wert zwischen den hohen und den niedrigen Säulen.",
+                "Nimm das oberste Kästchen der höchsten Säule und leg es auf die niedrigste. Wiederhole das.",
+                "Verteile die Kästchen gerecht auf alle Kinder. Der Zähler hilft dir.",
+                "Die gestrichelte Linie zeigt die Höhe, die am Ende alle Säulen haben."],
+        auftrag: () => "Stapel die Kästchen um, bis <strong>alle Säulen gleich hoch</strong> sind.",
+        inhalt: () => "",
+        sperre: () => alleGleich(lpSaeulen) ? null : "Stapel weiter, bis alle Säulen gleich hoch sind."
+      },
+      {
+        teil: 2,
+        zeige: "keins",
+        titel: "Geschafft ✓",
+        pause: true,
+        letzte: true,
+        summe: "ja",
+        auftrag: () => "",
+        inhalt: () => `
+          <p>Wasser, Waage, Säulen: Die Menge bleibt immer gleich, sie wird nur gerecht verteilt.
+          Bei ZORRO: ${summe(LP_ZORRO_START)} geteilt durch ${LP_ZORRO_START.length} ist ${ausgleichswert(LP_ZORRO_START)}.
+          So rechnest du den Ausgleichswert: alles zusammenzählen und durch die Anzahl teilen.</p>
           <div class="button-row"><button class="lp-knopf" onclick="modusWaehlen('labor')">Zum Freien Labor</button></div>`,
         sperre: () => null
       }
@@ -1782,9 +1948,214 @@
       lpAktualisieren();
     }
 
-    // Schaltet den nächsten Tipp der aktuellen Station frei (höchstens alle vorhandenen)
-    function lpTipp() {
+    // ===== Säulen-Werkstatt (Teil 2 und 3) =====
+    const SAEULEN_START_MELDUNG = "Tippe auf eine Säule. Dann nimmst du ihr oberstes Kästchen hoch.";
+
+    // Die geschätzte Zahl des Kindes (oder null, wenn noch nichts gewählt)
+    function lpSchaetzung() {
+      const i = lpAntworten.schaetzung;
+      return i === undefined ? null : Number(LP_SCHAETZUNGEN[i]);
+    }
+
+    // Alles zurück auf Anfang (Lernpfad-Start)
+    function lpSaeulenReset() {
+      lpSaeulen = LP_ZORRO_START.slice();
+      lpGestapelt = false;
+      lpSaeulenAnsichtReset();
+    }
+
+    // Beim Stationswechsel: Hand leer, Säulen-Ansicht, Umstapeln-Modus (Säulenhöhen bleiben)
+    function lpSaeulenAnsichtReset() {
+      lpSaeulenHand = null;
+      lpSaeulenModus = "stapeln";
+      lpSaeulenAnsicht = "saeulen";
+      lpVergleich = [];
+      lpSaeulenMeldung = "";
+    }
+
+    // Zeichnet die Werkstatt neu (Säulen oder Becher, Waage, Zähler, Linie, Meldung).
+    // Station "Schätzen" zeigt immer die Startwerte und ist nur zum Ansehen (Säulen gesperrt).
+    function saeulenZeigen() {
       const st = LP_STATIONEN[lpSchritt];
+      const aktiv = !!st.interaktiv;
+      const werte = aktiv ? lpSaeulen : LP_ZORRO_START;
+      const fertig = aktiv && alleGleich(werte);
+      const tipps = lpTipps[lpSchritt] || 0;
+      const vergleichen = aktiv && lpSaeulenModus === "vergleichen";
+      const ansichtSaeulen = lpSaeulenAnsicht === "saeulen";
+      const el = (id) => document.getElementById(id);
+
+      // Fokus merken, damit er nach dem Neuzeichnen nicht verloren geht
+      const aktuell = document.activeElement;
+      const merke = aktuell && aktuell.classList && aktuell.classList.contains("saeule") ? aktuell.dataset.i : null;
+
+      if (ansichtSaeulen) {
+        const spalten = werte.map((w, i) => {
+          const gewaehlt = vergleichen ? lpVergleich.includes(i) : lpSaeulenHand === i;
+          let label = `${LP_ZORRO_NAMEN[i]}: ${w} Kästchen`;
+          if (!vergleichen && lpSaeulenHand === i) label += ", oberstes Kästchen aufgenommen";
+          if (vergleichen && gewaehlt) label += ", für die Waage gewählt";
+          const kaestchen = Array.from({ length: w }, (_, k) =>
+            `<div class="k${lpSaeulenHand === i && k === w - 1 ? " hand" : ""}"></div>`).join("");
+          const seite = vergleichen && gewaehlt ? `<span class="ab">${lpVergleich.indexOf(i) === 0 ? "links" : "rechts"}</span>` : "";
+          return `<button type="button" class="saeule" data-i="${i}" aria-pressed="${gewaehlt}" aria-label="${label}" onclick="lpSaeuleTippen(${i})"${aktiv && !fertig ? "" : " disabled"}>
+            <div class="stapel">${kaestchen}</div>
+            <div class="name"><span>${LP_ZORRO_NAMEN[i]}</span><span class="tm" aria-hidden="true">🦊</span>${seite}</div></button>`;
+        }).join("");
+        // Ausgleichslinie: erst mit Tipp 4 oder nach dem Ausgleichen (verrät sonst die Antwort)
+        const zeigeLinie = aktiv && (tipps >= 4 || fertig);
+        const marken = [0, 5, 10, 15, 20];
+        el("saeulen-flaeche").innerHTML = `<div class="saeulen-plot">
+          <div class="saeulen-achse" aria-hidden="true"><span class="ml">ml</span>${marken.map((v) => `<span class="zahl" style="--v: ${v}">${v}</span>`).join("")}</div>
+          <div class="saeulen-feld"><div class="saeulen-gitter" aria-hidden="true">${marken.map((v) => `<i${v === 0 ? ' class="null"' : ""} style="--v: ${v}"></i>`).join("")}</div>
+          <div class="saeulen-spalten">${spalten}</div>
+          <div id="saeulen-linie" class="saeulen-linie" style="--v: ${ausgleichswert(werte)}"${zeigeLinie ? "" : " hidden"}>
+          <b>Ausgleichslinie ${ausgleichswert(werte)}</b></div></div></div>`;
+      } else {
+        const becher = werte.map((w, i) => `<figure><div class="cup-shell"><div class="water-fill" style="height: ${w / MAX_ML * 100}%;"></div></div>
+          <figcaption>${LP_ZORRO_NAMEN[i]} · ${w} ml</figcaption></figure>`).join("");
+        el("saeulen-flaeche").innerHTML = `<div class="saeulen-becher-reihe">${becher}</div>`;
+      }
+      if (merke !== null) {
+        const neu = el("saeulen-flaeche").querySelector(`.saeule[data-i="${merke}"]`);
+        if (neu && !neu.disabled) neu.focus();
+      }
+
+      // Umschalter: "Umstapeln/Vergleichen" erst nach dem ersten Umstapeln
+      el("saeulen-modusgruppe").hidden = !(aktiv && lpGestapelt);
+      el("saeulen-m-stapeln").setAttribute("aria-pressed", String(lpSaeulenModus === "stapeln"));
+      el("saeulen-m-vergleichen").setAttribute("aria-pressed", String(lpSaeulenModus === "vergleichen"));
+      el("saeulen-m-stapeln").disabled = el("saeulen-m-vergleichen").disabled = !ansichtSaeulen;
+      el("saeulen-a-becher").setAttribute("aria-pressed", String(!ansichtSaeulen));
+      el("saeulen-a-saeulen").setAttribute("aria-pressed", String(ansichtSaeulen));
+
+      // Balkenwaage zum Vergleichen: drei feste Zustände, die höhere Säule sinkt.
+      // waageNeigung: links höher = negativ = linke Seite sinkt = CSS rotate(negativ).
+      const zeigeWaage = vergleichen && ansichtSaeulen;
+      el("saeulen-waage").hidden = !zeigeWaage;
+      el("saeulen-buehne").classList.toggle("mit-waage", zeigeWaage);
+      if (zeigeWaage) {
+        const [l, r] = lpVergleich;
+        const beide = lpVergleich.length === 2;
+        const winkel = beide ? Math.sign(waageNeigung(werte[l], werte[r])) * 10 : 0;
+        el("saeulen-waage-balken").style.transform = `rotate(${winkel}deg)`;
+        el("saeulen-waage-balken").style.setProperty("--neigung", `${winkel}deg`);
+        el("saeulen-waage-links").textContent = l === undefined ? "?" : `${LP_ZORRO_NAMEN[l]} ${werte[l]}`;
+        el("saeulen-waage-rechts").textContent = r === undefined ? "?" : `${LP_ZORRO_NAMEN[r]} ${werte[r]}`;
+        el("saeulen-waage-text").textContent = !beide ? "Tippe zwei Säulen an."
+          : werte[l] === werte[r] ? "Gerade! Diese zwei sind gleich hoch. Prüfe auch die anderen."
+          : "Diese zwei sind nicht gleich hoch.";
+      }
+
+      // Zähler (Spoiler-Regel): Schätzen = nach Tipp 2 oder richtiger Schätzung, Umstapeln = ab Tipp 3
+      const zeigeZaehler = aktiv ? (tipps >= 3 || fertig)
+        : summeSichtbar("tipp", tipps, (st.tipps || []).length, lpSchaetzung() === 12);
+      el("saeulen-zaehler").hidden = !zeigeZaehler;
+      el("saeulen-zaehler").textContent = `Kästchen zusammen: ${summe(werte)} · Kinder: ${werte.length}`;
+
+      // Meldung
+      let text = lpSaeulenMeldung;
+      if (fertig) {
+        // Schluss-Rückmeldung in zwei Zeilen (nur Zahlen aus der Rechnung, kein Kindertext)
+        const wert = ausgleichswert(werte);
+        const schaetz = lpSchaetzung();
+        const zeile1 = schaetz === null ? ""
+          : schaetz === wert ? `Du hattest ${schaetz} geschätzt. Stimmt!`
+          : schaetz === 9 ? `Du hattest 9 geschätzt, den häufigsten Wert. Gerecht verteilt sind es ${wert}.`
+          : schaetz === 13 ? `Du hattest 13 geschätzt, die Mitte. Gerecht verteilt sind es ${wert}.`
+          : `Du hattest ${schaetz} geschätzt. Bei ${werte.length} Kindern sind es ${wert}.`;
+        const zeile2 = `${summe(werte)} Kästchen, ${werte.length} Kinder: ${summe(werte)} geteilt durch ${werte.length} ist ${wert}.`;
+        el("saeulen-meldung").innerHTML = (zeile1 ? zeile1 + "<br>" : "") + zeile2;
+        return;
+      } else if (!text) {
+        text = aktiv ? SAEULEN_START_MELDUNG
+          : "Das ist Team ZORRO. Schau dir die Säulen an. Hier musst du noch nichts umstapeln.";
+      }
+      el("saeulen-meldung").textContent = text;
+      el("saeulen-meldung").classList.toggle("warnt", /ist voll|kein Kästchen/.test(text));
+    }
+
+    // Tippen auf eine Säule: erst Kästchen aufnehmen, dann auf eine andere Säule legen (oder vergleichen)
+    function lpSaeuleTippen(i) {
+      const st = LP_STATIONEN[lpSchritt];
+      if (!st.interaktiv || alleGleich(lpSaeulen)) return;
+      const n = LP_ZORRO_NAMEN;
+      if (lpSaeulenModus === "vergleichen") {
+        const p = lpVergleich.indexOf(i);
+        if (p >= 0) lpVergleich.splice(p, 1);
+        else { if (lpVergleich.length === 2) lpVergleich.shift(); lpVergleich.push(i); }
+        lpSaeulenMeldung = "Tippe zwei Säulen an. Die Waage vergleicht sie.";
+      } else if (lpSaeulenHand === null) {
+        if (lpSaeulen[i] < 1) {
+          lpSaeulenMeldung = `${n[i]} hat kein Kästchen. Von hier kann ich nichts nehmen.`;
+        } else {
+          lpSaeulenHand = i;
+          lpSaeulenMeldung = "Kästchen aufgenommen. Tippe auf eine andere Säule.";
+        }
+      } else if (lpSaeulenHand === i) {
+        lpSaeulenHand = null;
+        lpSaeulenMeldung = "Kästchen zurückgelegt. Tippe eine Säule an, um ein Kästchen zu nehmen.";
+      } else {
+        const von = lpSaeulenHand;
+        const neu = stapleUm(lpSaeulen, von, i);
+        if (!neu) {
+          lpSaeulenMeldung = `${n[i]} ist voll (${MAX_ML} Kästchen). Hier passt nichts mehr drauf. Probier eine andere Säule.`;
+        } else {
+          // Lob nach den Höhen VOR dem Zug (nicht jeder Zug bringt die Säulen näher zusammen)
+          const hoeheVon = lpSaeulen[von], hoeheNach = lpSaeulen[i];
+          lpSaeulen = neu;
+          lpSaeulenHand = null;
+          lpGestapelt = true;
+          lpSaeulenMeldung = hoeheVon > hoeheNach + 1 ? "Gut! Die Säulen sind jetzt näher beieinander."
+            : hoeheVon === hoeheNach + 1 ? "Die beiden haben nur getauscht. Nimm lieber von einer Säule, die viel höher ist."
+            : "Jetzt ist der Unterschied größer. Nimm ein Kästchen von einer hohen Säule und leg es auf eine niedrige.";
+        }
+      }
+      lpZeigen(); // zeichnet neu und prüft die Sperre (Weiter)
+    }
+
+    // Umschalter Umstapeln / Vergleichen
+    function lpSaeulenModusWechseln(neu) {
+      if (lpSaeulenModus === neu) return; // schon aktiv: nichts ändern
+      const hatteHand = lpSaeulenHand !== null;
+      lpSaeulenModus = neu;
+      lpSaeulenHand = null;
+      lpVergleich = [];
+      lpSaeulenMeldung = neu === "stapeln" ? SAEULEN_START_MELDUNG
+        : (hatteHand ? "Das Kästchen liegt wieder auf seiner Säule. " : "") + "Tippe zwei Säulen an. Die Waage vergleicht sie.";
+      saeulenZeigen();
+    }
+
+    // Umschalter Becher / Säulen (Becher: eine aufgenommene Hand wird zurückgelegt und das gesagt)
+    function lpSaeulenAnsichtWechseln(neu) {
+      if (lpSaeulenAnsicht === neu) return;
+      const hatteHand = lpSaeulenHand !== null;
+      lpSaeulenAnsicht = neu;
+      if (neu === "becher") {
+        lpSaeulenHand = null;
+        lpVergleich = [];
+        lpSaeulenMeldung = (hatteHand ? "Das Kästchen liegt wieder auf seiner Säule. " : "") + "So viel Wasser ist jetzt in den Bechern. 1 Kästchen ist 1 ml.";
+      } else {
+        lpSaeulenMeldung = "Das sind dieselben Mengen, nur als Säulen aus Kästchen.";
+      }
+      saeulenZeigen();
+    }
+
+    // Schaltet den nächsten Tipp der aktuellen Station frei (höchstens alle vorhandenen)
+    let lpLetzterTipp = 0; // Zeitstempel: Doppel-Tippen zählt nur einmal
+    function lpTipp() {
+      const jetzt = Date.now();
+      if (jetzt - lpLetzterTipp < 600) return; // ein Tipp pro Tippen
+      lpLetzterTipp = jetzt;
+      const st = LP_STATIONEN[lpSchritt];
+      // Tipps verweisen auf Säulen: dorthin zurückwechseln
+      if (st.zeige === "saeulen" && (lpSaeulenAnsicht !== "saeulen" || lpSaeulenModus !== "stapeln")) {
+        const warBecher = lpSaeulenAnsicht === "becher";
+        lpSaeulenAnsicht = "saeulen";
+        lpSaeulenModus = "stapeln";
+        lpVergleich = [];
+        lpSaeulenMeldung = warBecher ? "Ich zeige dir wieder die Säulen. Dort passt der Tipp." : "Zurück zum Umstapeln. Dort passt der Tipp.";
+      }
       const anzahl = (st.tipps || []).length;
       lpTipps[lpSchritt] = Math.min((lpTipps[lpSchritt] || 0) + 1, anzahl);
       lpZeigen();
@@ -1808,7 +2179,7 @@
       const st = LP_STATIONEN[lpSchritt];
       document.body.classList.toggle("lp-pause", !!st.pause);
       // Was zeigt die Station: Waage, Teams oder nichts
-      for (const z of ["waage", "teams", "keins"]) document.body.classList.toggle("lp-zeige-" + z, st.zeige === z);
+      for (const z of ["waage", "teams", "saeulen", "keins"]) document.body.classList.toggle("lp-zeige-" + z, st.zeige === z);
       // Summen-Badges verstecken, wenn die Station es verlangt (Spoiler-Regel)
       const beantwortet = st.geloest ? st.geloest() : !st.sperre();
       document.body.classList.toggle("lp-summe-aus",
@@ -1821,7 +2192,7 @@
       }).join("");
 
       const imTeil = LP_STATIONEN.filter(s => s.teil === st.teil && !s.pause);
-      document.getElementById("lp-titel").textContent = st.pause
+      document.getElementById("lp-titel").textContent = (st.pause || imTeil.length === 1)
         ? st.titel
         : `Schritt ${imTeil.indexOf(st) + 1} von ${imTeil.length}: ${st.titel}`;
 
@@ -1830,6 +2201,7 @@
       document.getElementById("lp-auftrag").innerHTML = auftrag;
       document.getElementById("lp-inhalt").innerHTML = st.inhalt() + lpTippsHtml(st);
       if (st.zeige === "waage") waageZeigen();
+      if (st.zeige === "saeulen") saeulenZeigen();
       lpAktualisieren();
     }
 
@@ -1851,6 +2223,7 @@
       const ziel = lpSchritt + richtung;
       if (ziel < 0 || ziel >= LP_STATIONEN.length) return;
       lpSchritt = ziel;
+      lpSaeulenAnsichtReset(); // Hand leer, Säulen-Ansicht (Säulenhöhen bleiben)
       lpZeigen();
       window.scrollTo(0, 0);
     }
@@ -1868,6 +2241,7 @@
         lpSchritt = 0;
         lpAntworten = {};
         lpWaage = [14, 6];
+        lpSaeulenReset();
         lpTipps = {};
         stufe = "anfaenger"; // Lernpfad läuft immer im Anfängermodus
         pipetteSchritt = 1;
@@ -1877,7 +2251,7 @@
       } else {
         document.body.classList.remove("lp-pause");
         document.body.classList.remove("lp-summe-aus");
-        document.body.classList.remove("lp-zeige-waage", "lp-zeige-teams", "lp-zeige-keins");
+        document.body.classList.remove("lp-zeige-waage", "lp-zeige-teams", "lp-zeige-saeulen", "lp-zeige-keins");
         let gespeichert = null;
         try { gespeichert = sessionStorage.getItem("mw_stufe"); } catch (e) { /* kein Speicher */ }
         const ziel = gespeichert === "experte" ? "experte" : "anfaenger";
