@@ -71,22 +71,43 @@
 
     * { box-sizing: border-box; }
 
+    html { overflow-x: hidden; }
     body {
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--bg);
+      background: var(--wiese); /* Fallback hinter der Szene */
       color: var(--text);
       line-height: 1.5;
+      overflow-x: hidden;
     }
 
+    /* Szene: ruhige Deko hinter allem (keine Bewegung) */
+    .szene {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+    body > header, body > main { position: relative; z-index: 1; }
+
     header {
-      padding: 24px;
-      background: var(--kopf);
-      color: var(--weiss);
+      max-width: 1352px;
+      margin: 16px auto 0;
+      padding: 18px 24px;
+      background: var(--card);
+      color: var(--text);
+      border: 3px solid var(--kontur);
+      border-radius: 24px;
+      box-shadow: 0 5px 0 var(--karte-rand);
+    }
+    @media (max-width: 1400px) {
+      header { margin-left: 16px; margin-right: 16px; }
     }
 
     header h1 { margin: 0 0 8px 0; font-size: 2rem; }
-    header p { margin: 0; color: var(--kopf-text); max-width: 950px; }
+    header p { margin: 0; color: var(--text); max-width: 950px; }
 
     main {
       max-width: 1400px;
@@ -96,15 +117,16 @@
 
     .controls, .results, .team-card, .transfer-buffer, .student-input-section {
       background: var(--card);
-      border-radius: 18px;
+      border: 3px solid var(--kontur);
+      border-radius: 24px;
       padding: 24px;
-      box-shadow: 0 10px 28px var(--schatten);
+      box-shadow: 0 5px 0 var(--karte-rand);
       margin-bottom: 24px;
     }
 
     .transfer-buffer {
-      background: var(--flaeche);
-      border: 2px dashed var(--line);
+      background: var(--card);
+      border: 3px dashed var(--kontur);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -129,8 +151,11 @@
     }
 
     button {
-      border: none;
-      border-radius: 12px;
+      border: 3px solid var(--kontur);
+      border-radius: 16px;
+      min-height: 44px;
+      min-width: 44px;
+      touch-action: manipulation;
       padding: 12px 20px;
       font-size: 1rem;
       font-weight: 600;
@@ -142,7 +167,18 @@
 
     button:hover { opacity: 0.9; transform: translateY(-1px); }
     button:active { transform: translateY(0); }
-    button:disabled { opacity: 0.25; cursor: not-allowed; transform: none !important; }
+    button:disabled,
+    button.secondary:disabled, button.accent:disabled, button.warning:disabled,
+    button.lp-knopf:disabled, button.lp-knopf.zweit:disabled, button.lp-knopf.warning:disabled,
+    button.lp-option:disabled, button.lp-option[aria-pressed="true"]:disabled,
+    button.stufe-knopf:disabled, button.stufe-knopf[aria-pressed="true"]:disabled {
+      opacity: 1;
+      background: var(--flaeche);
+      color: var(--text-leise);
+      border: 3px dashed var(--kontur);
+      cursor: not-allowed;
+      transform: none !important;
+    }
     button.secondary { background: var(--sekundaer); }
     button:focus-visible, .lp-option:focus-visible { outline: 3px solid var(--fokus); outline-offset: 2px; }
     button.accent { background: var(--ok); }
@@ -151,8 +187,10 @@
     .btn-small {
       padding: 4px 10px;
       font-size: 0.85rem;
-      border-radius: 6px;
+      border-radius: 10px;
     }
+    header .btn-small { min-height: 44px; font-size: 0.95rem; padding: 6px 14px; }
+    .lp-tipp, .btn-tipp { background: var(--holz); color: var(--text); }
 
     .teams-grid {
       display: grid;
@@ -279,7 +317,7 @@
       background-color: var(--text);
       color: var(--weiss);
       text-align: left;
-      border-radius: 8px;
+      border-radius: 12px;
       padding: 12px;
       position: absolute;
       z-index: 20;
@@ -319,7 +357,8 @@
 
     .submitted-card {
       background: var(--ok-hell);
-      border: 2px solid var(--ok-rand);
+      border: 3px solid var(--kontur);
+      box-shadow: 0 4px 0 var(--karte-rand);
       color: var(--ok-text);
       padding: 16px;
       border-radius: 12px;
@@ -356,12 +395,13 @@
     .willkommen[hidden] { display: none; }
     .willkommen-karte {
       background: var(--card);
-      border-radius: 20px;
+      border: 3px solid var(--kontur);
+      border-radius: 24px;
       padding: 28px;
       max-width: 560px;
       width: 100%;
       font-size: 1.15rem;
-      box-shadow: 0 20px 40px var(--schatten-stark);
+      box-shadow: 0 5px 0 var(--karte-rand), 0 20px 40px var(--schatten-stark);
     }
     .willkommen-karte h2 { margin-top: 0; }
     .willkommen-klein { font-size: 1rem; color: var(--muted); margin-bottom: 0; }
@@ -396,9 +436,10 @@
 
     .lp-rahmen {
       background: var(--card);
-      border-radius: 18px;
+      border: 3px solid var(--kontur);
+      border-radius: 24px;
       padding: 20px 24px;
-      box-shadow: 0 10px 28px var(--schatten);
+      box-shadow: 0 5px 0 var(--karte-rand);
       margin-bottom: 24px;
     }
     .lp-leitfrage { margin: 0 0 12px 0; font-size: 1.15rem; }
@@ -472,8 +513,10 @@
       right: 0;
       bottom: 0;
       z-index: 30;
-      background: var(--weiss-fast);
-      border-top: 1px solid var(--line);
+      background: var(--card);
+      border-top: 3px solid var(--kontur);
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 -5px 0 var(--karte-rand);
       padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
     }
     .lp-fuss-reihe {
@@ -493,10 +536,11 @@
     /* ===== Stufen: Anfänger / Experte (nur Freies Labor) ===== */
     .stufe-box {
       background: var(--card);
-      border-radius: 14px;
+      border: 3px solid var(--kontur);
+      border-radius: 24px;
       padding: 12px 16px;
       margin-bottom: 16px;
-      box-shadow: 0 10px 28px var(--schatten);
+      box-shadow: 0 5px 0 var(--karte-rand);
     }
     .stufe-reihe { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 8px; }
     .stufe-reihe .stufe-name { font-weight: 700; }
@@ -519,9 +563,49 @@
     .start-reihe button { min-height: 44px; min-width: 44px; padding: 4px; font-size: 0.95rem; border-radius: 8px; }
     .action-btns button { min-height: 44px; }
     .team-header .btn-small { min-height: 44px; min-width: 44px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+      button:hover { transform: none; }
+    }
   </style>
 </head>
 <body>
+  <!-- Szene: Wiese, Bäume, Wimpelkette (nur Deko, ruhig) -->
+  <svg class="szene" aria-hidden="true" focusable="false" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="himmel" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" style="stop-color:var(--himmel-oben)"/>
+        <stop offset="1" style="stop-color:var(--himmel-unten)"/>
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="800" fill="url(#himmel)"/>
+    <g fill="none" stroke="var(--kontur)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M-10 90 Q300 190 600 110 T1210 120"/>
+    </g>
+    <g stroke="var(--kontur)" stroke-width="4" stroke-linejoin="round">
+      <polygon points="80,128 130,134 100,176" fill="var(--rosa)"/>
+      <polygon points="230,152 280,152 255,196" fill="var(--holz)"/>
+      <polygon points="390,152 440,146 418,192" fill="var(--primaer)"/>
+      <polygon points="560,122 610,116 590,162" fill="var(--huetchen)"/>
+      <polygon points="740,120 790,126 760,168" fill="var(--rosa)"/>
+      <polygon points="900,128 950,134 922,176" fill="var(--holz)"/>
+      <polygon points="1060,134 1110,128 1086,176" fill="var(--primaer)"/>
+    </g>
+    <path d="M0 520 Q300 400 620 470 T1200 440 V800 H0 Z" fill="var(--wiese)" stroke="var(--kontur)" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M-20 720 Q250 600 520 660 T1000 560 T1220 600" fill="none" stroke="var(--weg)" stroke-width="46" stroke-linecap="round"/>
+    <g stroke="var(--kontur)" stroke-width="4" stroke-linejoin="round">
+      <polygon points="300,640 324,590 348,640" fill="var(--huetchen)"/>
+      <polygon points="640,660 664,610 688,660" fill="var(--huetchen)"/>
+      <polygon points="940,590 964,540 988,590" fill="var(--huetchen)"/>
+    </g>
+    <g stroke="var(--kontur)" stroke-width="5" stroke-linejoin="round">
+      <rect x="132" y="430" width="34" height="100" rx="8" fill="var(--stamm)"/>
+      <circle cx="149" cy="400" r="80" fill="var(--krone)"/>
+      <rect x="1062" y="400" width="30" height="90" rx="8" fill="var(--stamm)"/>
+      <circle cx="1077" cy="372" r="68" fill="var(--krone)"/>
+    </g>
+  </svg>
 
   <header>
     <h1>Mathewelt – Wasser aufteilen</h1>
@@ -529,7 +613,7 @@
       Hallo, dein Ziel ist es, das Wasser innerhalb der Teams gerecht zu verteilen. Mit der Pipette kannst du Wasser von einem Becher aufnehmen und auf andere Becher des Teams verteilen. Finde für beide Teams den Ausgleichswert.
     </p>
     <div style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-      <span class="lehrkraft-presets" style="font-size: 0.9rem; color: var(--kopf-text);">Lehrkräfte-Presets:</span>
+      <span class="lehrkraft-presets" style="font-size: 0.9rem; color: var(--text-leise);">Lehrkräfte-Presets:</span>
       <button class="btn-small secondary lehrkraft-presets" onclick="loadPreset(1)">Aufgabe 1 (Wasser)</button>
       <button class="btn-small secondary lehrkraft-presets" onclick="loadPreset(2)">Aufgabe 3 (Medaillen-Struktur)</button>
       <button class="secondary btn-modus" id="btn-modus" onclick="modusWechseln()">Zum Lernpfad</button>
