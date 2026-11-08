@@ -77,6 +77,59 @@ if (L) {
       });
     });
 
+    // Säulen-Werkstatt: Kästchen umstapeln (1 Kästchen = 1 ml, ganze Zahlen)
+    describe("stapleUm und alleGleich", () => {
+      const zorro = [14, 9, 17, 11, 9]; // Summe 60, Ausgleichswert 12
+      it("ZORRO: ein Kästchen von Säule 2 auf Säule 1", () => {
+        assert.deepEqual(L.stapleUm(zorro, 2, 1), [14, 10, 16, 11, 9]);
+      });
+      it("Summe 60 bleibt nach vielen Schritten", () => {
+        let w = zorro;
+        for (const [v, n] of [[2, 1], [0, 4], [2, 3], [1, 0], [3, 2]]) w = L.stapleUm(w, v, n);
+        assert.equal(L.summe(w), 60);
+      });
+      it("aus leerer Säule geht nichts (null)", () => {
+        assert.equal(L.stapleUm([0, 5], 0, 1), null);
+      });
+      it("Ziel würde über 20 steigen (null)", () => {
+        assert.equal(L.stapleUm([20, 3], 1, 0), null);
+      });
+      it("von gleich nach gibt null", () => {
+        assert.equal(L.stapleUm(zorro, 1, 1), null);
+      });
+      it("ungültige Indizes geben null", () => {
+        assert.equal(L.stapleUm(zorro, -1, 1), null);
+        assert.equal(L.stapleUm(zorro, 5, 1), null);
+        assert.equal(L.stapleUm(zorro, 1, 5), null);
+        assert.equal(L.stapleUm(zorro, 1.5, 1), null);
+        assert.equal(L.stapleUm(zorro, 1, 0.5), null);
+      });
+      it("Eingabe wird nicht verändert", () => {
+        const w = [14, 9, 17, 11, 9];
+        L.stapleUm(w, 2, 1);
+        assert.deepEqual(w, [14, 9, 17, 11, 9]);
+      });
+      it("alleGleich: true bei lauter 12", () => {
+        assert.equal(L.alleGleich([12, 12, 12, 12, 12]), true);
+      });
+      it("alleGleich: false bei ungleichen, leeren und einzelnen Werten", () => {
+        assert.equal(L.alleGleich([12, 12, 13]), false);
+        assert.equal(L.alleGleich([]), false);
+        assert.equal(L.alleGleich([7]), false);
+      });
+      it("Greedy (höchste auf niedrigste) endet bei [12, 12, 12, 12, 12]", () => {
+        let w = zorro;
+        let schritte = 0;
+        while (!L.alleGleich(w) && schritte++ < 100) {
+          const hoch = w.indexOf(Math.max(...w));
+          const tief = w.indexOf(Math.min(...w));
+          w = L.stapleUm(w, hoch, tief);
+        }
+        assert.deepEqual(w, [12, 12, 12, 12, 12]);
+        assert.equal(L.alleGleich(w), true);
+      });
+    });
+
     // Umgießen von einem Becher in den anderen (Waage am Lernpfad-Anfang)
     describe("umgiessen", () => {
       it("[14, 6] von 0 gibt [13, 7]", () => {

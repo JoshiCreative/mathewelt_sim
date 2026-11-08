@@ -1075,9 +1075,27 @@
       return gegeben.werte.map(runde);
     }
 
+    // Säulen-Werkstatt: Ein Kästchen (1 ml) wandert von Säule "von" auf Säule "nach".
+    // Gibt ein NEUES Array zurück (Eingabe bleibt unverändert) oder null, wenn es nicht geht
+    // (gleiche Säule, ungültiger Index, Säule leer, Ziel würde über "max" steigen).
+    function stapleUm(werte, von, nach, max = MAX_ML) {
+      const gueltig = (i) => Number.isInteger(i) && i >= 0 && i < werte.length;
+      if (!gueltig(von) || !gueltig(nach) || von === nach) return null;
+      if (werte[von] < 1 || werte[nach] + 1 > max) return null;
+      const neu = werte.slice();
+      neu[von] -= 1;
+      neu[nach] += 1;
+      return neu;
+    }
+
+    // True, wenn mindestens 2 Säulen da sind und alle gleich hoch sind.
+    function alleGleich(werte) {
+      return werte.length >= 2 && istAusgeglichen(werte);
+    }
+
     const LOGIK = { MAX_ML, summe, ausgleichswert, istAusgeglichen, istGanzzahligTeilbar,
                     nimmWasser, gibWasser, runde, kindDazuAnfaenger, kindWegAnfaenger, summeSichtbar,
-                    waageNeigung, umgiessen };
+                    waageNeigung, umgiessen, stapleUm, alleGleich };
     /* LOGIC-END */
 
     // Start-Presets angepasst, damit die Summen glatt durch die Kinder-Anzahl teilbar sind!
