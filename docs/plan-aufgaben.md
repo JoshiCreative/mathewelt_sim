@@ -119,6 +119,9 @@
 Ab Schritt 2 bekommt jeder Baustein zuerst einen Entwurf, den Josh freigibt (wie beim Schulfest-Entwurf). Danach geht es weiter mit Logik und Tests, Oberfläche und den Prüfern.
 
 ## Offene Fragen an Josh
-- Soll die Säulen-Werkstatt eine eigene Seite unter `tools/` werden oder als weitere Station in `index.html` bleiben? Die Datei hat bereits rund 1600 Zeilen.
+- ~~Säulen-Werkstatt als eigene Seite unter `tools/` oder als Station in `index.html`?~~ **Entschieden (08.11.2026): Station in `index.html`.**
+  - Gründe: Die Kinder kommen ohne Seitenwechsel von den Bechern zu den Säulen, und die Werte kommen direkt aus dem Lernpfad. Es gibt nur einen LOGIC-Block mit einer Teststelle, die Logik wird also nicht doppelt gepflegt. Eine einzelne Datei funktioniert auch offline vollständig.
+  - Im Freien Labor kommt ein Umschalter „Becher ↔ Säulen" dazu.
+  - **Grenze für eine spätere Aufteilung:** Wird `index.html` größer als etwa 3000 Zeilen (Stand 08.11.2026: rund 1900) oder braucht eine Aufgabe die Werkstatt ohne den Wasser-Lernpfad, dann bekommen die späteren Aufgaben (voraussichtlich 5–7 mit Wippe und Häufigkeit) eigene Tools unter `tools/`.
 - Soll die Wippe (Aufgaben 5/6) echte Physik nachbilden (Drehmoment) oder nur sagen „kippt nach links, nach rechts, steht gerade"? Vorschlag: einfach halten. Die Rechnung im Hintergrund nutzt die Summe der Abstände, angezeigt werden nur drei Zustände.
 - Ist das ein Workshop-Tag (6. Klasse, Februar 2027) oder eine Reihe über mehrere Stunden? Davon hängt ab, welche Aufgaben 2027 zuerst fertig sein müssen.
