@@ -792,7 +792,8 @@
       <p id="meldung-gedanke" class="aktions-meldung" role="status" aria-live="polite"></p>
 
       <div id="submit-feedback" class="submitted-card">
-        <strong>✓ Super aufgeschrieben!</strong> Deine Antwort wurde in den Zwischenspeicher kopiert. Du kannst sie jetzt mit <kbd>STRG</kbd> + <kbd>V</kbd> (oder langem Drücken am Tablet) auf der digitalen Pinnwand der Klasse einfügen.
+        <span id="feedback-kopiert"><strong>✓ Super aufgeschrieben!</strong> Deine Antwort wurde in den Zwischenspeicher kopiert. Du kannst sie jetzt mit <kbd>STRG</kbd> + <kbd>V</kbd> (oder langem Drücken am Tablet) auf der digitalen Pinnwand der Klasse einfügen.</span>
+        <span id="feedback-nicht-kopiert" hidden><strong>✓ Super aufgeschrieben!</strong> Kopieren ging hier leider nicht. Markiere deinen Text und kopiere ihn selbst, oder schreib ihn ab.</span>
       </div>
     </section>
   </main>
@@ -1380,11 +1381,20 @@
       }
       aktionsMeldung("meldung-gedanke", "");
 
-      navigator.clipboard.writeText(text).then(() => {
+      const zeigeBestaetigung = (kopiert) => {
+        document.getElementById("feedback-kopiert").hidden = !kopiert;
+        document.getElementById("feedback-nicht-kopiert").hidden = kopiert;
         document.getElementById("submit-feedback").style.display = "block";
-      }).catch(err => {
-        document.getElementById("submit-feedback").style.display = "block";
-      });
+      };
+      if (!(navigator.clipboard && navigator.clipboard.writeText)) {
+        zeigeBestaetigung(false);
+        return;
+      }
+      try {
+        navigator.clipboard.writeText(text).then(() => zeigeBestaetigung(true), () => zeigeBestaetigung(false));
+      } catch (err) {
+        zeigeBestaetigung(false);
+      }
     }
 
     // ===== Lernpfad: Beobachten → Vorhersagen → Selbst machen =====
