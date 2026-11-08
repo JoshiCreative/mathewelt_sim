@@ -7,26 +7,51 @@
   <style>
     /* Farbpalette: alle Paare für Text erreichen WCAG AA (mind. 4,5:1) */
     :root {
-      --bg: #f5f7fa;          /* Hintergrund */
-      --card: #ffffff;        /* Fläche/Karten */
+      /* Schulfest-Palette (freigegeben, siehe docs/gestaltung.md) */
+      --himmel-oben: #D9F0FF;
+      --himmel-unten: #FFF3D6;
+      --wiese: #7CC36B;
+      --krone: #3F9E5A;       /* nur Deko */
+      --stamm: #8A5A3B;       /* nur Deko */
+      --holz: #E0B070;        /* nur Deko */
+      --wasser: #3B9DF0;      /* einzige kräftig blaue Fläche */
+      --wasser-rand: #1D6FB8; /* mit weißer Schrift 5,2:1 */
+      --kontur: #2F4A3A;      /* Umrisse */
+      --karte-rand: #B7C9B0;  /* nur Zierrand */
+      --text-leise: #4B5563;  /* auf Weiß 7,6:1 */
+      --rueck-hell: #F3F8F1;  /* Hintergrund Rückmeldung */
+      --weg: #F1DFA8;         /* nur Deko */
+      --huetchen: #E8743B;    /* nur Deko */
+      --rosa: #F29EB8;        /* nur Deko */
+      --weiss: #FFFFFF;
+      /* Hilfsfarben (Schatten, Schleier) */
+      --schatten: rgba(15, 23, 42, 0.05);
+      --schatten-mittel: rgba(0, 0, 0, 0.15);
+      --schatten-stark: rgba(15, 23, 42, 0.25);
+      --abdunkler: rgba(17, 24, 39, 0.6);
+      --weiss-halb: rgba(255, 255, 255, 0.6);
+      --weiss-fast: rgba(255, 255, 255, 0.96);
+      --fokus-schein: rgba(29, 111, 184, 0.25);
+      --bg: var(--himmel-unten); /* Hintergrund */
+      --card: #FFFFFF;        /* Fläche/Karten */
       --flaeche: #f8fafc;     /* helle graue Fläche */
-      --text: #1b2433;        /* Text */
-      --muted: #536070;       /* Text gedämpft */
+      --text: #1F2937;        /* Text */
+      --muted: var(--text-leise); /* Text gedämpft */
       --line: #cbd3dd;
       --kopf: #1b2433;        /* Kopfzeile */
       --kopf-text: #d5dce6;
-      --primaer: #1d4ed8;     /* Buttons */
-      --primaer-dunkel: #1e40af;
-      --primaer-hell: #eef3ff;
+      --primaer: #1F7A45;     /* Buttons, weiße Schrift 5,3:1 */
+      --primaer-dunkel: #17603A;
+      --primaer-hell: #E8F5EC; /* Text --primaer darauf 4,8:1 */
       --sekundaer: #4b5563;
       --akzent: #0f766e;
-      --water: linear-gradient(180deg, #2a8fd4 0%, #1565a8 100%);
-      --becher-rand: #475569;
+      --water: var(--wasser);
+      --becher-rand: var(--kontur);
       --linie: #1b2433;       /* Ausgleichslinie */
       --u: #6d28d9;           /* Team Unicorns (dunkel, violett) */
       --u-light: #f1ebff;
       --u-dark: #5b21b6;
-      --m: #b7791f;           /* Team Mathe-Asse (hell, gold) */
+      --m: #F5B02E;           /* Team Mathe-Asse (hell, gold): nie weiße Schrift darauf */
       --m-light: #fff4d6;
       --m-dark: #7a4a00;
       --ok: #15803d;          /* Erfolg */
@@ -41,7 +66,7 @@
       --danger-hell: #fdecec;
       --tipp-hell: #fefce8;
       --tipp-rand: #fde68a;
-      --fokus: #1d4ed8;
+      --fokus: var(--wasser-rand);
     }
 
     * { box-sizing: border-box; }
@@ -57,7 +82,7 @@
     header {
       padding: 24px;
       background: var(--kopf);
-      color: white;
+      color: var(--weiss);
     }
 
     header h1 { margin: 0 0 8px 0; font-size: 2rem; }
@@ -73,7 +98,7 @@
       background: var(--card);
       border-radius: 18px;
       padding: 24px;
-      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+      box-shadow: 0 10px 28px var(--schatten);
       margin-bottom: 24px;
     }
 
@@ -111,7 +136,7 @@
       font-weight: 600;
       cursor: pointer;
       background: var(--primaer);
-      color: white;
+      color: var(--weiss);
       transition: all 0.2s ease;
     }
 
@@ -174,7 +199,7 @@
       border-top: none;
       border-bottom-left-radius: 14px;
       border-bottom-right-radius: 14px;
-      background: rgba(255, 255, 255, 0.6);
+      background: var(--weiss-halb);
       overflow: hidden;
     }
 
@@ -192,7 +217,7 @@
       left: 0;
       right: 0;
       border-top: 3px dashed var(--linie);
-      box-shadow: 0 -1px 0 #fff, 0 1px 0 #fff; /* weißer Saum: sichtbar auf Wasser und leerem Becher */
+      box-shadow: 0 -1px 0 var(--weiss), 0 1px 0 var(--weiss); /* weißer Saum: sichtbar auf Wasser und leerem Becher */
       z-index: 10;
       pointer-events: none;
     }
@@ -238,7 +263,7 @@
       width: 18px;
       height: 18px;
       background: var(--sekundaer);
-      color: white;
+      color: var(--weiss);
       border-radius: 50%;
       font-size: 0.75rem;
       cursor: help;
@@ -252,7 +277,7 @@
       visibility: hidden;
       width: 260px;
       background-color: var(--text);
-      color: #fff;
+      color: var(--weiss);
       text-align: left;
       border-radius: 8px;
       padding: 12px;
@@ -266,7 +291,7 @@
       font-family: sans-serif;
       font-weight: normal;
       line-height: 1.4;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 12px var(--schatten-mittel);
     }
 
     .info-help:hover .tooltiptext {
@@ -289,7 +314,7 @@
     .student-textarea:focus {
       outline: none;
       border-color: var(--fokus);
-      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
+      box-shadow: 0 0 0 3px var(--fokus-schein);
     }
 
     .submitted-card {
@@ -322,7 +347,7 @@
       position: fixed;
       inset: 0;
       z-index: 50;
-      background: rgba(17, 24, 39, 0.6);
+      background: var(--abdunkler);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -336,7 +361,7 @@
       max-width: 560px;
       width: 100%;
       font-size: 1.15rem;
-      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
+      box-shadow: 0 20px 40px var(--schatten-stark);
     }
     .willkommen-karte h2 { margin-top: 0; }
     .willkommen-klein { font-size: 1rem; color: var(--muted); margin-bottom: 0; }
@@ -373,7 +398,7 @@
       background: var(--card);
       border-radius: 18px;
       padding: 20px 24px;
-      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+      box-shadow: 0 10px 28px var(--schatten);
       margin-bottom: 24px;
     }
     .lp-leitfrage { margin: 0 0 12px 0; font-size: 1.15rem; }
@@ -447,7 +472,7 @@
       right: 0;
       bottom: 0;
       z-index: 30;
-      background: rgba(255, 255, 255, 0.96);
+      background: var(--weiss-fast);
       border-top: 1px solid var(--line);
       padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
     }
@@ -471,7 +496,7 @@
       border-radius: 14px;
       padding: 12px 16px;
       margin-bottom: 16px;
-      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+      box-shadow: 0 10px 28px var(--schatten);
     }
     .stufe-reihe { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 8px; }
     .stufe-reihe .stufe-name { font-weight: 700; }
