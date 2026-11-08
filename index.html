@@ -171,6 +171,7 @@
     button.secondary:disabled, button.accent:disabled, button.warning:disabled,
     button.lp-knopf:disabled, button.lp-knopf.zweit:disabled, button.lp-knopf.warning:disabled,
     button.lp-option:disabled, button.lp-option[aria-pressed="true"]:disabled,
+    button.lp-tipp:disabled, button.btn-tipp:disabled,
     button.stufe-knopf:disabled, button.stufe-knopf[aria-pressed="true"]:disabled {
       opacity: 1;
       background: var(--flaeche);
@@ -190,7 +191,19 @@
       border-radius: 10px;
     }
     header .btn-small { min-height: 44px; font-size: 0.95rem; padding: 6px 14px; }
-    .lp-tipp, .btn-tipp { background: var(--holz); color: var(--text); }
+    button.lp-tipp, .btn-tipp {
+      background: var(--holz); color: var(--text);
+      border: 3px solid var(--kontur);
+      min-height: 56px; min-width: 56px; padding: 12px 30px; font-size: 1.3rem;
+    }
+    .lp-tipps { margin-top: 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+    .lp-tipp-text {
+      margin: 0; padding: 12px 16px; width: 100%; box-sizing: border-box;
+      background: var(--card); color: var(--text);
+      border: 3px solid var(--kontur); border-radius: 14px;
+      font-size: 1.1rem; line-height: 1.4;
+    }
+    .lp-tipp-text strong { font-weight: 800; color: var(--text); }
 
     .teams-grid {
       display: grid;
@@ -491,6 +504,8 @@
     body.lernpfad .student-input-section,
     body.lernpfad .results,
     body.lp-pause .teams-grid { display: none; }
+    /* Spoiler-Regel: Summen-Badges verstecken (Platz bleibt, nichts springt) */
+    body.lp-summe-aus #sum-u, body.lp-summe-aus #sum-m { visibility: hidden; }
     body.lernpfad { padding-bottom: 120px; }
 
     .lp-rahmen {
@@ -893,8 +908,17 @@
       return diff === 0 ? rest : null;
     }
 
+    // Spoiler-Regel: Darf die Summe der Becher gerade sichtbar sein?
+    // einstellung: "ja" | "nein" | "tipp" (nur nach allen Tipps oder richtiger Antwort)
+    function summeSichtbar(einstellung, tippsGenutzt, tippAnzahl, beantwortet) {
+      if (einstellung === "ja") return true;
+      if (einstellung === "nein") return false;
+      if (einstellung === "tipp") return !!beantwortet || (tippAnzahl > 0 && tippsGenutzt >= tippAnzahl);
+      return false; // unbekannt oder fehlend: lieber verstecken (Spoiler-Regel)
+    }
+
     const LOGIK = { MAX_ML, summe, ausgleichswert, istAusgeglichen, istGanzzahligTeilbar,
-                    nimmWasser, gibWasser, runde, kindDazuAnfaenger, kindWegAnfaenger };
+                    nimmWasser, gibWasser, runde, kindDazuAnfaenger, kindWegAnfaenger, summeSichtbar };
     /* LOGIC-END */
 
     // Start-Presets angepasst, damit die Summen glatt durch die Kinder-Anzahl teilbar sind!
@@ -1404,6 +1428,7 @@
     let modus = null; // "lernpfad" oder "labor"
     let lpSchritt = 0;
     let lpAntworten = {};
+    let lpTipps = {}; // Anzahl genutzter Tipps pro Stationsindex
 
     function lpRichtigesTeam() {
       const su = summe(data.u.values), sm = summe(data.m.values);
@@ -1417,7 +1442,10 @@
         auftrag: () => "Schau dir die Becher beider Teams an. Welches Team hat <strong>insgesamt</strong> mehr Wasser?",
         inhalt: () => lpFrage("mehr", ["Unicorns", "Mathe-Asse", "Beide gleich viel"], lpRichtigesTeam(),
           `Genau. Die Mathe-Asse haben zusammen ${summe(data.m.values)} ml, die Unicorns ${summe(data.u.values)} ml.`,
-          "Schau auf die Summe unter den Bechern. Welche Zahl ist größer?"),
+          "Rechne das Wasser jedes Teams zusammen. Der Tipp-Knopf hilft dir."),
+        summe: "tipp",
+        tipps: ["Zähle das Wasser aller Becher eines Teams zusammen.", "Unter den Bechern steht jetzt die Summe jedes Teams. Welche ist größer?"],
+        geloest: () => lpAntworten.mehr === lpRichtigesTeam(),
         sperre: () => lpAntworten.mehr === lpRichtigesTeam() ? null
           : lpAntworten.mehr === undefined ? "Wähle zuerst eine Antwort." : "Probiere es noch einmal."
       },
@@ -1425,6 +1453,7 @@
         teil: 0,
         titel: "Gerecht verteilen",
         auftrag: () => "Tippe auf <strong>„Mathematisch exakt ausgleichen“</strong>. Schau genau hin: Was passiert mit dem Wasser in den Bechern?",
+        summe: "nein",
         inhalt: () => `<div class="button-row"><button class="lp-knopf warning" onclick="equalizeAll()">Mathematisch exakt ausgleichen</button></div>`,
         sperre: () => (istAusgeglichen(data.u.values) && istAusgeglichen(data.m.values))
           ? null : "Tippe zuerst auf „Mathematisch exakt ausgleichen“."
@@ -1432,10 +1461,14 @@
       {
         teil: 0,
         titel: "Was ist gleich geblieben?",
+        summe: "tipp",
+        tipps: ["Weißt du noch, wie viel Wasser jedes Team am Anfang zusammen hatte? Das stand nach Schritt 1 unter den Bechern.",
+                "Unter den Bechern steht jetzt die Summe nach dem Ausgleichen. Vergleiche sie mit vorher."],
+        geloest: () => lpAntworten.gleich === 0,
         auftrag: () => "Jetzt hat in jedem Team jedes Kind gleich viel. Was ist beim Ausgleichen <strong>gleich geblieben</strong>?",
         inhalt: () => lpFrage("gleich", ["Die Summe des Teams", "Die Menge in jedem Becher", "Nichts ist gleich geblieben"], 0,
           "Richtig. Es geht kein Wasser verloren. Es wird nur anders verteilt.",
-          "Schau auf die Summe unter den Bechern. Hat sie sich verändert?")
+          "Denk an die Summe vom Anfang. Der Tipp-Knopf hilft dir.")
           + (lpAntworten.gleich === 0 ? `
           <div class="lp-erklaerung">
             <strong>Neues Wort: Ausgleichswert</strong><br>
@@ -1450,6 +1483,7 @@
         titel: "Teil 1 geschafft ✓",
         pause: true,
         letzte: true,
+        summe: "ja",
         auftrag: () => "",
         inhalt: () => `
           <p>Du hast <strong>beobachtet</strong>: Beim Ausgleichen bleibt die Summe gleich. Jedes Kind bekommt den Ausgleichswert.</p>
@@ -1480,9 +1514,34 @@
       lpZeigen();
     }
 
+    // Schaltet den nächsten Tipp der aktuellen Station frei (höchstens alle vorhandenen)
+    function lpTipp() {
+      const st = LP_STATIONEN[lpSchritt];
+      const anzahl = (st.tipps || []).length;
+      lpTipps[lpSchritt] = Math.min((lpTipps[lpSchritt] || 0) + 1, anzahl);
+      lpZeigen();
+    }
+
+    // Baut den Tipp-Block (freigeschaltete Tipps + Tipp-Knopf)
+    function lpTippsHtml(st) {
+      const alle = st.tipps || [];
+      if (!alle.length) return "";
+      const genutzt = lpTipps[lpSchritt] || 0;
+      const texte = alle.slice(0, genutzt)
+        .map((t, i) => `<p class="lp-tipp-text"><strong>Tipp ${i + 1}:</strong> ${t}</p>`).join("");
+      const knopf = genutzt >= alle.length
+        ? `<button class="lp-tipp" disabled>Keine Tipps mehr</button>`
+        : `<button class="lp-tipp" onclick="lpTipp()">💡 Tipp</button>`;
+      return `<div class="lp-tipps" aria-live="polite">${texte}${knopf}</div>`;
+    }
+
     function lpZeigen() {
       const st = LP_STATIONEN[lpSchritt];
       document.body.classList.toggle("lp-pause", !!st.pause);
+      // Summen-Badges verstecken, wenn die Station es verlangt (Spoiler-Regel)
+      const beantwortet = st.geloest ? st.geloest() : !st.sperre();
+      document.body.classList.toggle("lp-summe-aus",
+        !summeSichtbar(st.summe, lpTipps[lpSchritt] || 0, (st.tipps || []).length, beantwortet));
 
       document.getElementById("lp-teile").innerHTML = TEILE.map((t, i) => {
         const zustand = (i < st.teil || (st.pause && i === st.teil)) ? "fertig" : i === st.teil ? "aktiv" : "";
@@ -1498,7 +1557,7 @@
       const auftrag = st.auftrag();
       document.getElementById("lp-auftrag-karte").hidden = !auftrag;
       document.getElementById("lp-auftrag").innerHTML = auftrag;
-      document.getElementById("lp-inhalt").innerHTML = st.inhalt();
+      document.getElementById("lp-inhalt").innerHTML = st.inhalt() + lpTippsHtml(st);
       lpAktualisieren();
     }
 
@@ -1536,6 +1595,7 @@
         pipetteSourceTeam = null;
         lpSchritt = 0;
         lpAntworten = {};
+        lpTipps = {};
         stufe = "anfaenger"; // Lernpfad läuft immer im Anfängermodus
         pipetteSchritt = 1;
         loadPreset(1);
@@ -1543,6 +1603,7 @@
         lpZeigen();
       } else {
         document.body.classList.remove("lp-pause");
+        document.body.classList.remove("lp-summe-aus");
         let gespeichert = null;
         try { gespeichert = sessionStorage.getItem("mw_stufe"); } catch (e) { /* kein Speicher */ }
         const ziel = gespeichert === "experte" ? "experte" : "anfaenger";
