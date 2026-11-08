@@ -504,6 +504,56 @@
     body.lernpfad .student-input-section,
     body.lernpfad .results,
     body.lp-pause .teams-grid { display: none; }
+    /* Waage-Stationen: Bühne nur dort zeigen, Teams dort ausblenden (Feinschliff: gui-designer) */
+    body:not(.lp-zeige-waage) #waage-buehne { display: none; }
+    body.lernpfad.lp-zeige-waage .teams-grid,
+    body.lernpfad.lp-zeige-keins .teams-grid { display: none; }
+    /* Balkenwaage: Karte, Ständer (SVG), Balken dreht sich, Schalen mit Bechern bleiben aufrecht (Gegenrotation) */
+    .waage-buehne {
+      --neigung: 0deg;
+      position: relative; box-sizing: border-box;
+      width: 100%; max-width: 480px; height: 300px; margin: 0 auto 16px;
+      background: var(--card); border: 3px solid var(--kontur); border-radius: 18px;
+    }
+    .waage-stand { position: absolute; left: 50%; top: 198px; width: 120px; height: 92px; margin-left: -60px; }
+    .waage-lot { position: absolute; left: 50%; top: 96px; width: 4px; height: 14px; margin-left: -2px; background: var(--kontur); border-radius: 2px; }
+    .waage-balken {
+      position: absolute; left: 50%; top: 198px; width: 300px; height: 14px; margin: -7px 0 0 -150px;
+      background: var(--holz); border: 3px solid var(--kontur); border-radius: 8px; box-sizing: border-box;
+      transition: transform .4s ease-in-out;
+    }
+    .waage-zeiger {
+      position: absolute; left: 50%; bottom: 100%; width: 8px; height: 76px; margin-left: -4px;
+      background: var(--kontur); border-radius: 4px 4px 0 0; transform-origin: 50% 100%;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    }
+    .waage-gerade .waage-zeiger { background: var(--ok); }
+    .waage-gerade-marke {
+      display: none; position: absolute; left: 50%; top: 8px; transform: translateX(-50%);
+      padding: 4px 12px; border: 2px solid var(--ok); border-radius: 999px;
+      background: var(--card); color: var(--ok); font-weight: 700; white-space: nowrap;
+    }
+    .waage-gerade .waage-gerade-marke { display: block; }
+    .waage-ende {
+      position: absolute; bottom: 100%; margin-bottom: -3px; width: 110px; margin-left: -55px;
+      display: flex; flex-direction: column; align-items: center;
+      transform-origin: 50% 100%; transform: rotate(calc(-1 * var(--neigung)));
+      transition: transform .4s ease-in-out;
+    }
+    .waage-ende.links { left: 0; }
+    .waage-ende.rechts { left: 100%; }
+    .waage-ende .cup-shell { width: 80px; height: 136px; box-sizing: border-box; }
+    .waage-schale {
+      width: 110px; height: 16px; box-sizing: border-box; background: var(--holz); border: 3px solid var(--kontur);
+      border-radius: 0 0 55px 55px / 0 0 16px 16px; margin-top: -1px;
+    }
+    .waage-ende .cup-name {
+      position: absolute; top: calc(100% + 20px); width: 150px; left: 50%; margin-left: -75px;
+      font-size: 1.05rem; line-height: 1.2; color: var(--text);
+    }
+    @media (max-height: 860px) { .waage-buehne { zoom: .85; } }
+    @media (prefers-reduced-motion: reduce) { .waage-balken, .waage-ende { transition: none; } }
+    .lp-knopf.waage-giessen { min-height: 56px; font-weight: 700; flex: 1 1 220px; }
     /* Spoiler-Regel: Summen-Badges verstecken (Platz bleibt, nichts springt) */
     body.lp-summe-aus #sum-u, body.lp-summe-aus #sum-m { visibility: hidden; }
     body.lernpfad { padding-bottom: 120px; }
@@ -734,8 +784,33 @@
       <div id="buffer-display" style="font-weight: bold; font-size: 1.2rem; text-align: right;">Gefüllt: 0 ml<br><span style="font-size:0.85rem; font-weight:normal; color:var(--muted);">Team: Keins</span></div>
     </section>
 
+    <!-- Waage-Bühne (nur Lernpfad, Stationen mit zeige: "waage"). Aussehen macht der gui-designer. -->
+    <section id="waage-buehne" class="waage-buehne" aria-label="Waage mit zwei Bechern">
+      <div class="waage-gerade-marke" aria-hidden="true">✓ gerade</div>
+      <div class="waage-lot" aria-hidden="true"></div>
+      <svg class="waage-stand" viewBox="0 0 120 92" aria-hidden="true">
+        <g style="fill:var(--holz);stroke:var(--kontur)" stroke-width="3" stroke-linejoin="round">
+          <polygon points="60,2 100,78 20,78"/>
+          <rect x="8" y="76" width="104" height="14" rx="6"/>
+        </g>
+      </svg>
+      <div id="waage-balken" class="waage-balken">
+        <div class="waage-zeiger"></div>
+        <div class="waage-ende links">
+          <div class="cup-shell"><div id="waage-becher-a" class="water-fill" style="height: 0%;"></div></div>
+          <div class="waage-schale"></div>
+          <div id="waage-label-a" class="cup-name">Becher A</div>
+        </div>
+        <div class="waage-ende rechts">
+          <div class="cup-shell"><div id="waage-becher-b" class="water-fill" style="height: 0%;"></div></div>
+          <div class="waage-schale"></div>
+          <div id="waage-label-b" class="cup-name">Becher B</div>
+        </div>
+      </div>
+    </section>
+
     <section class="teams-grid">
-      
+
       <article class="team-card team-u">
         <div class="team-header">
           <h2><span aria-hidden="true">🦄</span> Unicorns</h2>
@@ -1452,6 +1527,7 @@
     let lpSchritt = 0;
     let lpAntworten = {};
     let lpTipps = {}; // Anzahl genutzter Tipps pro Stationsindex
+    let lpWaage = [14, 6]; // Waage-Stationen: ml in Becher A und Becher B
 
     function lpRichtigesTeam() {
       const su = summe(data.u.values), sm = summe(data.m.values);
@@ -1461,8 +1537,56 @@
     const LP_STATIONEN = [
       {
         teil: 0,
+        zeige: "waage",
+        titel: "Zwei Becher auf der Waage",
+        summe: "nein",
+        auftrag: () => "Hier stehen zwei Becher auf einer Waage. Ist das Wasser <strong>fair verteilt</strong>?",
+        inhalt: () => lpFrage("fair", ["Ja, beide haben gleich viel", "Nein, ein Becher hat mehr"], 1,
+          "Genau. Die Waage kippt zum Becher mit mehr Wasser.",
+          "Schau auf die Waage. Steht sie gerade?"),
+        geloest: () => lpAntworten.fair === 1,
+        sperre: () => lpAntworten.fair === 1 ? null
+          : lpAntworten.fair === undefined ? "Wähle zuerst eine Antwort." : "Probiere es noch einmal."
+      },
+      {
+        teil: 0,
+        zeige: "waage",
+        titel: "Fair verteilen",
+        summe: "nein",
+        auftrag: () => "Gieße Wasser um, bis die Waage <strong>gerade</strong> steht.",
+        inhalt: () => {
+          const fertig = istAusgeglichen(lpWaage);
+          return `<div class="button-row">
+            <button class="lp-knopf waage-giessen" onclick="lpGiessen(0)"${fertig ? " disabled" : ""}>Becher A → Becher B (1 ml)</button>
+            <button class="lp-knopf waage-giessen" onclick="lpGiessen(1)"${fertig ? " disabled" : ""}>Becher A ← Becher B (1 ml)</button>
+          </div>
+          <p class="aktions-meldung" id="waage-meldung" role="status" aria-live="polite">${fertig ? "Die Waage steht gerade!" : ""}</p>`;
+        },
+        sperre: () => istAusgeglichen(lpWaage) ? null : "Gieße weiter, bis die Waage gerade steht."
+      },
+      {
+        teil: 0,
+        zeige: "waage",
+        titel: "Neues Wort: Ausgleichswert",
+        summe: "nein",
+        auftrag: () => "Jetzt haben beide Becher gleich viel. Wie viel Wasser ist es <strong>zusammen</strong>?",
+        inhalt: () => lpFrage("zusammen", ["10 ml", "20 ml", "14 ml"], 1,
+          `Richtig. Es ist immer noch ${summe(lpWaage)} ml. Es ging kein Wasser verloren.`,
+          "Zähle das Wasser beider Becher zusammen.")
+          + (lpAntworten.zusammen === 1 ? `
+          <div class="lp-erklaerung">
+            <strong>Neues Wort: Ausgleichswert</strong><br>
+            So viel Wasser hat jeder Becher, wenn alles fair verteilt ist. Hier sind es ${ausgleichswert(lpWaage)} ml.
+          </div>` : ""),
+        geloest: () => lpAntworten.zusammen === 1,
+        sperre: () => lpAntworten.zusammen === 1 ? null
+          : lpAntworten.zusammen === undefined ? "Wähle zuerst eine Antwort." : "Probiere es noch einmal."
+      },
+      {
+        teil: 0,
+        zeige: "teams",
         titel: "Die Becher ansehen",
-        auftrag: () => "Schau dir die Becher beider Teams an. Welches Team hat <strong>insgesamt</strong> mehr Wasser?",
+        auftrag: () => "Jetzt sind es mehr Becher: zwei Teams. Schau dir die Becher beider Teams an. Welches Team hat <strong>insgesamt</strong> mehr Wasser?",
         inhalt: () => lpFrage("mehr", ["Unicorns", "Mathe-Asse", "Beide gleich viel"], lpRichtigesTeam(),
           `Genau. Die Mathe-Asse haben zusammen ${summe(data.m.values)} ml, die Unicorns ${summe(data.u.values)} ml.`,
           "Rechne das Wasser jedes Teams zusammen. Der Tipp-Knopf hilft dir."),
@@ -1474,6 +1598,7 @@
       },
       {
         teil: 0,
+        zeige: "teams",
         titel: "Gerecht verteilen",
         auftrag: () => "Tippe auf <strong>„Mathematisch exakt ausgleichen“</strong>. Schau genau hin: Was passiert mit dem Wasser in den Bechern?",
         summe: "nein",
@@ -1483,6 +1608,7 @@
       },
       {
         teil: 0,
+        zeige: "teams",
         titel: "Was ist gleich geblieben?",
         summe: "tipp",
         tipps: ["Weißt du noch, wie viel Wasser jedes Team am Anfang zusammen hatte? Das stand nach Schritt 1 unter den Bechern.",
@@ -1494,8 +1620,7 @@
           "Denk an die Summe vom Anfang. Der Tipp-Knopf hilft dir.")
           + (lpAntworten.gleich === 0 ? `
           <div class="lp-erklaerung">
-            <strong>Neues Wort: Ausgleichswert</strong><br>
-            So viel Wasser bekommt jedes Kind, wenn alles gerecht verteilt ist.
+            <strong>Wieder der Ausgleichswert</strong><br>
             Bei den Unicorns sind es ${ausgleichswert(data.u.values)} ml, bei den Mathe-Assen ${ausgleichswert(data.m.values)} ml.
           </div>` : ""),
         sperre: () => lpAntworten.gleich === 0 ? null
@@ -1503,6 +1628,7 @@
       },
       {
         teil: 0,
+        zeige: "keins",
         titel: "Teil 1 geschafft ✓",
         pause: true,
         letzte: true,
@@ -1537,6 +1663,38 @@
       lpZeigen();
     }
 
+    // Waage-Anzeige aktualisieren: Füllhöhe (% von 20 ml), Beschriftung, Neigung des Balkens.
+    // Es wird bewusst KEINE Summe angezeigt (Spoiler-Regel).
+    function waageZeigen() {
+      const [a, b] = lpWaage;
+      document.getElementById("waage-becher-a").style.height = (a / MAX_ML * 100) + "%";
+      document.getElementById("waage-becher-b").style.height = (b / MAX_ML * 100) + "%";
+      document.getElementById("waage-label-a").textContent = `Becher A: ${a} ml`;
+      document.getElementById("waage-label-b").textContent = `Becher B: ${b} ml`;
+      // waageNeigung: rechts schwerer = positiv. CSS rotate(+) kippt im Uhrzeigersinn
+      // (rechte Seite sinkt), also gleiches Vorzeichen. --neigung dient der Gegenrotation der Schalen.
+      const neigung = waageNeigung(a, b);
+      const buehne = document.getElementById("waage-buehne");
+      buehne.style.setProperty("--neigung", neigung + "deg");
+      buehne.classList.toggle("waage-gerade", neigung === 0);
+      document.getElementById("waage-balken").style.transform = `rotate(${neigung}deg)`;
+    }
+
+    // Gießt 1 ml von Becher "von" (0 = A, 1 = B) in den anderen Becher
+    function lpGiessen(von) {
+      const meldung = document.getElementById("waage-meldung");
+      const neu = umgiessen(lpWaage, von);
+      if (!neu) {
+        meldung.textContent = lpWaage[von] < 1 ? "Aus einem leeren Becher kann nichts fließen." : "Der Becher ist schon voll.";
+        return;
+      }
+      lpWaage = neu;
+      meldung.textContent = "";
+      waageZeigen();
+      lpZeigen(); // baut Knöpfe neu (gesperrt, wenn ausgeglichen) und setzt die Meldung
+      lpAktualisieren();
+    }
+
     // Schaltet den nächsten Tipp der aktuellen Station frei (höchstens alle vorhandenen)
     function lpTipp() {
       const st = LP_STATIONEN[lpSchritt];
@@ -1561,6 +1719,8 @@
     function lpZeigen() {
       const st = LP_STATIONEN[lpSchritt];
       document.body.classList.toggle("lp-pause", !!st.pause);
+      // Was zeigt die Station: Waage, Teams oder nichts
+      for (const z of ["waage", "teams", "keins"]) document.body.classList.toggle("lp-zeige-" + z, st.zeige === z);
       // Summen-Badges verstecken, wenn die Station es verlangt (Spoiler-Regel)
       const beantwortet = st.geloest ? st.geloest() : !st.sperre();
       document.body.classList.toggle("lp-summe-aus",
@@ -1581,6 +1741,7 @@
       document.getElementById("lp-auftrag-karte").hidden = !auftrag;
       document.getElementById("lp-auftrag").innerHTML = auftrag;
       document.getElementById("lp-inhalt").innerHTML = st.inhalt() + lpTippsHtml(st);
+      if (st.zeige === "waage") waageZeigen();
       lpAktualisieren();
     }
 
@@ -1618,6 +1779,7 @@
         pipetteSourceTeam = null;
         lpSchritt = 0;
         lpAntworten = {};
+        lpWaage = [14, 6];
         lpTipps = {};
         stufe = "anfaenger"; // Lernpfad läuft immer im Anfängermodus
         pipetteSchritt = 1;
@@ -1627,6 +1789,7 @@
       } else {
         document.body.classList.remove("lp-pause");
         document.body.classList.remove("lp-summe-aus");
+        document.body.classList.remove("lp-zeige-waage", "lp-zeige-teams", "lp-zeige-keins");
         let gespeichert = null;
         try { gespeichert = sessionStorage.getItem("mw_stufe"); } catch (e) { /* kein Speicher */ }
         const ziel = gespeichert === "experte" ? "experte" : "anfaenger";
