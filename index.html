@@ -202,42 +202,80 @@
       .teams-grid { grid-template-columns: 1fr; }
     }
 
+    /* Team-Karten: Unicorns = rund, Teamfarbe als Kopfband, durchgezogenes Schild;
+       Mathe-Asse = eckig, abgeschrägtes Kopfband, gestricheltes Schild */
+    .team-card { padding: 16px; margin-bottom: 16px; }
+    .team-card.team-u { border-radius: 32px; border-top: 3px solid var(--kontur); }
+    .team-card.team-m { border-radius: 6px; border-top: 3px solid var(--kontur); }
+
     .team-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 2px solid var(--line);
-      padding-bottom: 12px;
-      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px 14px;
+      margin: -16px -16px 12px -16px;
+      border-bottom: 3px solid var(--kontur);
+    }
+    .team-u .team-header { background: var(--u); border-radius: 29px 29px 0 0; }
+    .team-m .team-header {
+      background: var(--m);
+      border-radius: 3px 3px 0 0;
+      clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
+    }
+    .team-header h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      color: var(--text);
+      background: var(--card);
+      border: 3px solid var(--kontur);
+      padding: 4px 14px;
+    }
+    .team-u .team-header h2 { border-style: solid; border-radius: 999px; }
+    .team-m .team-header h2 { border-style: dashed; border-radius: 4px; }
+    .team-header .btn-small {
+      background: var(--card);
+      color: var(--text);
+      font-size: 1rem;
+      border-radius: 12px;
+    }
+    .team-header .btn-small:disabled {
+      background: var(--flaeche);
+      color: var(--text-leise);
+      border: 3px dashed var(--kontur);
     }
 
+    /* Becherbank: weiße Fläche in der Team-Karte */
     .cup-container {
       display: flex;
       flex-wrap: wrap;
-      gap: 20px;
+      gap: 12px;
       justify-content: center;
       align-items: flex-end;
+      background: var(--card);
+      border: 3px solid var(--kontur);
+      border-radius: 18px;
+      padding: 12px 8px;
     }
 
     .cup-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
-      width: 110px;
+      gap: 6px;
+      width: 104px;
     }
 
     .cup-name { font-weight: bold; text-align: center; font-size: 0.95rem; }
-    
+
     .cup-shell {
       position: relative;
-      width: 70px;
-      height: 140px;
-      border: 3px solid var(--becher-rand);
-      border-top: none;
-      border-bottom-left-radius: 14px;
-      border-bottom-right-radius: 14px;
-      background: var(--weiss-halb);
+      width: 64px;
+      height: 120px;
+      border: 3px solid var(--kontur);
+      border-radius: 4px 4px 18px 18px;
+      background: var(--card);
       overflow: hidden;
     }
 
@@ -246,9 +284,13 @@
       left: 0;
       bottom: 0;
       width: 100%;
-      background: var(--water);
+      box-sizing: border-box;
+      background: var(--wasser);
+      border-top: 3px solid var(--wasser-rand);
       transition: height 0.3s ease-in-out;
     }
+    /* leerer Becher (0 ml): keine blaue Linie am Boden */
+    .water-fill[style*="height: 0%"] { border-top: none; }
 
     .cup-avg-line {
       position: absolute;
@@ -268,8 +310,10 @@
     .action-btns button {
       flex: 1;
       padding: 6px 2px;
-      font-size: 0.8rem;
-      border-radius: 6px;
+      font-size: 1.4rem;
+      font-weight: 700;
+      line-height: 1;
+      border-radius: 12px;
     }
 
     .explanation {
@@ -291,39 +335,51 @@
       margin-right: 8px;
     }
     
-    .badge-u { background: var(--u-light); color: var(--u-dark); }
-    .badge-m { background: var(--m-light); color: var(--m-dark); }
+    .badge-u { background: var(--u-light); color: var(--u-dark); border: 2px solid var(--u); font-size: 1rem; }
+    .badge-m { background: var(--m-light); color: var(--m-dark); border: 2px dashed var(--m-dark); font-size: 1rem; }
 
     .info-help {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 18px;
-      height: 18px;
-      background: var(--sekundaer);
+      width: 44px;
+      height: 44px;
+      vertical-align: middle;
       color: var(--weiss);
-      border-radius: 50%;
-      font-size: 0.75rem;
-      cursor: help;
-      margin-left: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-left: 0;
       position: relative;
+      isolation: isolate;
     }
-
-    .info-help:hover { background: var(--text); }
+    .info-help::before {
+      content: "";
+      position: absolute;
+      left: 50%; top: 50%;
+      width: 30px; height: 30px;
+      margin: -15px 0 0 -15px;
+      border-radius: 50%;
+      background: var(--sekundaer);
+      z-index: -1;
+    }
+    .info-help:hover::before, .info-help.offen::before { background: var(--text); }
 
     .info-help .tooltiptext {
       visibility: hidden;
-      width: 260px;
+      width: min(280px, calc(100vw - 48px));
+      box-sizing: border-box;
       background-color: var(--text);
       color: var(--weiss);
       text-align: left;
       border-radius: 12px;
       padding: 12px;
-      position: absolute;
+      position: fixed; /* mittig im Fenster: wird am Rand nie abgeschnitten */
       z-index: 20;
-      bottom: 125%;
       left: 50%;
-      transform: translateX(-50%);
+      top: 40%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      font-size: 1rem;
       opacity: 0;
       transition: opacity 0.2s;
       font-family: sans-serif;
@@ -332,7 +388,10 @@
       box-shadow: 0 4px 12px var(--schatten-mittel);
     }
 
-    .info-help:hover .tooltiptext {
+    .info-help:hover .tooltiptext,
+    .info-help:focus .tooltiptext,
+    .info-help:focus-within .tooltiptext,
+    .info-help.offen .tooltiptext {
       visibility: visible;
       opacity: 1;
     }
@@ -580,30 +639,30 @@
       </linearGradient>
     </defs>
     <rect width="1200" height="800" fill="url(#himmel)"/>
-    <g fill="none" stroke="var(--kontur)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <g fill="none" style="stroke:var(--kontur)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
       <path d="M-10 90 Q300 190 600 110 T1210 120"/>
     </g>
-    <g stroke="var(--kontur)" stroke-width="4" stroke-linejoin="round">
-      <polygon points="80,128 130,134 100,176" fill="var(--rosa)"/>
-      <polygon points="230,152 280,152 255,196" fill="var(--holz)"/>
-      <polygon points="390,152 440,146 418,192" fill="var(--primaer)"/>
-      <polygon points="560,122 610,116 590,162" fill="var(--huetchen)"/>
-      <polygon points="740,120 790,126 760,168" fill="var(--rosa)"/>
-      <polygon points="900,128 950,134 922,176" fill="var(--holz)"/>
-      <polygon points="1060,134 1110,128 1086,176" fill="var(--primaer)"/>
+    <g style="stroke:var(--kontur)" stroke-width="4" stroke-linejoin="round">
+      <polygon points="80,128 130,134 100,176" style="fill:var(--rosa)"/>
+      <polygon points="230,152 280,152 255,196" style="fill:var(--holz)"/>
+      <polygon points="390,152 440,146 418,192" style="fill:var(--primaer)"/>
+      <polygon points="560,122 610,116 590,162" style="fill:var(--huetchen)"/>
+      <polygon points="740,120 790,126 760,168" style="fill:var(--rosa)"/>
+      <polygon points="900,128 950,134 922,176" style="fill:var(--holz)"/>
+      <polygon points="1060,134 1110,128 1086,176" style="fill:var(--primaer)"/>
     </g>
-    <path d="M0 520 Q300 400 620 470 T1200 440 V800 H0 Z" fill="var(--wiese)" stroke="var(--kontur)" stroke-width="5" stroke-linejoin="round"/>
-    <path d="M-20 720 Q250 600 520 660 T1000 560 T1220 600" fill="none" stroke="var(--weg)" stroke-width="46" stroke-linecap="round"/>
-    <g stroke="var(--kontur)" stroke-width="4" stroke-linejoin="round">
-      <polygon points="300,640 324,590 348,640" fill="var(--huetchen)"/>
-      <polygon points="640,660 664,610 688,660" fill="var(--huetchen)"/>
-      <polygon points="940,590 964,540 988,590" fill="var(--huetchen)"/>
+    <path d="M0 520 Q300 400 620 470 T1200 440 V800 H0 Z" style="fill:var(--wiese);stroke:var(--kontur)" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M-20 720 Q250 600 520 660 T1000 560 T1220 600" fill="none" style="stroke:var(--weg)" stroke-width="46" stroke-linecap="round"/>
+    <g style="stroke:var(--kontur)" stroke-width="4" stroke-linejoin="round">
+      <polygon points="300,640 324,590 348,640" style="fill:var(--huetchen)"/>
+      <polygon points="640,660 664,610 688,660" style="fill:var(--huetchen)"/>
+      <polygon points="940,590 964,540 988,590" style="fill:var(--huetchen)"/>
     </g>
-    <g stroke="var(--kontur)" stroke-width="5" stroke-linejoin="round">
-      <rect x="132" y="430" width="34" height="100" rx="8" fill="var(--stamm)"/>
-      <circle cx="149" cy="400" r="80" fill="var(--krone)"/>
-      <rect x="1062" y="400" width="30" height="90" rx="8" fill="var(--stamm)"/>
-      <circle cx="1077" cy="372" r="68" fill="var(--krone)"/>
+    <g style="stroke:var(--kontur)" stroke-width="5" stroke-linejoin="round">
+      <rect x="132" y="430" width="34" height="100" rx="8" style="fill:var(--stamm)"/>
+      <circle cx="149" cy="400" r="80" style="fill:var(--krone)"/>
+      <rect x="1062" y="400" width="30" height="90" rx="8" style="fill:var(--stamm)"/>
+      <circle cx="1077" cy="372" r="68" style="fill:var(--krone)"/>
     </g>
   </svg>
 
@@ -659,9 +718,9 @@
 
     <section class="teams-grid">
       
-      <article class="team-card" style="border-top: 4px solid var(--u);">
+      <article class="team-card team-u">
         <div class="team-header">
-          <h2 style="color: var(--u-dark);"><span aria-hidden="true">🦄</span> Unicorns</h2>
+          <h2><span aria-hidden="true">🦄</span> Unicorns</h2>
           <div>
             <button class="btn-small secondary" id="btn-sub-u" onclick="changeCount('u', -1)">&minus; Kind</button>
             <button class="btn-small secondary" id="btn-add-u" onclick="changeCount('u', 1)">&plus; Kind</button>
@@ -672,16 +731,16 @@
           <span class="badge badge-u" id="sum-u">Summe: 0 ml</span>
           <span class="badge badge-u">
             Ausgleichswert
-            <span class="info-help">?
+            <span class="info-help" tabindex="0" role="button" aria-label="Was ist der Ausgleichswert?">?
               <span class="tooltiptext">Der Ausgleichswert gibt an, wie viel Milliliter Wasser in jedem Becher wären, wenn man das gesamte Wasser des Teams völlig gleichmäßig auf alle Kinder aufteilen würde.</span>
-            </span>: 
+            </span>:
             <span id="avg-u" style="color: var(--warn-text); font-weight: bold;">gesucht...</span>
           </span>
         </div>
       </article>
 
-      <article class="team-card" style="border-top: 4px dashed var(--m);">
-        <div class="team-header" style="color: var(--m-dark);">
+      <article class="team-card team-m">
+        <div class="team-header">
           <h2><span aria-hidden="true">⭐</span> Mathe-Asse</h2>
           <div>
             <button class="btn-small secondary" id="btn-sub-m" onclick="changeCount('m', -1)">&minus; Kind</button>
@@ -693,9 +752,9 @@
           <span class="badge badge-m" id="sum-m">Summe: 0 ml</span>
           <span class="badge badge-m">
             Ausgleichswert
-            <span class="info-help">?
+            <span class="info-help" tabindex="0" role="button" aria-label="Was ist der Ausgleichswert?">?
               <span class="tooltiptext">Der Ausgleichswert gibt an, wie viel Milliliter Wasser in jedem Becher wären, wenn man das gesamte Wasser des Teams völlig gleichmäßig auf alle Kinder aufteilen würde.</span>
-            </span>: 
+            </span>:
             <span id="avg-m" style="color: var(--warn-text); font-weight: bold;">gesucht...</span>
           </span>
         </div>
@@ -925,6 +984,28 @@
       renderTeam('u');
       renderTeam('m');
     }
+
+    // Anzeige: Info-Tooltip "?" per Tippen öffnen/schließen (keine Rechenlogik)
+    function infoUmschalten(el, offen) {
+      el.classList.toggle("offen", offen);
+      el.setAttribute("aria-expanded", offen ? "true" : "false");
+    }
+    document.addEventListener("click", (e) => {
+      const hilfe = e.target.closest(".info-help");
+      document.querySelectorAll(".info-help.offen").forEach((el) => {
+        if (el !== hilfe) infoUmschalten(el, false);
+      });
+      if (hilfe) infoUmschalten(hilfe, !hilfe.classList.contains("offen"));
+    });
+    document.addEventListener("keydown", (e) => {
+      const hilfe = e.target.closest && e.target.closest(".info-help");
+      if (e.key === "Escape") {
+        document.querySelectorAll(".info-help.offen").forEach((el) => infoUmschalten(el, false));
+      } else if (hilfe && (e.key === "Enter" || e.key === " ")) {
+        e.preventDefault();
+        infoUmschalten(hilfe, !hilfe.classList.contains("offen"));
+      }
+    });
 
     // Startmenge eines Bechers ändern (Experte, nur vor dem ersten Umschütten)
     function startAendern(key, idx, delta) {
